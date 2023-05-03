@@ -1,0 +1,39 @@
+### Request for getting API reachability
+GET http://localhost:3000/status
+Content-Type: application/json
+
+### Request for register Method
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "username": "sotenck",
+  "password": "superPW",
+  "email": "sotenck@gmail.com"
+}
+
+### Request to login User
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+"username": "sotenck",
+"password": "test"
+}
+
+### Request to resend verification E-Mail
+POST http://localhost:3000/auth/mail/resend
+Content-Type: application/json
+
+{
+  "email" : "info@sotenck.de"
+}
+
+### Request to verify E-Mail
+POST http://localhost:3000/auth/mail/verify
+Content-Type: application/json
+
+{
+"id" : 1,
+"hash": "ff0182eeeae743bc0caeac2b80ef694e"
+}
