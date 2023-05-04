@@ -30,7 +30,12 @@ Use the built-in continuous integration in GitLab.
 ***
 
 ## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+With innovative text- and image-generating AIs like Chat GPT or Midjourney, completely new and personalized children's books can be generated, tailored to each individual child. 
+Currently, the individual AIs must be operated separately, and the generated content must be manually combined. 
+There is high market potential in optimizing this process and offering it as a SaaS or "Children's Book Generation as a Service" on the internet.
+
+In the first step we will develop an MVP for this use case to ensure the basic feasibility. 
+The MVP also lays the foundation for demonstrating the potential of such a service to potential customers.
 
 ## Badges
 On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
@@ -39,16 +44,40 @@ On some READMEs, you may see small images that convey metadata, such as whether 
 Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+
+The software requires a database conenction. 
+For this you will need to manually add a file with the name ormconfig.json in the toplevel of the project folder (right in "Team13") and add the following content:
+
+{
+  "type": "mysql",
+  "host": "s204.goserver.host",
+  "port": 3306,
+  "username": "web14_7",
+  "password": "",
+  "database": "web14_db7",
+  "synchronize": true,
+  "entities": [
+    "dist/**/*.entity.{js,ts}"
+  ]
+}
+
+The password will be sent seperately upon request.
+
+Further you need to add a file to the same folder called ".env" which contains:
+
+SECRETKEY=
+PORT=3000
+
+The to be added key will be sent seperately upon request as well.
 
 ## Usage
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
 
 ## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+For support and questions email us at info@urbook.com
 
 ## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+After the MVP we plan to further develop the software into a proper commercial service.
 
 ## Contributing
 State if you are open to contributions and what your requirements are for accepting them.
@@ -61,7 +90,15 @@ You can also document commands to lint the code or run tests. These steps help t
 Show your appreciation to those who have contributed to the project.
 
 ## License
-For open source projects, say how it is licensed.
+The Software is licensed as proprietary software:
+
+Rights to the software: The software is copyrighted by the software developer. The customer acquires a simple right of use to the software and has the right to use the software.
+
+Access to the source code: The customer does not have the right to access the source code of the software. The source code remains with the software developer and is not passed on to the customer.
+
+Restrictions on use: The customer may only use the software for the purposes expressly stated in this agreement. The customer may not copy, modify, decompile, reverse engineer, or distribute the software, unless expressly permitted by applicable law.
+
+Disclaimer: The software developer assumes no liability for damages that may arise from the use of the software. The customer uses the software at their own risk.
 
 ## Project status
 If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.

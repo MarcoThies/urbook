@@ -1,0 +1,9 @@
+The Software is licensed as proprietary software:
+
+Rights to the software: The software is copyrighted by the software developer. The customer acquires a simple right of use to the software and has the right to use the software.
+
+Access to the source code: The customer does not have the right to access the source code of the software. The source code remains with the software developer and is not passed on to the customer.
+
+Restrictions on use: The customer may only use the software for the purposes expressly stated in this agreement. The customer may not copy, modify, decompile, reverse engineer, or distribute the software, unless expressly permitted by applicable law.
+
+Disclaimer: The software developer assumes no liability for damages that may arise from the use of the software. The customer uses the software at their own risk.
