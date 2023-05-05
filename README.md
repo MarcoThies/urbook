@@ -48,7 +48,7 @@ Depending on what you are making, it can be a good idea to include screenshots o
 The software requires a database conenction. 
 For this you will need to manually add a file with the name ormconfig.json in the toplevel of the project folder (right in "Team13") and add the following content:
 
-`
+```json
 {
   "type": "mysql",
   "host": "s204.goserver.host",
@@ -61,16 +61,16 @@ For this you will need to manually add a file with the name ormconfig.json in th
     "dist/**/*.entity.{js,ts}"
   ]
 }
-`
+```
 
 The password will be sent seperately upon request.
 
 Further you need to add a file to the same folder called ".env" which contains:
 
-`
+```env
 SECRETKEY=
 PORT=3000
-`
+```
 
 The to be added key will be sent seperately upon request as well.
 
