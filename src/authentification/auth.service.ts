@@ -9,62 +9,43 @@ import { LoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from "./interfaces/payload.interface";
 import { stat } from "fs";
 import { retry } from "rxjs";
+import { ApiKeyDto } from "../_shared/dto/api-key.dto";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { Repository } from "typeorm";
+import { hashKey } from "../_shared/utils";
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    @InjectRepository(ApiKeyEntity)
+    private readonly apiKeyRepo : Repository<ApiKeyEntity>,
   ) {}
 
-  async register(userDto: CreateUserDto): Promise<RegistrationStatus> {
-    let status: RegistrationStatus = {
-      success: true,
-      message: 'user registered',
-    };
+  async login(apiKeyDto: ApiKeyDto): Promise<any> {
+      // hash given api key
+      const apiKeyHash = await hashKey(apiKeyDto.apiKey);
 
-    try {
-      await this.userService.create(userDto);
-    } catch (err) {
-      status.success = false;
-      status.message = err.response;
-      status.code = err.status;
-    }
+      // find api hash in db
+      const keyValid = await this.apiKeyRepo.findOne({ where: { apiHash: apiKeyHash } });
 
-    return status;
+      if(!keyValid) return new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
+
+      // generate and jwt token
+      return this._createToken(keyValid.apiHash);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<LoginStatus> {
-    // find user in db
-    try {
-      const user = await this.userService.findByLogin(loginUserDto);
-
-      // generate and sign token
-      const token = this._createToken(user);
-
-      return {
-        username: user.username,
-        ...token
-      };
-
-    } catch (err) {
-      console.log(err);
-      return {
-        code: err.status,
-        message: err.response
-      } as any
-    }
-  }
-
-  private _createToken({ username }: UserDto): any {
-    const user: JwtPayload = { username };
+  private _createToken(identityHash:string): any {
+    const user: JwtPayload = { userId:identityHash };
     const accessToken = this.jwtService.sign(user);
     return {
       timestamp: (new Date()).toLocaleDateString(),
-      accessToken,
+      accessToken
     };
   }
 
+  /*
   async validateUser(payload: JwtPayload): Promise<UserDto> {
     const user = await this.userService.findByPayload(payload);
     if (!user) {
@@ -72,6 +53,6 @@ export class AuthService {
     }
     return user;
   }
-
+  */
 
 }

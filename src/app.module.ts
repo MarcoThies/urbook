@@ -3,19 +3,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
-import { CoreModule } from "./core/core.module";
-import { UserEntity } from "./user/entities/user.entity";
+import { AuthModule } from './authentification/auth.module';
+import { CoreModule } from "./_core/core.module";
+import { AdministrationModule } from './administration/administration.module';
+import { AdministrationService } from "./administration/administration.service";
+import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
 
 @Module({
   controllers: [AppController],
   imports: [
     AuthModule,
-    UserModule,
     CoreModule,
+    AdministrationModule,
     TypeOrmModule.forRoot({
       entities: [
-        UserEntity
+        ApiKeyEntity
       ],
       autoLoadEntities: true,
     }),

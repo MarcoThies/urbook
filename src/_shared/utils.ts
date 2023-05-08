@@ -31,3 +31,11 @@ export const runDbMigrations = async (connectionName: string = 'default') => {
 export const comparePasswords = async (userPassword, currentPassword) => {
   return await bcrypt.compare(currentPassword, userPassword);
 };
+
+export const createSalt = async () => {
+  return await bcrypt.genSalt(10);
+}
+
+export const hashKey = async (key: string) => {
+  return await bcrypt.hash(key, process.env.APISALT);
+}

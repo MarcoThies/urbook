@@ -9,7 +9,7 @@ import {
   Session,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { AuthService } from "../auth/auth.service";
+import { AuthService } from "../authentification/auth.service";
 import { UserEntity } from "./entities/user.entity";
 import { UserDto } from "./dto/user.dto";
 import { AuthGuard } from "@nestjs/passport";

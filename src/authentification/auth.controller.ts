@@ -7,22 +7,23 @@ import { CreateUserDto } from "../user/dto/user.create.dto";
 import { UserDto } from "../user/dto/user.dto";
 import { JwtPayload } from "./interfaces/payload.interface";
 import { UserEntity } from "../user/entities/user.entity";
+import { ApiKeyDto } from "../_shared/dto/api-key.dto";
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {
   }
 
-  @Post('register')
-  public async register(@Body() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
-    const result:
-      RegistrationStatus = await this.authService.register(createUserDto);
-    return result;
-  }
+  // @Post('register')
+  // public async register(@Body() createUserDto: CreateUserDto): Promise<RegistrationStatus> {
+  //   const result:
+  //     RegistrationStatus = await this.authService.register(createUserDto);
+  //   return result;
+  // }
 
-  @Post('login')
-  public async login(@Body() loginUserDto: LoginUserDto): Promise<LoginStatus> {
-    return await this.authService.login(loginUserDto);
+  @Post('signin')
+  public async login(@Body() apiKeyDto: ApiKeyDto): Promise<LoginStatus> {
+    return await this.authService.login(apiKeyDto);
   }
 
 }

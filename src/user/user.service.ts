@@ -4,9 +4,9 @@ import { Repository } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { CreateUserDto } from './dto/user.create.dto';
 import { LoginUserDto } from './dto/user-login.dto';
-import { comparePasswords } from "../shared/utils";
+import { comparePasswords } from "../_shared/utils";
 import { UserEntity } from "./entities/user.entity";
-import { toUserDto } from "../shared/mapper";
+import { toUserDto } from "../_shared/mapper";
 import { randomBytes } from "crypto";
 import { ExceptionHandler } from "@nestjs/core/errors/exception-handler";
 

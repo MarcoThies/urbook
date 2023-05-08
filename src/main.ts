@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { runDbMigrations } from './shared/utils';
+import { runDbMigrations } from './_shared/utils';
 
 const port = process.env.PORT;
 
@@ -26,6 +26,8 @@ async function bootstrap() {
   //app.use(helmet());
 
   app.enableCors();
+
+  app.setGlobalPrefix('api/');
 
   // /**
   //  * we need this because "cookie" is true in csrfProtection

@@ -1,0 +1,3 @@
+### Request for getting API reachability
+GET http://localhost:3000/api/status
+Content-Type: application/json
