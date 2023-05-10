@@ -3,7 +3,8 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { runDbMigrations } from './_shared/utils';
+import { ConfigService } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
 
 const port = process.env.PORT;
 
@@ -59,7 +60,6 @@ async function bootstrap() {
   /**
    * Run DB migrations
    */
-  await runDbMigrations();
 
   await app.listen(port);
 

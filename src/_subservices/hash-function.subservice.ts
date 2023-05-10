@@ -5,6 +5,6 @@ export class HashFunctionSubservice {
   }
 
   public async hash(value: string) : Promise<string> {
-    return await bcrypt.hash(value, process.env.APISALT);
+    return await bcrypt.hash(value, process.env.API_SALT);
   }
 }
