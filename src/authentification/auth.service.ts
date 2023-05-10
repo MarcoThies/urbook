@@ -1,10 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from "../user/dto/user.create.dto";
-import { UserService } from "../user/user.service";
 import { RegistrationStatus } from "./interfaces/registration-status.interface";
-import { LoginUserDto } from "../user/dto/user-login.dto";
-import { UserDto } from '../user/dto/user.dto';
 import { LoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from "./interfaces/payload.interface";
 import { stat } from "fs";
@@ -13,7 +9,7 @@ import { ApiKeyDto } from "../_shared/dto/api-key.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { Repository } from "typeorm";
-import { hashKey } from "../_shared/utils";
+import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
 
 @Injectable()
 export class AuthService {
@@ -25,7 +21,8 @@ export class AuthService {
 
   async login(apiKeyDto: ApiKeyDto): Promise<any> {
       // hash given api key
-      const apiKeyHash = await hashKey(apiKeyDto.apiKey);
+      const hashFunctionSubservice = new HashFunctionSubservice();
+      const apiKeyHash = await hashFunctionSubservice.hash(apiKeyDto.apiKey);
 
       // find api hash in db
       const keyValid = await this.apiKeyRepo.findOne({ where: { apiHash: apiKeyHash } });
@@ -45,14 +42,13 @@ export class AuthService {
     };
   }
 
-  /*
-  async validateUser(payload: JwtPayload): Promise<UserDto> {
-    const user = await this.userService.findByPayload(payload);
-    if (!user) {
+  async validateSession(payload: JwtPayload): Promise<ApiKeyEntity> {
+    const apiUser = await this.apiKeyRepo.findOne({ where: { apiHash: payload.userId } });
+    if (!apiUser) {
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
-    return user;
+    return apiUser;
   }
-  */
+
 
 }

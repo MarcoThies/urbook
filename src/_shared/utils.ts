@@ -35,7 +35,3 @@ export const comparePasswords = async (userPassword, currentPassword) => {
 export const createSalt = async () => {
   return await bcrypt.genSalt(10);
 }
-
-export const hashKey = async (key: string) => {
-  return await bcrypt.hash(key, process.env.APISALT);
-}

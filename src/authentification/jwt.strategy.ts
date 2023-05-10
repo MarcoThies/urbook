@@ -1,9 +1,9 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { UserDto } from "../user/dto/user.dto";
 import { AuthService } from "./auth.service";
 import { JwtPayload } from "./interfaces/payload.interface";
+import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -15,10 +15,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  /*
-  async validate(payload: JwtPayload): Promise<UserDto> {
-    const user = await this.authService.validateUser(payload);
-    return user;
+  async validate(payload: JwtPayload): Promise<ApiKeyEntity> {
+    const apiUser = await this.authService.validateSession(payload);
+    return apiUser;
   }
-  */
+
 }

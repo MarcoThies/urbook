@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ApiKeyDto } from "../_shared/dto/api-key.dto";
-import { UserService } from "../user/user.service";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
-import { createSalt, hashKey } from "../_shared/utils";
+import { createSalt } from "../_shared/utils";
+import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
 
 @Injectable()
 export class AdministrationService {
@@ -20,7 +20,8 @@ export class AdministrationService {
     const newKey = this.generateApiKey(4,4);
 
     // hash API key
-    const apiKeyHash = await hashKey(newKey);
+    const hashFunctionSubservice = new HashFunctionSubservice();
+    const apiKeyHash = await hashFunctionSubservice.hash(newKey);
 
     // save API key hash to database (with unique check)
     // check if hash is already in Database

@@ -1,0 +1,5 @@
+### Request List of all (user related) books
+
+GET http://localhost:3000/api/manage/list-books
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIkMmIkMTAkaHJrdEtTMWRWOEVRREs5Vk9maDZJT0ZXaVBIRmRYQ05RaFNic3JPMkg4ZlpiL1JWVDU4aE8iLCJpYXQiOjE2ODM3MDU1NTgsImV4cCI6MTY4MzcwNjE1OH0.EEYjA7Bb-ciQ9MD977K3_Dsy19gqBmM3V-U86RSSRYU

@@ -1,10 +1,12 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Exclude } from "class-transformer";
 
 @Entity('api-keys')
 export class ApiKeyEntity {
   @PrimaryGeneratedColumn('increment')
   id: string;
 
+  @Exclude()
   @Column({
     type: 'varchar',
     nullable: false,
