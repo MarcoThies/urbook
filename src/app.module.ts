@@ -1,32 +1,28 @@
 import { Module, DynamicModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './authentification/auth.module';
 import { CoreModule } from "./_core/core.module";
 import { AdministrationModule } from './administration/administration.module';
 import { AdministrationService } from "./administration/administration.service";
-import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
 import { ManageModule } from './manage/manage.module';
 import { GenerateModule } from './generate/generate.module';
+import { DataSource } from "typeorm";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import * as ormconfig from './_core/ormconfig';
 
 @Module({
   controllers: [AppController],
   imports: [
-    AuthModule,
     CoreModule,
+    TypeOrmModule.forRoot(ormconfig),
+    AuthModule,
     AdministrationModule,
-    TypeOrmModule.forRoot({
-      entities: [
-        ApiKeyEntity
-      ],
-      autoLoadEntities: true,
-    }),
     ManageModule,
-    GenerateModule,
+    GenerateModule
   ],
-  providers: [AppService],
-
+  providers: [AppService]
 })
+
 export class AppModule {
 }
