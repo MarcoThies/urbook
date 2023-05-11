@@ -1,6 +1,6 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AuthService } from "./auth.service";
 import { JwtPayload } from "./interfaces/payload.interface";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
@@ -17,6 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload): Promise<ApiKeyEntity> {
     const apiUser = await this.authService.validateSession(payload);
+    console.log('isAdmin', apiUser.admin);
     return apiUser;
   }
 

@@ -2,6 +2,7 @@
 POST http://localhost:3000/api/auth/signin
 Content-Type: application/json
 
+# admin key = 12ZF-R790-YQTG-GVGY
 {
-  "apiKey": "SLXK-LPCQ-NYXJ-NLFR"
+  "apiKey": "12ZF-R790-YQTG-GVGY"
 }

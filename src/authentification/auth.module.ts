@@ -8,11 +8,15 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 @Module({
+  providers: [
+    AuthService,
+    JwtStrategy
+  ],
   imports: [
     PassportModule.register({
       defaultStrategy: 'jwt',
-      property: 'user',
-      session: false,
+      session: true,
+
     }),
     JwtModule.register({
       secret: process.env.SECRETKEY,
@@ -23,7 +27,7 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
     TypeOrmModule.forFeature([ApiKeyEntity])
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+
   exports: [
     PassportModule,
     JwtModule

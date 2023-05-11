@@ -1,10 +1,11 @@
 import 'dotenv/config';
 
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { RolesGuard } from "./authentification/roles/roles.guard";
 
 const port = process.env.PORT;
 
@@ -15,6 +16,9 @@ async function bootstrap() {
       logger: console,
     },
   );
+
+  app.useGlobalGuards(app.get(RolesGuard));
+
 
   /**
    * Helmet can help protect your app from some well-known
@@ -27,6 +31,7 @@ async function bootstrap() {
   //app.use(helmet());
 
   app.enableCors();
+
 
   app.setGlobalPrefix('api/');
 
