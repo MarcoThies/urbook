@@ -8,7 +8,11 @@ export class AppController {
 
   @Get('status')
   status(): statusObj {
+    let generator = new PdfGeneratorSubservice();
+    generator.createA5Book(7);
+    console.log("done");
     return this.appService.requestStatus();
+
   }
 
 }
