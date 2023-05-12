@@ -46,22 +46,8 @@ Depending on what you are making, it can be a good idea to include screenshots o
 ## Installation
 
 The software requires a database conenction. 
-For this you will need to manually add a file with the name ormconfig.json in the toplevel of the project folder (right in "Team13") and add the following content:
+For this you will need to manually add a file with the name .env in the toplevel of the project folder (right in "Team13") and add the following content:
 
-```json
-{
-  "type": "mysql",
-  "host": "s204.goserver.host",
-  "port": 3306,
-  "username": "web14_7",
-  "password": "",
-  "database": "web14_db7",
-  "synchronize": true,
-  "entities": [
-    "dist/**/*.entity.{js,ts}"
-  ]
-}
-```
 
 The password will be sent seperately upon request.
 

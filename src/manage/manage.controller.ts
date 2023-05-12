@@ -6,8 +6,7 @@ import { UserTypeGuard } from "../authentification/roles/type.guard";
 
 @Controller('manage')
 export class ManageController {
-  constructor(private readonly manageService: ManageService) {
-  }
+  constructor(private readonly manageService: ManageService) {}
 
   @UseGuards(
     AuthGuard('jwt'),
