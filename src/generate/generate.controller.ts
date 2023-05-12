@@ -1,4 +1,5 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from "@nestjs/common";
+
 
 @Controller('generate')
 export class GenerateController {}

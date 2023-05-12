@@ -1,12 +1,10 @@
-import { Injectable } from '@nestjs/common';
-import { ApiKeyDto } from "../_shared/dto/api-key.dto";
-import { JwtService } from "@nestjs/jwt";
+import { HttpException, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
-import { createSalt } from "../_shared/utils";
 import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
+import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -40,6 +38,12 @@ export class AdministrationService {
     }
   }
 
+  async removeKey(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
+    const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
+    if(!hashExists) throw new HttpException('API key not found', 404);
+    await this.apiKeyRepo.delete(hashExists.id);
+    return true;
+  }
 
   generateApiKey(segments= 3, length:number = 8, delimiter:string = "-"): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

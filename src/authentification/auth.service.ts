@@ -1,10 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
-import { RegistrationStatus } from "./interfaces/registration-status.interface";
-import { LoginStatus } from './interfaces/login-status.interface';
 import { JwtPayload } from "./interfaces/payload.interface";
-import { stat } from "fs";
-import { retry } from "rxjs";
 import { ApiKeyDto } from "../_shared/dto/api-key.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
@@ -27,7 +23,7 @@ export class AuthService {
       // find api hash in db
       const keyValid = await this.apiKeyRepo.findOne({ where: { apiHash: apiKeyHash } });
 
-      if(!keyValid) return new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
+      if(!keyValid) throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
 
       // generate and jwt token
       return this._createToken(keyValid.apiHash);
@@ -44,9 +40,7 @@ export class AuthService {
 
   async validateSession(payload: JwtPayload): Promise<ApiKeyEntity> {
     const apiUser = await this.apiKeyRepo.findOne({ where: { apiHash: payload.userId } });
-    if (!apiUser) {
-      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
-    }
+    if (!apiUser) throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     return apiUser;
   }
 

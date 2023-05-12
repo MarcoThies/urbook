@@ -12,7 +12,15 @@ export class ApiKeyEntity {
     nullable: false,
     unique: true
   })
-  apiHash: string
+  apiHash: string;
+
+  @Column({
+    type: 'boolean',
+    nullable: false,
+    unique: false,
+    default: false
+  })
+  admin: boolean;
 
   @Column({
     type: 'timestamp',
@@ -22,7 +30,7 @@ export class ApiKeyEntity {
   })
   createdAt: Date;
 
-  @Column({
+  @Column({ 
     type: 'timestamp',
     nullable: true,
     unique: false,
