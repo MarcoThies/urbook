@@ -4,7 +4,6 @@ import { BooksEntity } from 'src/_shared/entities/books.entity';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BookIdInterface } from "./interfaces/book-id.interface";
-import { timeStamp } from 'console';
 
 @Injectable()
 export class GenerateService {
@@ -28,11 +27,11 @@ export class GenerateService {
         });
         await this.booksRepo.save(bookIdEntry)
 
-        return{
+        return {
             bookId: newBookId,
             status: 1,
-            bookTimeStamp: (new Date()).toLocaleDateString()
-        }
+            timeStamp: bookIdEntry.createdAt.toUTCString()
+        } as BookIdInterface
 
         // bookid geneireren, neues buch mit status gestartet erstellt in DB
         // user bekommt interface mit bookid und status mit time zurück
