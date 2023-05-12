@@ -10,12 +10,10 @@ export class ManageController {
   constructor(private readonly manageService: ManageService) {
   }
 
+  @Roles('user')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Get('list-books')
-  @Roles('user')
   public async listBooks() : Promise<BooksEntity[]> {
     return await this.manageService.listBooks();
   }
 }
-
-//   "url": "mysql://web14_7:o7K31S8RXaycvOBr@s204.goserver.host:3306/web14_db7",
