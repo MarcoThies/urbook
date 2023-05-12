@@ -1,4 +1,13 @@
-### Request for authentification Method
+### Request for generating a new API-Key
 GET http://localhost:3000/api/admin/create-key
 Content-Type: application/json
-#Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIkMmIkMTAkaHJrdEtTMWRWOEVRREs5Vk9maDZJT3NTQjVUZURMdVdna1pTRnk1UzdqSnNnWW9td3NJcE8iLCJpYXQiOjE2ODM4MjE4NTAsImV4cCI6MTY4MzgyMjQ1MH0.RxxUiPI0jH8hS2QsNIrfG-evk9fIYHHwUYP6171Iup8
+Authorization: Bearer {{session}}
+
+### Request for removing an existing API-Key
+POST http://localhost:3000/api/admin/remove-key
+Content-Type: application/json
+Authorization: Bearer {{session}}
+
+{
+  "apiHash": "$2b$10$hrktKS1dV8EQDK9VOfh6IOoWnUbJMkXmzut5ctiH8mI4kN.nlmtqK"
+}
