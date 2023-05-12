@@ -39,9 +39,7 @@ export class AuthService {
   }
 
   async validateSession(payload: JwtPayload): Promise<ApiKeyEntity> {
-    console.log("validating session...");
     const apiUser = await this.apiKeyRepo.findOne({ where: { apiHash: payload.userId } });
-    console.log("got something from db...", apiUser);
     if (!apiUser) throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     return apiUser;
   }

@@ -8,15 +8,11 @@ import { ManageModule } from './manage/manage.module';
 import { GenerateModule } from './generate/generate.module';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import * as ormconfig from './_core/ormconfig';
-import { RolesModule } from "./authentification/roles/roles.module";
-import { JwtStrategy } from "./authentification/jwt.strategy";
-import { RolesGuard } from "./authentification/roles/roles.guard";
 
 @Module({
-  providers: [AppService, RolesGuard],
+  providers: [AppService],
   imports: [
     AuthModule,
-    RolesModule,
     CoreModule,
     TypeOrmModule.forRoot(ormconfig),
     AdministrationModule,
