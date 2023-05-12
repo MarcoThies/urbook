@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateBookDto } from "../generate/dto/createbook.dto";
+import { CreateBookDto } from "./dto/createbook.dto";
 import { BooksEntity } from 'src/_shared/entities/books.entity';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -13,8 +13,7 @@ export class GenerateService {
         private readonly booksRepo : Repository<BooksEntity>,
     ) {}
 
-    public async create(createBookDto: CreateBookDto): Promise<BookIdInterface>
-    {
+    public async create(createBookDto: CreateBookDto): Promise<BookIdInterface> {
         const newBookId = this.generateBookId(3,4);
 
         const bookIdExists = await this.booksRepo.findOne({ where: { isbn: newBookId }});

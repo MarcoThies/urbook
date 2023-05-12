@@ -6,13 +6,13 @@ Content-Type: application/json
   "child_name": "Timy",
   "child_favColor": "Rosa",
   "child_favAnimals": "Schweine",
-  "child_age": "9",
+  "child_age": 9,
   "child_country": "Deutschland",
   "child_language": "deutsch",
   "child_gender": "maennlich",
 
   "topic_moralType": "Hilfsbereitschaft",
-  "topic_chapterCount": "5",
+  "topic_chapterCount": 5,
   "topic_imageStyle": "Comic",
-  "topic_specialTopic": "Piraten",
+  "topic_specialTopic": "Piraten"
 }
