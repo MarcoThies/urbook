@@ -23,7 +23,8 @@ export class GenerateService {
 
         const bookIdEntry = await this.booksRepo.create({
           isbn: newBookId,
-          state: 1
+          state: 1,
+          childname: createBookDto.child_name
         });
         await this.booksRepo.save(bookIdEntry)
 
