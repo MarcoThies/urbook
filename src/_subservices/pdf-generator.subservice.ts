@@ -41,7 +41,7 @@ export class PdfGeneratorSubservice {
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
-    const path = 'D:\\user\\USER-Q05R-7UF3-Z26N\\BOOK-Q05R-7UF3-Z26N\\';
+    const path = '.\\exports\\USER-Q05R-7UF3-Z26N\\BOOK-Q05R-7UF3-Z26N\\';
     const fileName = 'Connies_Schneeabenteuer_' + 'v2' + '.pdf'
     this.writeFile(pdfBytes, path, fileName);
 
@@ -117,7 +117,7 @@ export class PdfGeneratorSubservice {
       size: fontSize,
       font: this.titleFont,
       color: rgb(1, 0.53, 0.21),
-      maxWidth: maxTextWidth,
+      maxWidth: maxTextWidth
     })
   }
 
