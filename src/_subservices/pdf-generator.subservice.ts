@@ -1,5 +1,6 @@
 import { Console } from "console";
-import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "../../node_modules/pdf-lib";
+import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
+import * as fs from "fs";
 
 export class PdfGeneratorSubservice {
   constructor() {
@@ -17,7 +18,7 @@ export class PdfGeneratorSubservice {
   // -------------------------------------------------------------------------------------------------------
 
   // generate PDF in A5 format
-  public async createA5Book(numberOfPages : number) : Promise<string> {
+  public async createA5Book(numberOfPages : number) : Promise<boolean> {
     // define PDF attributes
     this.pdfDoc = await PDFDocument.create();
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.TimesRoman);
@@ -41,12 +42,19 @@ export class PdfGeneratorSubservice {
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
-    const path = '.\\exports\\USER-Q05R-7UF3-Z26N\\BOOK-Q05R-7UF3-Z26N\\';
+
+    const user_id = 'USER-Q05R-7UF3-Z26N'
+    const book_id = 'BOOK-Q05R-7UF3-Z26N'
+    const path = './exports/' + user_id + '/' + book_id + '/';
     const fileName = 'Connies_Schneeabenteuer_' + 'v2' + '.pdf'
-    this.writeFile(pdfBytes, path, fileName);
+
+    if (!fs.existsSync(path)){
+      fs.mkdirSync(path, { recursive: true});
+    }
 
     console.log("PDF saved");
-    return "PDF created";
+    return await this.writeFile(pdfBytes, path, fileName);
+
   }
   // -------------------------------------------------------------------------------------------------------
   // --- 2. methods to add A5 cover, content pages and backside of book ------------------------------------
