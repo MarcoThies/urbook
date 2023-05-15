@@ -12,8 +12,7 @@ function createUserTypeGuard(...types: string[]) : Type<CanActivate> {
         throw new HttpException('Invalid user', HttpStatus.UNAUTHORIZED);
       }
 
-      const isUserAdmin = user.admin;
-      if (isUserAdmin) return true; // Admin darf alles
+      if (user.admin) return true; // Admin darf alles
 
       if(!types.includes('user')) {
         throw new HttpException('No access rights', HttpStatus.UNAUTHORIZED);
