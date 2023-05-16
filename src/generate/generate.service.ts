@@ -24,12 +24,25 @@ export class GenerateService {
     if(bookIdExists) return await this.create(createBookDto, user);
 
     const parameterEntry = await this.parameterRepo.create({
-      childName: createBookDto.child_name
+      childName: createBookDto.child_name,
+      childFavColor: createBookDto.child_favColor,
+      childFavAnimal: createBookDto.child_favAnimals,
+      childAge: createBookDto.child_age,
+      childCountry: createBookDto.child_country,
+      childLanguage: createBookDto.child_language,
+      childGender: createBookDto.child_gender,
+      topicMoralType: createBookDto.topic_moralType,
+      topicChapterCount: createBookDto.topic_chapterCount,
+      topicImageStyle: createBookDto.topic_imageStyle,
+      topicSpecialTopic: createBookDto.topic_specialTopic
     });
+
+    //create Title
+    let newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;   
 
     const bookIdEntry = await this.booksRepo.create({
       isbn: newBookId,
-      title: "myBook Title",
+      title: newTitle,
       state: 1,
       parameterLink: parameterEntry,
       apiKeyLink: user

@@ -9,8 +9,8 @@ export class CreateBookDto {
   @IsNotEmpty() child_language: string;
   @IsNotEmpty() child_gender: string;
 
-  @IsNotEmpty() topic_moralType: any;
+  @IsNotEmpty() topic_moralType: string;
   @IsNotEmpty() topic_chapterCount: number;
-  @IsNotEmpty() topic_imageStyle: any;
+  @IsNotEmpty() topic_imageStyle: string;
   @IsNotEmpty() topic_specialTopic: string;
 }
