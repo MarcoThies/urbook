@@ -11,8 +11,9 @@ import { UserTypeGuard } from "../authentification/roles/type.guard";
 )
 @Controller('generate')
 export class GenerateController {
-    constructor(private readonly generateService: GenerateService) {
-    }
+    constructor(
+      private readonly generateService: GenerateService
+    ) {}
     @Post('create-new')
     public async create(@Body() createBookDto: CreateBookDto): Promise<BookIdInterface> {
       return await this.generateService.create(createBookDto);

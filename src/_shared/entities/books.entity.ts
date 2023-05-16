@@ -1,16 +1,22 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ApiKeyEntity } from "./api-keys.entity";
+import { ParameterEntity } from "../../generate/entities/parameter.entity";
 import { Exclude } from "class-transformer";
 
 @Entity('books')
 export class BooksEntity {
   @PrimaryGeneratedColumn('increment')
-  id: string;
+  id: number;
 
   @Exclude()
   @OneToOne(() => ApiKeyEntity, { "cascade" : true})
-  @JoinColumn({ name: "apiHash"})
-  apiKeyLink: string
+  @JoinColumn({ name: "id"})
+  apiKeyLink: number
+
+  @Exclude()
+  @OneToOne(() => ParameterEntity, { "cascade" : true})
+  @JoinColumn({ name: "id"})
+  parameterLink: number
 
   @Column({
     type: 'varchar',
@@ -25,13 +31,6 @@ export class BooksEntity {
     unique: false
   })
   state: number
-
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    unique: false
-  })
-  childname: string
 
   @Column({
     type: 'varchar',
