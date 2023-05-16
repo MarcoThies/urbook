@@ -14,6 +14,27 @@ export class BooksEntity {
 
   @Column({
     type: 'varchar',
+    nullable: false,
+    unique: true
+  })
+  isbn: string
+
+  @Column({
+    type: 'tinyint',
+    nullable: false,
+    unique: false
+  })
+  state: number
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    unique: false
+  })
+  childname: string
+
+  @Column({
+    type: 'varchar',
     nullable: true,
     unique: false
   })
