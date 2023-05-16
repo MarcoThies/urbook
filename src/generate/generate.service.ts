@@ -49,6 +49,8 @@ export class GenerateService {
     });
     const newBook = await this.booksRepo.save(bookIdEntry);
 
+    console.log(newBook);
+
     return {
         bookId: newBookId,
         status: 1,
