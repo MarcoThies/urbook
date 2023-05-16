@@ -39,6 +39,7 @@
     "mysql2": "^2.3.3",
     "node-mailjet": "^5.1.1",
     "passport-jwt": "^4.0.0",
+    "pdf-lib": "^1.17.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",

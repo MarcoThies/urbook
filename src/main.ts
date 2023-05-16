@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from "@nestjs/config";
@@ -27,6 +27,7 @@ async function bootstrap() {
   //app.use(helmet());
 
   app.enableCors();
+
 
   app.setGlobalPrefix('api/');
 
