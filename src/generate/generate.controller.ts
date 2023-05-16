@@ -1,6 +1,6 @@
 import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { GenerateService } from "./generate.service";
-import { CreateBookDto } from "../generate/dto/createbook.dto";
+import { CreateBookDto } from "./dto/createbook.dto";
 import { BookIdInterface } from "./interfaces/book-id.interface";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
