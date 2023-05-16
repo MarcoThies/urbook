@@ -41,7 +41,7 @@ export class AdministrationService {
   async removeKey(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
     const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
     if(!hashExists) throw new HttpException('API key not found', 404);
-    await this.apiKeyRepo.delete(hashExists.id);
+    await this.apiKeyRepo.delete(hashExists.apiId);
     return true;
   }
 

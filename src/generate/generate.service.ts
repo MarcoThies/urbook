@@ -6,6 +6,7 @@ import { Repository } from "typeorm";
 import { BookIdInterface } from "./interfaces/book-id.interface";
 import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
 import { ParameterEntity } from './entities/parameter.entity';
+import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 @Injectable()
 export class GenerateService {
@@ -16,23 +17,24 @@ export class GenerateService {
     private readonly parameterRepo : Repository<ParameterEntity>,
   ) {}
 
-  public async create(createBookDto: CreateBookDto): Promise<BookIdInterface> {
+  public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
     const newBookId = this.generateBookId(3,4);
 
     const bookIdExists = await this.booksRepo.findOne({ where: { isbn: newBookId }});
-    if(bookIdExists) return await this.create(createBookDto);
+    if(bookIdExists) return await this.create(createBookDto, user);
 
     const parameterEntry = await this.parameterRepo.create({
-      childname: createBookDto.child_name
+      childName: createBookDto.child_name
     });
-    await this.parameterRepo.save(parameterEntry);
 
     const bookIdEntry = await this.booksRepo.create({
       isbn: newBookId,
+      title: "myBook Title",
       state: 1,
-      parameterLink: parameterEntry
+      parameterLink: parameterEntry,
+      apiKeyLink: user
     });
-    await this.booksRepo.save(bookIdEntry);
+    const newBook = await this.booksRepo.save(bookIdEntry);
 
     return {
         bookId: newBookId,

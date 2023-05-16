@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ApiKeyEntity } from "./api-keys.entity";
 import { ParameterEntity } from "../../generate/entities/parameter.entity";
 import { Exclude } from "class-transformer";
@@ -9,14 +9,14 @@ export class BooksEntity {
   id: number;
 
   @Exclude()
-  @OneToOne(() => ApiKeyEntity, { "cascade" : true})
-  @JoinColumn({ name: "id"})
-  apiKeyLink: number
+  @ManyToOne(() => ApiKeyEntity, { "cascade" : true})
+  @JoinColumn({ name: "apiId"})
+  apiKeyLink: ApiKeyEntity
 
   @Exclude()
   @OneToOne(() => ParameterEntity, { "cascade" : true})
-  @JoinColumn({ name: "id"})
-  parameterLink: number
+  @JoinColumn({ name: "paraId"})
+  parameterLink: ParameterEntity
 
   @Column({
     type: 'varchar',
@@ -38,7 +38,6 @@ export class BooksEntity {
     unique: false
   })
   title: string
-
 
   @Column({
     type: 'timestamp',

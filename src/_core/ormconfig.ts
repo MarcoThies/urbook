@@ -1,6 +1,7 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { BooksEntity } from "../_shared/entities/books.entity";
+import { ParameterEntity } from "../generate/entities/parameter.entity";
 
 const config: TypeOrmModuleOptions = {
   type: "mariadb",
@@ -11,6 +12,6 @@ const config: TypeOrmModuleOptions = {
   database: process.env.TYPEORM_DATABASE,
   synchronize: process.env.TYPEORM_SYNC === 'true',
   logging: true,
-  entities: [ApiKeyEntity, BooksEntity]
+  entities: [ApiKeyEntity, BooksEntity, ParameterEntity]
 };
 export = config;

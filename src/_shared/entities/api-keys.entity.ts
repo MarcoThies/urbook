@@ -4,7 +4,7 @@ import { Exclude } from "class-transformer";
 @Entity('api-keys')
 export class ApiKeyEntity {
   @PrimaryGeneratedColumn('increment')
-  id: number;
+  apiId: number;
 
   @Exclude()
   @Column({
