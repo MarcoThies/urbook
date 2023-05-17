@@ -35,3 +35,7 @@ export const generateId = (segments= 3, length:number = 8, delimiter:string = "-
   }
   return keyGroup.join(delimiter);
 };
+
+export const hash = async (value: string) : Promise<string> => {
+  return await bcrypt.hash(value, process.env.API_SALT);
+}

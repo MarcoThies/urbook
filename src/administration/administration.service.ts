@@ -3,9 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
-import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
-import { generateId } from "../_shared/utils";
+import { generateId, hash } from "../_shared/utils";
 
 @Injectable()
 export class AdministrationService {
@@ -19,8 +18,7 @@ export class AdministrationService {
     const newKey = generateId(4,4);
 
     // hash API key
-    const hashFunctionSubservice = new HashFunctionSubservice();
-    const apiKeyHash = await hashFunctionSubservice.hash(newKey);
+    const apiKeyHash = await hash(newKey);
 
     // save API key hash to database (with unique check)
     // check if hash is already in Database

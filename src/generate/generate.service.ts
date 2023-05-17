@@ -23,7 +23,7 @@ export class GenerateService {
     @InjectRepository(ParameterEntity)
     private readonly parameterRepo : Repository<ParameterEntity>,
 
-    private readonly bookGeneratorSubservice : BookGeneratorSubservice
+    private readonly bookGenSubservice : BookGeneratorSubservice
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
@@ -44,6 +44,9 @@ export class GenerateService {
       apiKeyLink: user
     });
     const newBook : BooksEntity = await this.booksRepo.save(bookIdEntry);
+
+    // now start the generation process
+    this.bookGenSubservice.generateNewBook(newBook);
 
     return {
         bookId: newBookId,

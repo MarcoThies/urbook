@@ -5,7 +5,7 @@ import { ApiKeyDto } from "../_shared/dto/api-key.dto";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { Repository } from "typeorm";
-import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
+import { hash } from "../_shared/utils";
 
 @Injectable()
 export class AuthService {
@@ -17,8 +17,7 @@ export class AuthService {
 
   async login(apiKeyDto: ApiKeyDto): Promise<any> {
       // hash given api key
-      const hashFunctionSubservice = new HashFunctionSubservice();
-      const apiKeyHash = await hashFunctionSubservice.hash(apiKeyDto.apiKey);
+      const apiKeyHash = await hash(apiKeyDto.apiKey);
 
       // find api hash in db
       const keyValid = await this.apiKeyRepo.findOne({ where: { apiHash: apiKeyHash } });

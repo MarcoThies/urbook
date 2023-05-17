@@ -8,7 +8,7 @@ export class BookGeneratorSubservice {
     private readonly booksRepo : Repository<BooksEntity>
   ) {}
 
-  public async anyFunction() : Promise<string[]> {
-    return [];
+  public async generateNewBook(book: BooksEntity){
+    // begin Book generation Prozess
   }
 }
