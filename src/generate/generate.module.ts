@@ -4,12 +4,13 @@ import { GenerateController } from './generate.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BooksEntity } from '../_shared/entities/books.entity';
 import { ParameterEntity } from './entities/parameter.entity';
+import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
 
 
 @Module({
+  imports: [TypeOrmModule.forFeature([BooksEntity, ParameterEntity])],
   controllers: [GenerateController],
-  providers: [GenerateService],
+  providers: [GenerateService, BookGeneratorSubservice],
   exports: [GenerateService],
-  imports: [TypeOrmModule.forFeature([BooksEntity, ParameterEntity])]
 })
 export class GenerateModule {}

@@ -5,6 +5,7 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
 import { HashFunctionSubservice } from "../_subservices/hash-function.subservice";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
+import { generateId } from "../_shared/utils";
 
 @Injectable()
 export class AdministrationService {
@@ -15,7 +16,7 @@ export class AdministrationService {
 
   async createKey(): Promise<ApiKeyInterface> {
     // create new API key
-    const newKey = this.generateApiKey(4,4);
+    const newKey = generateId(4,4);
 
     // hash API key
     const hashFunctionSubservice = new HashFunctionSubservice();
@@ -45,20 +46,4 @@ export class AdministrationService {
     return true;
   }
 
-  generateApiKey(segments= 3, length:number = 8, delimiter:string = "-"): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let keyGroup = [] as string[];
-
-    let keySegment
-    for (let n = 0; n < segments; n++) {
-      keySegment = "";
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        keySegment += characters.charAt(randomIndex);
-      }
-      keyGroup.push(keySegment);
-    }
-
-    return keyGroup.join(delimiter);
-  }
 }

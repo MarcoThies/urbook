@@ -18,3 +18,20 @@ export const comparePasswords = async (userPassword, currentPassword) => {
 export const createSalt = async () => {
   return await bcrypt.genSalt(10);
 };
+
+
+export const generateId = (segments= 3, length:number = 8, delimiter:string = "-"): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let keyGroup = [] as string[];
+
+  let keySegment
+  for (let n = 0; n < segments; n++) {
+    keySegment = "";
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      keySegment += characters.charAt(randomIndex);
+    }
+    keyGroup.push(keySegment);
+  }
+  return keyGroup.join(delimiter);
+};

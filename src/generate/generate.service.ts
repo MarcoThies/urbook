@@ -1,12 +1,19 @@
+// Common
 import { Injectable } from '@nestjs/common';
+import { generateId } from "../_shared/utils";
+// Interface & DTO
 import { CreateBookDto } from "./dto/createbook.dto";
-import { BooksEntity } from 'src/_shared/entities/books.entity';
+import { BookIdInterface } from "./interfaces/book-id.interface";
+// db repository
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { BookIdInterface } from "./interfaces/book-id.interface";
-import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
+// db typeorm entities
+import { BooksEntity } from '../_shared/entities/books.entity';
 import { ParameterEntity } from './entities/parameter.entity';
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+// Sub-Services
+import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
+import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
 
 @Injectable()
 export class GenerateService {
@@ -15,10 +22,12 @@ export class GenerateService {
     private readonly booksRepo : Repository<BooksEntity>,
     @InjectRepository(ParameterEntity)
     private readonly parameterRepo : Repository<ParameterEntity>,
+
+    private readonly bookGeneratorSubservice : BookGeneratorSubservice
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
-    const newBookId = this.generateBookId(3,4);
+    const newBookId = generateId(3,4);
 
     const bookIdExists = await this.booksRepo.findOne({ where: { isbn: newBookId }});
     if(bookIdExists) return await this.create(createBookDto, user);
@@ -34,7 +43,7 @@ export class GenerateService {
       parameterLink: parameterEntry,
       apiKeyLink: user
     });
-    const newBook = await this.booksRepo.save(bookIdEntry);
+    const newBook : BooksEntity = await this.booksRepo.save(bookIdEntry);
 
     return {
         bookId: newBookId,
@@ -43,21 +52,6 @@ export class GenerateService {
     } as BookIdInterface
   } 
 
-  generateBookId(segments= 3, length:number = 8, delimiter:string = "-"): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let keyGroup = [] as string[];
-
-    let keySegment
-    for (let n = 0; n < segments; n++) {
-      keySegment = "";
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        keySegment += characters.charAt(randomIndex);
-      }
-      keyGroup.push(keySegment);
-    }
-    return keyGroup.join(delimiter);
-  }
 
   //DEMO function
   async generatePdf(): Promise<boolean> {
