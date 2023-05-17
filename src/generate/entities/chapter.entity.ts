@@ -36,6 +36,13 @@ export class ChapterEntity {
   })
   imageUrl: string
 
+  @Column({
+    type: 'text',
+    nullable: true,
+    unique: false
+  })
+  prompt: string
+
   @ManyToMany(() => CharacterEntity, character => character.chapter, { cascade: true })
   @JoinTable({name: 'chapter_character'})
   characters: CharacterEntity[];

@@ -39,6 +39,10 @@ export class DataManagerSubservice {
     return await this.booksRepo.save(book);
   }
 
+  public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
+    return await this.booksRepo.save(book);
+  }
+
   public async saveNewChapters(chapterArr: ChapterEntity[], book:BooksEntity): Promise<BooksEntity> {
     book.chapters = chapterArr;
     return await this.booksRepo.save(book);

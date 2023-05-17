@@ -22,7 +22,7 @@ export class BookGeneratorSubservice {
   ) {}
 
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
-    // begin Book generation Prozess
+    // begin Book generation Process
     const newBookId = generateId(3,4);
 
     const bookIdExists = await this.dataManager.getBookById(newBookId);
@@ -52,10 +52,10 @@ export class BookGeneratorSubservice {
     // 1. Generate Story from Book-Parameters
     const storyPrompt: string = this.textPromtDesigner.generateStoryPrompt(book.parameterLink);
 
-    // 2. Generate Story from Story-Promt
+    // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
 
-    var chapterArr:ChapterEntity[] = []
+    let chapterArr:ChapterEntity[] = []
     for(var x in story) {
       // 2.1 Save Chapters to DB
       let chapter = story[x].trim();
@@ -81,12 +81,11 @@ export class BookGeneratorSubservice {
     // 5. Generate Character-Prompts from Character-Description
     const characterImages: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterImages(imageAvatars);
 
-    // 6. Request Images from Image AI
+    // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImage(characterImages);
 
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
-
     const chapters = book.chapters;
     for(var ind in chapters) {
       const currChapter = chapters[ind];
@@ -123,5 +122,11 @@ export class BookGeneratorSubservice {
 
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     await this.dataManager.updateBookState(book, 4);
+
+    // 8. Generate Text-Prompt from Story-Image-Prompt
+    // Create empty Image-Prompt-Group
+
+    book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);;
+    await this.dataManager.updateBookContent(book);
   }
 }
