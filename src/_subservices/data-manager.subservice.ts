@@ -4,6 +4,8 @@ import { Repository } from "typeorm";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { ChapterEntity } from "../generate/entities/chapter.entity";
+import { CharacterEntity } from "../generate/entities/character.entity";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -12,6 +14,10 @@ export class DataManagerSubservice {
     private readonly booksRepo : Repository<BooksEntity>,
     @InjectRepository(ParameterEntity)
     private readonly parameterRepo : Repository<ParameterEntity>,
+    @InjectRepository(ChapterEntity)
+    private readonly chapterRepo : Repository<ChapterEntity>,
+    @InjectRepository(CharacterEntity)
+    private readonly characterRepo : Repository<CharacterEntity>,
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity> {
@@ -31,5 +37,23 @@ export class DataManagerSubservice {
     });
     // save new Book
     return await this.booksRepo.save(book);
+  }
+
+  public async saveNewChapters(chapterArr: ChapterEntity[], book:BooksEntity): Promise<BooksEntity> {
+    book.chapters = chapterArr;
+    return await this.booksRepo.save(book);
+  }
+
+  public async updateChapter(newChapter: ChapterEntity): Promise<ChapterEntity> {
+    return await this.chapterRepo.save(newChapter);
+  }
+
+  public async createCharacter(character: CharacterEntity): Promise<CharacterEntity> {
+    return await this.characterRepo.save(character);
+  }
+
+  public async updateBookState(book: BooksEntity, state: number) {
+    book.state = state;
+    await this.booksRepo.save(book);
   }
 }

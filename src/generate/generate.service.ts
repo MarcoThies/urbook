@@ -9,11 +9,12 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 // Sub-Services
 import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
+import { RequestManagerSubservice } from "../_subservices/request-manager.subservice";
 
 @Injectable()
 export class GenerateService {
   constructor(
-    private readonly bookGenSubservice : BookGeneratorSubservice
+    private readonly bookGenSubservice : BookGeneratorSubservice,
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {

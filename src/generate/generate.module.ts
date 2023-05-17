@@ -15,8 +15,8 @@ import { DataManagerModule } from "../_shared/data-manager.module";
   providers: [
     GenerateService,
     BookGeneratorSubservice,
+    RequestManagerSubservice,
     ImagePromtDesignerSubservice, TextPromptDesignerSubservice,
-    RequestManagerSubservice
   ],
   exports: [GenerateService],
 })
