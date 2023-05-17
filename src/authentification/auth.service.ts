@@ -24,6 +24,10 @@ export class AuthService {
 
       if(!keyValid) throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
 
+      // update database lastUse
+      keyValid.lastUse = new Date();
+      await this.apiKeyRepo.save(keyValid);
+
       // generate and jwt token
       return this._createToken(keyValid.apiHash);
   }
