@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from "@nestjs/common";
+import { Controller, Get, Request, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { ManageService } from "./manage.service";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { AuthGuard } from "@nestjs/passport";
@@ -13,7 +13,9 @@ export class ManageController {
     UserTypeGuard('admin', 'user')
   )
   @Get('list-books')
-  public async listBooks() : Promise<BooksEntity[]> {
-    return await this.manageService.listBooks();
+  public async listBooks(@Request() req) : Promise<BooksEntity[]> {
+    const currUser = req.user;
+    if(!currUser) new UnauthorizedException('User missing');
+    return await this.manageService.listBooks(currUser);
   }
 }
