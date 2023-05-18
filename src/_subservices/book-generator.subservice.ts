@@ -79,7 +79,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
-    const characterImages: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterImages(imageAvatars);
+    const characterImages: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImage(characterImages);
@@ -125,8 +125,15 @@ export class BookGeneratorSubservice {
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
-
-    book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);;
+    book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);
     await this.dataManager.updateBookContent(book);
+
+    // 9. Request Story-Images from Image AI
+    book.chapters = await this.requestManager.requestStoryImages(book.chapters);
+    await this.dataManager.updateBookContent(book, true);
+
+    // update Book status 5 => Building Done
+    await this.dataManager.updateBookState(book,  10);
+
   }
 }

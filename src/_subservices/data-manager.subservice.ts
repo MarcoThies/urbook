@@ -6,6 +6,7 @@ import { Injectable } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
+import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -18,6 +19,8 @@ export class DataManagerSubservice {
     private readonly chapterRepo : Repository<ChapterEntity>,
     @InjectRepository(CharacterEntity)
     private readonly characterRepo : Repository<CharacterEntity>,
+
+    private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity> {
@@ -39,7 +42,10 @@ export class DataManagerSubservice {
     return await this.booksRepo.save(book);
   }
 
-  public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
+  public async updateBookContent(book: BooksEntity, createPdf=false): Promise<BooksEntity> {
+    // wait for PDF generator
+    if(createPdf) await this.pdfGenerator.createA5Book(book);
+
     return await this.booksRepo.save(book);
   }
 

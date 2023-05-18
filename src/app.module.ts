@@ -11,7 +11,6 @@ import { ManageModule } from './manage/manage.module';
 import { GenerateModule } from './generate/generate.module';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { DataManagerModule } from "./_shared/data-manager.module";
-import { DataManagerSubservice } from "./_subservices/data-manager.subservice";
 
 @Module({
   providers: [

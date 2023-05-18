@@ -7,9 +7,7 @@ import { BookIdInterface } from "./interfaces/book-id.interface";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 // Sub-Services
-import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
-import { RequestManagerSubservice } from "../_subservices/request-manager.subservice";
 
 @Injectable()
 export class GenerateService {
@@ -29,9 +27,4 @@ export class GenerateService {
     } as BookIdInterface
   } 
 
-  //DEMO function
-  async generatePdf(): Promise<boolean> {
-    let generator = new PdfGeneratorSubservice();
-    return await generator.createA5Book(7);
-      }
 }

@@ -10,7 +10,7 @@ export class ImagePromtDesignerSubservice {
     private readonly requestManager: RequestManagerSubservice
   ) {}
 
-  public async generateCharacterImages(characters:IImageAvatar[]) : Promise<IImageAvatar[]> {
+  public async generateCharacterPrompts(characters:IImageAvatar[]) : Promise<IImageAvatar[]> {
 
     // 1. Generate one Text Prompt for creating image Prompts
     const characterPromptText: string = this.generateCharacterImagePrompt(characters);

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { ChapterEntity } from "../generate/entities/chapter.entity";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -110,6 +111,7 @@ export class RequestManagerSubservice {
     return this.dataFromAnswer(requestReturn);
   }
 
+  // Some helper function to extract important data from the AIs response
   private dataFromAnswer(str: string) : string[][] {
     let result: string[][] = [];
     let offset = 0;
@@ -134,5 +136,23 @@ export class RequestManagerSubservice {
       timeout--;
     }
     return result;
+  }
+
+
+  private demoStoryImages = [
+    "https://media.discordapp.net/attachments/1099720790330585188/1108529721957945534/Storgi_Colorful_f577b6ca-8ba2-4c22-a7a5-42fc0bf9a48d.png?width=3072&height=1537",
+    "https://media.discordapp.net/attachments/1099720790330585188/1108529842661642361/Storgi_Entering_cave_heap_of_sparkling_81686cf0-7a5b-4bec-8aeb-50a9b2067bf7.png?width=3072&height=1537",
+    "https://media.discordapp.net/attachments/1099720790330585188/1108530558948089976/Storgi_Pirate_children_challenging_dragon_small_crew_sailing_to_b9fd36c6-ae72-4971-a2e0-2895c197fc47.png?width=3072&height=1537",
+    "https://media.discordapp.net/attachments/1099720790330585188/1108530706436591656/Storgi_Important_decision_steal_treasure_or_negotiate_peaceful_1251235a-5fc6-4b18-b32f-679d1005c885.png?width=3072&height=1537",
+    "https://media.discordapp.net/attachments/1099720790330585188/1108530779237142610/Storgi_Surprised_dragon_brave_and_honest_request_shared_treasur_95912075-4f77-43f5-925a-b490f470e520.png?width=3072&height=1537",
+    "https://media.discordapp.net/attachments/1099720790330585188/1108531516260221008/Storgi_Important_lesson_value_beyond_treasures_helping_others_g_b9752ec2-4851-4bd9-9281-ab43a8865539.png?width=3072&height=1537"
+  ]
+  public async requestStoryImages(chapters: ChapterEntity[]) : Promise<ChapterEntity[]> {
+    // Todo make Request and handle queue
+
+    for(var x in chapters) {
+      chapters[x].imageUrl = this.demoStoryImages[x];
+    }
+    return chapters;
   }
 }

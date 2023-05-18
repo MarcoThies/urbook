@@ -15,6 +15,7 @@ import { BooksEntity } from "../../_shared/entities/books.entity";
 
 @Entity('chapter')
 export class ChapterEntity {
+  @Exclude()
   @PrimaryGeneratedColumn('increment')
   chapterId: number;
 
@@ -36,6 +37,7 @@ export class ChapterEntity {
   })
   imageUrl: string
 
+  @Exclude()
   @Column({
     type: 'text',
     nullable: true,
@@ -43,10 +45,15 @@ export class ChapterEntity {
   })
   prompt: string
 
-  @ManyToMany(() => CharacterEntity, character => character.chapter, { cascade: true })
+  @ManyToMany(
+    () => CharacterEntity,
+      character => character.chapter,
+    { cascade:true, eager: true}
+  )
   @JoinTable({name: 'chapter_character'})
   characters: CharacterEntity[];
 
+  @Exclude()
   @Column({
     type: 'timestamp',
     unique: false,

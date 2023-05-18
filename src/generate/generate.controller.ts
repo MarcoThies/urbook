@@ -20,9 +20,4 @@ export class GenerateController {
       if(!currUser) new UnauthorizedException('User missing');
       return await this.generateService.create(createBookDto, currUser);
     }
-    // DEMO REQUEST FOR PDF FILE GENERATION
-    @Get('pdf')
-    async generatePdf() {
-      return await this.generateService.generatePdf();
-    }
 }

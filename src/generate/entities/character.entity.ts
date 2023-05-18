@@ -1,9 +1,11 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BooksEntity } from "../../_shared/entities/books.entity";
 import { ChapterEntity } from "./chapter.entity";
+import { Exclude } from "class-transformer";
 
 @Entity('character')
 export class CharacterEntity {
+  @Exclude()
   @PrimaryGeneratedColumn('increment')
   characterId: number;
 
@@ -24,6 +26,7 @@ export class CharacterEntity {
   })
   description: string
 
+  @Exclude()
   @Column({
     type: 'text',
     nullable: true,

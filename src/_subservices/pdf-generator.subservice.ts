@@ -1,6 +1,7 @@
 import { Console } from "console";
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
 import * as fs from "fs";
+import { BooksEntity } from "../_shared/entities/books.entity";
 
 export class PdfGeneratorSubservice {
   constructor() {
@@ -18,8 +19,9 @@ export class PdfGeneratorSubservice {
   // -------------------------------------------------------------------------------------------------------
 
   // generate PDF in A5 format
-  public async createA5Book(numberOfPages : number) : Promise<boolean> {
+  public async createA5Book(book: BooksEntity) : Promise<boolean> {
     // define PDF attributes
+    const numberOfPages = book.chapters.length;
     this.pdfDoc = await PDFDocument.create();
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.TimesRoman);
     this.titleFont = await this.pdfDoc.embedFont(StandardFonts.TimesRomanBold);

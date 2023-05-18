@@ -41,7 +41,10 @@ export class BooksEntity {
   })
   title: string;
 
-  @OneToMany(() => ChapterEntity, chapter => chapter.book, { "cascade" : true})
+  @OneToMany(
+    () => ChapterEntity,
+    chapter => chapter.book,
+    { cascade:true, eager: true})
   chapters: ChapterEntity[];
 
   @Column({
