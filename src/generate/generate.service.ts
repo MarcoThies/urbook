@@ -12,7 +12,7 @@ import { BookGeneratorSubservice } from "../_subservices/book-generator.subservi
 @Injectable()
 export class GenerateService {
   constructor(
-    private readonly bookGenSubservice : BookGeneratorSubservice,
+    private readonly bookGenSubservice : BookGeneratorSubservice
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
@@ -24,7 +24,7 @@ export class GenerateService {
         bookId: newBook.isbn,
         status: true,
         timeStamp: newBook.createdAt.toUTCString()
-    } as BookIdInterface
+    } as BookIdInterface;
   } 
 
 }

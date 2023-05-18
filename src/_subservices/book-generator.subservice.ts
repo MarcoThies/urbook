@@ -43,7 +43,7 @@ export class BookGeneratorSubservice {
     const newBookEntry = await this.dataManager.saveNewBook(newBook, newParameter);
 
     // do some async stuff with the new Book
-    this.startGenerationPipeline(newBookEntry)
+    this.startGenerationPipeline(newBookEntry);
 
     return newBookEntry;
   }
@@ -55,7 +55,8 @@ export class BookGeneratorSubservice {
     // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
 
-    let chapterArr:ChapterEntity[] = []
+    // create db entities from paragraphs
+    let chapterArr: ChapterEntity[] = []
     for(var x in story) {
       // 2.1 Save Chapters to DB
       let chapter = story[x].trim();
@@ -64,10 +65,11 @@ export class BookGeneratorSubservice {
         paragraph: chapter
       } as ChapterEntity);
     }
-    book = await this.dataManager.saveNewChapters(chapterArr, book);
-
+    // set new Chapter content to book entity
+    book.chapters = chapterArr;
     // update Book status 2 => Story generated | Now generating Characters-Descriptions
-    await this.dataManager.updateBookState(book, 2);
+    book.state = 2;
+    await this.dataManager.updateBookContent(book);
 
     // 3.Generate Characters-Descriptions from Story
     const characterPrompt: string = this.textPromtDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
@@ -79,10 +81,10 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
-    const characterImages: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
+    const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
     // 6. Request Avatar Images from Image AI
-    const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImage(characterImages);
+    const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImage(characterImagePrompts);
 
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
@@ -115,7 +117,6 @@ export class BookGeneratorSubservice {
           currChapter.characters.push(character);
         }
       }
-
       // Save the updated Chapter-Entity to DB
       await this.dataManager.updateChapter(currChapter);
     }

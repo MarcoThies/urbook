@@ -7,9 +7,7 @@ export class AppController {
 
   @Get('status')
   status(): statusObj {
-
     return this.appService.requestStatus();
-
   }
 
 }

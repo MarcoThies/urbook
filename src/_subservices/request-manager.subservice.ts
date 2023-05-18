@@ -21,6 +21,7 @@ export class RequestManagerSubservice {
   public async requestStory(textPromt: string) : Promise<string[]> {
 
     // Todo: Create Request and wait for response
+
     console.log("Request new Story from Text-KI");
     const fullTextReturn = this.demoStoryResponse;
 
@@ -40,6 +41,8 @@ export class RequestManagerSubservice {
     // clean outpout
     let characterArray = [] as IImageAvatar[];
 
+
+    // TODO use DataFromResponse Functio instead of this
     const splitParagraphs = requestReturn.split("\n");
     for(var x in splitParagraphs) {
 
@@ -58,12 +61,12 @@ export class RequestManagerSubservice {
       const characterDescription = paragraph.substring(nameTags[1] + 2, paragraph.length);
 
       // create character entity object interface
-      const characterEntity = {
+      const characterAvatar = {
         name: characterName.trim(),
         description: characterDescription.trim()
       } as IImageAvatar;
 
-      characterArray.push(characterEntity);
+      characterArray.push(characterAvatar);
     }
 
     return characterArray;

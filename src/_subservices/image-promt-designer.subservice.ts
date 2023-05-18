@@ -44,7 +44,7 @@ export class ImagePromtDesignerSubservice {
     });
     characterImagePromt += charaTextJoin.join("\n\n");
 
-    characterImagePromt += "\n\nSchreibe vor den genierten Prompt immer den Namen der Person / Characters in eckigen Klammern, aber lasse den Namen auf jeden Fall aus den Prompts selbst aus!"
+    characterImagePromt += "\n\nSchreibe vor dem genierten Prompt immer den Namen der Person / Characters in eckigen Klammern, aber lasse den Namen auf jeden Fall aus den Prompts selbst aus!"
 
     return characterImagePromt;
   }
