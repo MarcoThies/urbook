@@ -1,5 +1,5 @@
 export interface BookIdInterface {
     bookId: string;
-    status: number;
+    status: boolean;
     timeStamp: any;
   }

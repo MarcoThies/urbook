@@ -1,7 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ApiKeyEntity } from "./api-keys.entity";
 import { ParameterEntity } from "../../generate/entities/parameter.entity";
 import { Exclude } from "class-transformer";
+import { CharacterEntity } from "../../generate/entities/character.entity";
+import { ChapterEntity } from "../../generate/entities/chapter.entity";
 
 @Entity('books')
 export class BooksEntity {
@@ -23,21 +25,27 @@ export class BooksEntity {
     nullable: false,
     unique: true
   })
-  isbn: string
+  isbn: string;
 
   @Column({
     type: 'tinyint',
     nullable: false,
     unique: false
   })
-  state: number
+  state: number;
 
   @Column({
     type: 'varchar',
     nullable: true,
     unique: false
   })
-  title: string
+  title: string;
+
+  @OneToMany(
+    () => ChapterEntity,
+    chapter => chapter.book,
+    { cascade:true, eager: true})
+  chapters: ChapterEntity[];
 
   @Column({
     type: 'timestamp',

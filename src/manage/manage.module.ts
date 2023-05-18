@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ManageController } from './manage.controller';
 import { ManageService } from './manage.service';
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { BooksEntity } from "../_shared/entities/books.entity";
+import { DataManagerModule } from "../_shared/data-manager.module";
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BooksEntity])
-  ],
+  imports: [DataManagerModule],
   controllers: [ManageController],
   providers: [ManageService],
 })

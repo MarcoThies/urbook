@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BooksEntity } from "../_shared/entities/books.entity";
+import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
+import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 @Injectable()
 export class ManageService {
   constructor(
-    @InjectRepository(BooksEntity)
-    private readonly booksRepo: Repository<BooksEntity>,
+    private readonly dataManager: DataManagerSubservice,
   ) {}
 
-  public async listBooks(): Promise<BooksEntity[]> {
-    // TODO: Only give books that are related to user
-    return await this.booksRepo.find();
+  public async listBooks(user: ApiKeyEntity): Promise<BooksEntity[]> {
+    return await this.dataManager.getBookList(user);
   }
 }

@@ -15,19 +15,17 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
   imports: [
     PassportModule.register({
       defaultStrategy: 'jwt',
-      session: true,
-
+      session: true
     }),
     JwtModule.register({
       secret: process.env.SECRETKEY,
       signOptions: {
-        expiresIn: "10min",
+        expiresIn: "10min"
       },
     }),
     TypeOrmModule.forFeature([ApiKeyEntity])
   ],
   controllers: [AuthController],
-
   exports: [
     PassportModule,
     JwtModule
