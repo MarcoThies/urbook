@@ -1,4 +1,3 @@
-import { Console } from "console";
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
 import * as fs from "fs";
 import { BooksEntity } from "../_shared/entities/books.entity";
@@ -13,6 +12,7 @@ export class PdfGeneratorSubservice {
   private titleFont;
   private pageDimensions;
   private numberOfPages;
+  private book;
 
   // -------------------------------------------------------------------------------------------------------
   // --- 1. Generation of book attributes, orchestration of book generation and PDF export -----------------
@@ -21,22 +21,25 @@ export class PdfGeneratorSubservice {
   // generate PDF in A5 format
   public async createA5Book(book: BooksEntity) : Promise<boolean> {
     // define PDF attributes
-    const numberOfPages = book.chapters.length;
     this.pdfDoc = await PDFDocument.create();
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.TimesRoman);
     this.titleFont = await this.pdfDoc.embedFont(StandardFonts.TimesRomanBold);
     this.pageDimensions = [PageSizes.A5[1], PageSizes.A5[0] ] as [number, number];
-    this.numberOfPages = numberOfPages;
+    this.numberOfPages = book.chapters.length * 2 - 2; /// -2 is workaround for last chapter of dummy book not having imageURL yet, must get udpted!!!!!!!!!!
+    this.book = book;
+
+    console.log(this.numberOfPages)
 
     // add cover page
     await this.addCoverPage();
     console.log("Cover generated");
 
     // add all pages with content
-    for (var i = 1; i < numberOfPages; i++) {
+    for (var i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
-      console.log('Page ' + i + ' generated.');
+      console.log('page', i)
     }
+    console.log("Content pages generated");
       
     // add backside of book
     await this.addLastPage();
@@ -46,9 +49,9 @@ export class PdfGeneratorSubservice {
     const pdfBytes = await this.pdfDoc.save();
 
     const user_id = 'USER-Q05R-7UF3-Z26N'
-    const book_id = 'BOOK-Q05R-7UF3-Z26N'
+    const book_id = book.isbn
     const path = './exports/' + user_id + '/' + book_id + '/';
-    const fileName = 'Connies_Schneeabenteuer_' + 'v2' + '.pdf'
+    const fileName = book.title + 'v2' + '.pdf'
 
     if (!fs.existsSync(path)){
       fs.mkdirSync(path, { recursive: true});
@@ -67,52 +70,63 @@ export class PdfGeneratorSubservice {
 
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.getImageLink(0), 1);
-    this.addTitle(page, "Connies Schneeabenteuer", 50, this.pageDimensions[1] - 210, 30, 500);
+    await this.addImage(page, "https://i.postimg.cc/FRYwck05/book2.png", 0.87);
+    this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 500);
   }
 
   private async addPage(pageNumber : number) {
 
     switch(this.getCurrentPageType_alternating(pageNumber)) {
       case 'text_left': {
-        await this.addTextPage(pageNumber, this.pageDimensions[0]-180, 80, 100, 100, 1);
+        const pageText = this.book.chapters[(pageNumber - 1) / 2].paragraph
+        const bgImageUrl = "https://i.postimg.cc/nzGFWnVy/bg-text-l.png"
+        const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
+        console.log('text left', (pageNumber - 1) / 2, chapterImageUrl)
+        await this.addTextPage(pageNumber, pageText, this.pageDimensions[0]-180, 80, 100, bgImageUrl, chapterImageUrl);
         break;
       }
       case 'text_right': {
-        await this.addTextPage(pageNumber, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, 101, -1);
+        const pageText = this.book.chapters[(pageNumber - 2) / 2].paragraph
+        const bgImageUrl = "https://i.postimg.cc/MHZ62gvv/bg-text-r.png"
+        const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
+        console.log('text right', (pageNumber - 2) / 2, chapterImageUrl)
+        await this.addTextPage(pageNumber, pageText, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, bgImageUrl, chapterImageUrl);
         break;
       }
       case 'image_left': {
-        await this.addImagePage(pageNumber, 0, 100);
+        const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
+        await this.addImagePage(pageNumber, chapterImageUrl, 0, 100);
+        console.log('image left', (pageNumber - 1) / 2, chapterImageUrl)
         break;
       }
       case 'image_right': {
-        await this.addImagePage(pageNumber, -180, this.pageDimensions[0] - 100);
+        const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
+        console.log('image right', (pageNumber - 2) / 2, chapterImageUrl)
+        await this.addImagePage(pageNumber, chapterImageUrl, -180, this.pageDimensions[0] - 100);
         break;
       }
-    }
+    } 
   }
 
   private async addLastPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.getImageLink(0), 0.87, this.pageDimensions[0]-180);
-    await this.addImage(page, this.getImageLink(100), 1);
+    await this.addImage(page, "https://i.postimg.cc/FRYwck05/book2.png", 0.87, this.pageDimensions[0]-180);
+    await this.addImage(page, "https://i.postimg.cc/nzGFWnVy/bg-text-l.png", 1);
     const pageText = "urContent GmbH \nUnter den Linden 1 \n10117 Berlin \ninfo@urBook.de \nwww.urbook.de";
     this.addText(page, pageText, 100, 160, 10, 100, 12);
   }
 
-  private async addTextPage(pageNumber : number, imageOffset: number, xPosText : number, xPosPageNumber : number, bgImageCode : number, imageNeighbor : number) {
+  private async addTextPage(pageNumber : number, pageText : string, imageOffset: number, xPosText : number, xPosPageNumber : number, bgImageURL : string, chapterImageUrl : string) {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.getImageLink(pageNumber+imageNeighbor), 0.87, imageOffset);
-    await this.addImage(page, this.getImageLink(bgImageCode), 1);
-    const pageText = "Es war einmal ein " + (pageNumber) + "ter Beispieltext und er geht noch weiter weil wir mal schauen wollen, was eigentlich mit Zeilenumbrüchen passiert undso weiter und so fort.";
-    await this.addText(page, pageText, xPosText, this.pageDimensions[1] - 150, 15);
+    await this.addImage(page, chapterImageUrl, 0.55, imageOffset);
+    await this.addImage(page, bgImageURL, 1);
+    await this.addText(page, pageText, xPosText, this.pageDimensions[1] - 80, 15);
     await this.addPageNumber(page, pageNumber.toString(), xPosPageNumber);
   }
 
-  private async addImagePage(pageNumber : number, imageOffset : number, xPosPageNumber : number) {
+  private async addImagePage(pageNumber : number, chapterImageUrl : string, imageOffset : number, xPosPageNumber : number) {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.getImageLink(pageNumber), 0.87, imageOffset);
+    await this.addImage(page, chapterImageUrl, 0.55, imageOffset);
     await this.addPageNumber(page, pageNumber.toString(), xPosPageNumber);
   }
 
@@ -154,7 +168,6 @@ export class PdfGeneratorSubservice {
   }
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
-    const { width, height } = page.getSize();
     const pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer())
     const pngImage = await this.pdfDoc.embedPng(pngImageBytes as ArrayBuffer);
     const pngDims = pngImage.scale(scale);
@@ -171,53 +184,19 @@ export class PdfGeneratorSubservice {
   // --- 4. utility methods --------------------------------------------------------------------------------
   // -------------------------------------------------------------------------------------------------------
 
-  // get iamge files to generate book with (temporary until they are available from DB)
-  private getImageLink(id : number) : string {
-
-    switch (id) {
-      case 0:
-        return "https://i.postimg.cc/qRr3YSx1/book4.png";
-      case 1:
-        return "https://i.postimg.cc/FRYwck05/book2.png";
-      case 2:
-        return "https://i.postimg.cc/FRYwck05/book2.png";
-      case 3:
-        return "https://i.postimg.cc/6QnZMtn7/book3.png";
-      case 4:
-        return "https://i.postimg.cc/6QnZMtn7/book3.png";
-      case 5:
-        return "https://i.postimg.cc/qRr3YSx1/book4.png";
-      case 6:
-        return "https://i.postimg.cc/qRr3YSx1/book4.png";
-      case 7:
-        return "https://i.postimg.cc/FRYwck05/book2.png";
-      case 8:
-        return "https://i.postimg.cc/FRYwck05/book2.png";
-      case 100:
-        return "https://i.postimg.cc/nzGFWnVy/bg-text-l.png";
-      case 101:
-        return "https://i.postimg.cc/MHZ62gvv/bg-text-r.png";
-    }
-  }
   
   // provide schematics of how content pages are organised in book
   private getCurrentPageType_alternating(pageNumber : number) : string {
 
-    if (pageNumber == 0)
-      return 'cover';
-    if (pageNumber == this.numberOfPages)
-      return 'backside';
-    else {
-      switch(pageNumber % 4) {
-        case 1:
-          return 'text_left';
-        case 2:
-          return 'image_right';
-        case 3:
-          return 'image_left';
-        case 0:
-          return 'text_right';
-      }
+    switch(pageNumber % 4) {
+      case 1:
+        return 'text_left';
+      case 2:
+        return 'image_right';
+      case 3:
+        return 'image_left';
+      case 0:
+        return 'text_right';
     }
   }
 
