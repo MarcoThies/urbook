@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
@@ -5,12 +6,13 @@ import { ImagePromtDesignerSubservice } from "./image-promt-designer.subservice"
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { generateId } from "../_shared/utils";
 import { CreateBookDto } from "../generate/dto/create-book.dto";
+import { RegenerateChapterDto } from "../generate/dto/regenerate-chapter.dto";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
-import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { IImageAvatar } from "./interfaces/image-character-prompt.interface copy";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -137,4 +139,40 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book,  10);
 
   }
+
+  public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
+    const book = await this.dataManager.getBookById(regenerateChapterDto.bookId);
+    if(!book) new NotFoundException(`Book with ID ${regenerateChapterDto.bookId} not found!`)
+    const chapterId = regenerateChapterDto.chapterId;
+    var bookChapters = book.chapters;
+
+    // reassamble whole book text with paragraph numbers to be able to give it as context to AI for regeneration of chapter
+    var bookText : string = '';
+    for (var index in bookChapters) {
+      bookText.concat('\n[', index, '] \n');
+      bookText.concat(bookChapters[index].paragraph);
+    }
+
+    // get prompt for regenerating chapter
+    const regenerationPrompt = await this.textPromtDesigner.generateChapterTextPrompt(chapterId, bookText)
+
+    // generate new chapter text utilising prompt
+    const newChapterText = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
+
+    // alter chapter text in book and update database entry 
+    book.chapters[chapterId].paragraph = newChapterText;
+    return await this.dataManager.updateBookContent(book, true);
+
+  }
+
+  public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
+    const book = await this.dataManager.getBookById(regenerateChapterDto.bookId);
+    if(!book) new NotFoundException(`Book with ID ${regenerateChapterDto.bookId} not found!`)
+
+    const chapterId = regenerateChapterDto.chapterId;
+    var bookChapters = book.chapters;
+
+    return book;
+  }
+
 }

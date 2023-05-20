@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { IImageAvatar } from "./interfaces/image-character-prompt.interface copy";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 
 @Injectable()
@@ -27,6 +27,26 @@ export class RequestManagerSubservice {
 
     return fullTextReturn.split("\n");
   }
+
+  public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
+
+    console.log("Request new chapter text from Text-KI");
+    // temp text generation
+    const fullTextReturn = this.demoStoryResponse;
+    const splittedTextReturn = fullTextReturn.split("\n");
+
+    // temp cleanup for demo method
+    let chapterArr: string[] = []
+    for(var x in splittedTextReturn) {
+      let chapter = splittedTextReturn[x].trim();
+      if (chapter.length < 1) continue;
+      chapterArr.push(chapter);
+    }
+    
+    // return same chapter text as before but add " - regereated -" tag in the end, to identify it as regenerated
+    return chapterArr[tempChapterId] + ' - regenerated -';
+  }
+
 
   private demoCharacterisationResponse: string = ""+
     "[Tim]: Tim war ein kleiner Piratenjunge mit wilden, braunen Locken, die im Wind flatterten, während er auf dem Boot stand. Seine Augen leuchteten vor Abenteuerlust und seine braune Haut glänzte in der Sonne. Er trug ein zerfetztes, gestreiftes Hemd und eine abgenutzte Piratenhose, die von vielen vergangenen Entdeckungsreisen erzählte. Mit seinem mutigen Blick und einem frechen Grinsen auf den Lippen war er stets bereit, sich den Gefahren der Meere zu stellen.\n\n" +

@@ -1,7 +1,7 @@
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { Injectable } from "@nestjs/common";
-import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { IImageAvatar } from "./interfaces/image-character-prompt.interface copy";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 
 @Injectable()
