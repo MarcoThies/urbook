@@ -28,19 +28,31 @@ export class BookGeneratorSubservice {
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
+    const newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;
+
     // Generate new Book & Parameter entity-data-object
     const newBook = {
       isbn: newBookId,
-      title: "myBook Title",
+      title: newTitle,
       state: 1,
-      apiKeyLink: user
+      apiKeyLink: user,
+      parameterLink: {
+        childName: createBookDto.child_name,
+        childFavColor: createBookDto.child_favColor,
+        childFavAnimal: createBookDto.child_favAnimals,
+        childAge: createBookDto.child_age,
+        childCountry: createBookDto.child_country,
+        childLanguage: createBookDto.child_language,
+        childGender: createBookDto.child_gender,
+        topicMoralType: createBookDto.topic_moralType,
+        topicChapterCount: createBookDto.topic_chapterCount,
+        topicImageStyle: createBookDto.topic_imageStyle,
+        topicSpecialTopic: createBookDto.topic_specialTopic
+      } as ParameterEntity
     } as BooksEntity;
 
-    const newParameter = {
-      childName: createBookDto.child_name
-    } as ParameterEntity;
 
-    const newBookEntry = await this.dataManager.saveNewBook(newBook, newParameter);
+    const newBookEntry = await this.dataManager.saveNewBook(newBook);
 
     // do some async stuff with the new Book
     this.startGenerationPipeline(newBookEntry);

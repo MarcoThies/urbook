@@ -11,12 +11,12 @@ export class BooksEntity {
   id: number;
 
   @Exclude()
-  @ManyToOne(() => ApiKeyEntity, { "cascade" : true})
+  @ManyToOne(() => ApiKeyEntity, { "cascade" : true })
   @JoinColumn({ name: "apiId"})
   apiKeyLink: ApiKeyEntity
 
   @Exclude()
-  @OneToOne(() => ParameterEntity, { "cascade" : true})
+  @OneToOne(() => ParameterEntity, { "cascade" : true })
   @JoinColumn({ name: "paraId"})
   parameterLink: ParameterEntity
 

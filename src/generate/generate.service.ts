@@ -8,11 +8,13 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 // Sub-Services
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
+import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
 
 @Injectable()
 export class GenerateService {
   constructor(
-    private readonly bookGenSubservice : BookGeneratorSubservice
+    private readonly bookGenSubservice : BookGeneratorSubservice,
+    private readonly dataManager: DataManagerSubservice,
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
@@ -25,6 +27,8 @@ export class GenerateService {
         status: true,
         timeStamp: newBook.createdAt.toUTCString()
     } as BookIdInterface;
-  } 
+  }
+
+
 
 }
