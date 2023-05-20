@@ -3,8 +3,6 @@ import 'dotenv/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from "@nestjs/config";
-import { TypeOrmModule } from "@nestjs/typeorm";
 
 const port = process.env.PORT;
 
@@ -27,7 +25,6 @@ async function bootstrap() {
   //app.use(helmet());
 
   app.enableCors();
-
 
   app.setGlobalPrefix('api/');
 
