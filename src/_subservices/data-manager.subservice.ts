@@ -2,7 +2,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { Repository } from "typeorm";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
@@ -58,6 +58,9 @@ export class DataManagerSubservice {
   }
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<boolean> {
+    const isbnExists = await this.booksRepo.findOne({ where: { ...bookIdDto } });
+    if(!isbnExists) throw new HttpException('Book ID not found', 404);
+    await this.booksRepo.delete(isbnExists.isbn);
     return true;
   }
 }
