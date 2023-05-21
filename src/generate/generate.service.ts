@@ -14,7 +14,6 @@ import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
 export class GenerateService {
   constructor(
     private readonly bookGenSubservice : BookGeneratorSubservice,
-    private readonly dataManager: DataManagerSubservice,
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {

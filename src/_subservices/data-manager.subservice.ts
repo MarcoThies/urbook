@@ -7,6 +7,7 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
+import { BookIdDto } from "../_shared/dto/book-id.dto";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -54,5 +55,9 @@ export class DataManagerSubservice {
   public async updateBookState(book: BooksEntity, state: number) {
     book.state = state;
     await this.booksRepo.save(book);
+  }
+
+  public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<boolean> {
+    return true;
   }
 }
