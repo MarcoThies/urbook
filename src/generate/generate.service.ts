@@ -30,7 +30,6 @@ export class GenerateService {
 
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BookIdInterface> {
 
-    
     const newBook = await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {

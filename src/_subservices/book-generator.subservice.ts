@@ -140,6 +140,43 @@ export class BookGeneratorSubservice {
 
   }
 
+  // Not used yet, might be able to delete after team meeting 22.5 
+  private async mapCharactersToChapter(chapters : ChapterEntity[], fullAvatarGroup : IImageAvatar[]) {
+
+    const characterMap = new Map<string, CharacterEntity>();
+    for(var ind in chapters) {
+      const currChapter = chapters[ind];
+
+      // Search for each character Name in Chapter Text
+      for(var n in fullAvatarGroup) {
+        const currAvatar = fullAvatarGroup[n];
+        if(currChapter.paragraph.includes(currAvatar.name)) {
+          // Character found in current Paragraph
+          // Check if Character-Entity already exists
+          let character = characterMap.get(currAvatar.name);
+
+          if (!character) {
+            // If not, create a new Character-Entity
+            character = new CharacterEntity();
+            // set currAvatar data to Character-Entity
+            character = {...character, ...currAvatar};
+
+            // Add the new Character-Entity to the Map
+            characterMap.set(currAvatar.name, character);
+          }
+
+          // This will later be updated in database
+          if (!currChapter.characters) {
+            currChapter.characters = [];
+          }
+          currChapter.characters.push(character);
+        }
+      }
+      // Save the updated Chapter-Entity to DB
+      await this.dataManager.updateChapter(currChapter);
+    }
+  }
+
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
     const book = await this.dataManager.getBookById(regenerateChapterDto.bookId);
     if(!book) new NotFoundException(`Book with ID ${regenerateChapterDto.bookId} not found!`)
@@ -163,6 +200,11 @@ export class BookGeneratorSubservice {
     book.chapters[chapterId].paragraph = newChapterText;
     return await this.dataManager.updateBookContent(book, true);
 
+    // Leftover ToDos: 
+    // Find all characters in book
+    // Check which characters appear in chapter 
+    // Regenerate image?!
+
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
@@ -170,7 +212,14 @@ export class BookGeneratorSubservice {
     if(!book) new NotFoundException(`Book with ID ${regenerateChapterDto.bookId} not found!`)
 
     const chapterId = regenerateChapterDto.chapterId;
-    var bookChapters = book.chapters;
+    var bookChapters : ChapterEntity[] = [book.chapters[chapterId]];
+
+    // generate new chapter with altered image prompt 
+    var newChapterArray = await this.imagePromptDesigner.generateStoryImages(book.chapters);
+    // request new chapter image from image AI and save to DB
+    newChapterArray = await this.requestManager.requestStoryImages(newChapterArray);
+    book.chapters[chapterId] = newChapterArray[0];
+    await this.dataManager.updateBookContent(book, true);
 
     return book;
   }

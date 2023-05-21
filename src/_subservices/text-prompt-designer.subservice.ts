@@ -15,9 +15,10 @@ export class TextPromptDesignerSubservice {
 
   public generateChapterTextPrompt(chapterId: number, currentStory: string) : string {
     // generate text prompt for regeneration of particular chapter
-    const textPromt = "Gegeben ist die foglende Geschichte mit per [index] nummerierten Absätzen:" +
+    const textPromt = "Gegeben ist die foglende Geschichte mit per [index] nummerierten Absätzen: " +
     currentStory +
-    "\nGeneriere einen neuen Text für Absatz " + chapterId + " und gebe nur diesen als Antwort zurück."
+    "\nGeneriere einen neuen Text für Absatz " + chapterId + " und gebe nur diesen als Antwort zurück. " +
+    "Im neu generierten Text müssen die gleichen Charaktere vorkommen wie im alten."
     return textPromt;
   }
 
