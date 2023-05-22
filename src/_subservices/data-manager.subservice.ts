@@ -7,8 +7,6 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
-import { createSecurePair } from "tls";
-import * as fs from "fs";
 
 @Injectable()
 export class DataManagerSubservice {

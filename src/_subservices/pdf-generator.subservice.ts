@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
-import * as fs from "fs";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
+import * as fs from "fs";
 
+@Injectable()
 export class PdfGeneratorSubservice {
-  constructor(private readonly dataManager : DataManagerSubservice) {
-  }
+  constructor(private readonly dataManager : DataManagerSubservice) {}
 
   // declare PDF attributes
   private pdfDoc;

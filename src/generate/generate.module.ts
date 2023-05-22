@@ -6,8 +6,9 @@ import { BookGeneratorSubservice } from "../_subservices/book-generator.subservi
 import { ImagePromtDesignerSubservice } from "../_subservices/image-promt-designer.subservice";
 import { TextPromptDesignerSubservice } from "../_subservices/text-prompt-designer.subservice";
 import { RequestManagerSubservice } from "../_subservices/request-manager.subservice";
+import { PdfGeneratorSubservice } from '../_subservices/pdf-generator.subservice';
 import { DataManagerModule } from "../_shared/data-manager.module";
-import { PdfGeneratorSubservice } from 'src/_subservices/pdf-generator.subservice';
+
 
 // Generate-Service Module
 @Module({
