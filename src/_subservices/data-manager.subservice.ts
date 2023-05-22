@@ -105,18 +105,23 @@ export class DataManagerSubservice {
 
   }
 
-  public resetFileStructure() : boolean {
+  public resetFileStructure() : void {
     const fs = require("fs");
     fs.rmSync('./exports/', { recursive : true, force: true });
     fs.mkdirSync('./exports/');
+  }
+
+  public async resetDB() : Promise<boolean> {
+    await this.clearThisRepo(this.booksRepo);
+    await this.clearThisRepo(this.characterRepo);
+    await this.clearThisRepo(this.parameterRepo);
     return true;
   }
 
-  public resetDB() : boolean {
-    //this.booksRepo.clear();
-    //this.chapterRepo.clear();
-    //this.characterRepo.clear();
-    return true;
+  private async clearThisRepo(repo : Repository<any>) : Promise<void> {
+    const dataset = await repo.find();
+    await repo.remove(dataset);
+    return;
   }
 
 }

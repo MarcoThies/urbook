@@ -47,10 +47,10 @@ export class AdministrationService {
     return true;
   }
 
-  public clearData() : boolean {
-    if (this.dataManager.resetDB())
-      return this.dataManager.resetFileStructure();
-    return false;
+  public async clearData() : Promise<boolean> {
+    const clearedDb = await this.dataManager.resetDB();
+    this.dataManager.resetFileStructure();
+    return clearedDb;
   }
 
 }

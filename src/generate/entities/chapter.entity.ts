@@ -48,7 +48,7 @@ export class ChapterEntity {
   @ManyToMany(
     () => CharacterEntity,
       character => character.chapter,
-    { cascade:true, eager: true}
+    { cascade: true, eager: true, onDelete: "CASCADE"}
   )
   @JoinTable({name: 'chapter_character'})
   characters: CharacterEntity[];
