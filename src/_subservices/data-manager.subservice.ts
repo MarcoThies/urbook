@@ -7,6 +7,8 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
+import { createSecurePair } from "tls";
+import * as fs from "fs";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -41,6 +43,16 @@ export class DataManagerSubservice {
   }
 
   public async updateBookContent(book: BooksEntity, createPdf=false): Promise<BooksEntity> {
+
+    // check if book uses images from online ressources, if yes, download them and link to local file
+    const chapters = book.chapters;
+    for (var ind in chapters) {
+      const currImagePath = chapters[ind].imageUrl;
+      console.log(currImagePath);
+      if (typeof currImagePath === 'string' && currImagePath.includes('https:'))
+        chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
+    }
+
     // wait for PDF generator
     if(createPdf) await this.pdfGenerator.createA5Book(book);
 
@@ -55,4 +67,69 @@ export class DataManagerSubservice {
     book.state = state;
     await this.booksRepo.save(book);
   }
+
+  private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
+    
+    // download image and convert it to be writabel to a file
+    const response = await fetch(book.chapters[chapterId].imageUrl);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    
+    // generate path and filename 
+    const user_id = book.apiKeyLink.apiId;
+    const book_id = book.isbn;
+    const path = './exports/' + user_id + '/' + book_id + '/img/';
+    const fileName = chapterId + '.png'
+
+    this.writeFile(buffer, path, fileName)
+
+    return path + fileName;
+  }
+
+  public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
+   
+    // generate folder structure if it doesn't exist yet
+    const fs = require("fs");
+    if (!fs.existsSync(path)){
+      fs.mkdirSync(path, { recursive: true});
+    }
+
+    // write file
+    await fs.writeFile(path + fileName, content, err => {
+      if (err) {
+        console.error(err);
+        return false;
+      }
+    });
+
+    return true;
+  }
+
+  public readFile(filePath : string) : Promise<Uint8Array> {
+
+    var content;
+    const fs = require("fs");
+    content = fs.readFileSync(filePath, (err) => {
+      if (err)
+        console.error(err);
+    });
+
+    return content;
+  }
+
+  public resetFileStructure() : boolean {
+    const fs = require("fs");
+    fs.rmSync('./exports/', { recursive : true, force: true });
+    fs.mkdirSync('./exports/');
+    return true;
+  }
+
+  public resetDB() : boolean {
+    //this.booksRepo.clear();
+    //this.chapterRepo.clear();
+    //this.characterRepo.clear();
+    return true;
+  }
+
 }

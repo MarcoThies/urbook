@@ -23,5 +23,10 @@ export class AdministrationController {
     return await this.adminService.removeKey(apiKeyHashDto);
   }
 
+  @Get('clear-data')
+  async clearData(): Promise<any> {
+    return await this.adminService.clearData();
+  }
+
 
 }

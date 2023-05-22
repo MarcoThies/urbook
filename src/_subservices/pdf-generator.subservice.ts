@@ -1,6 +1,8 @@
+import { Injectable } from '@nestjs/common';
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
 import * as fs from "fs";
 import { BooksEntity } from "../_shared/entities/books.entity";
+import { DataManagerSubservice } from "./data-manager.subservice";
 
 export class PdfGeneratorSubservice {
   constructor() {
@@ -48,17 +50,21 @@ export class PdfGeneratorSubservice {
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
 
-    const user_id = 'USER-Q05R-7UF3-Z26N'
-    const book_id = book.isbn
+    const user_id = book.apiKeyLink.apiId;
+    const book_id = book.isbn;
     const path = './exports/' + user_id + '/' + book_id + '/';
-    const fileName = book.title + 'v2' + '.pdf'
+    const fileName = book.title + '-v2' + '.pdf'
 
     if (!fs.existsSync(path)){
       fs.mkdirSync(path, { recursive: true});
     }
 
-    console.log("PDF saved");
-    return await this.writeFile(pdfBytes, path, fileName);
+    const pdfSuccessfullySaved = await this.writeFile(pdfBytes, path, fileName);
+
+    if (pdfSuccessfullySaved)
+      console.log("PDF saved");
+
+    return pdfSuccessfullySaved;
 
   }
   // -------------------------------------------------------------------------------------------------------
@@ -168,10 +174,20 @@ export class PdfGeneratorSubservice {
   }
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
-    const pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer())
-    const pngImage = await this.pdfDoc.embedPng(pngImageBytes as ArrayBuffer);
-    const pngDims = pngImage.scale(scale);
 
+    // get image from either weblink or file
+    var pngImageBytes : Buffer;
+    if (imagePath.includes('https:'))
+      pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer
+    else {
+      pngImageBytes = await this.readFile(imagePath) as Buffer;
+    }
+    
+    // embed image into PDF
+    const pngImage = await this.pdfDoc.embedPng(pngImageBytes as ArrayBuffer);
+
+    // draw image onto page
+    const pngDims = pngImage.scale(scale);
     page.drawImage(pngImage, {
       x: 0 + offset,
       y: 0,
@@ -184,7 +200,6 @@ export class PdfGeneratorSubservice {
   // --- 4. utility methods --------------------------------------------------------------------------------
   // -------------------------------------------------------------------------------------------------------
 
-  
   // provide schematics of how content pages are organised in book
   private getCurrentPageType_alternating(pageNumber : number) : string {
 
@@ -200,10 +215,17 @@ export class PdfGeneratorSubservice {
     }
   }
 
+  // method to be migrated to data manager
   public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
-    const fs = require('fs');
+   
+    // generate folder structure if it doesn't exist yet
+    const fs = require("fs");
+    if (!fs.existsSync(path)){
+      fs.mkdirSync(path, { recursive: true});
+    }
 
-    fs.writeFile(path + fileName, content, err => {
+    // write file
+    await fs.writeFile(path + fileName, content, err => {
       if (err) {
         console.error(err);
         return false;
@@ -213,4 +235,16 @@ export class PdfGeneratorSubservice {
     return true;
   }
 
+  // method to be migtrated to data manager
+  public readFile(filePath : string) : Promise<Uint8Array> {
+
+    var content;
+    const fs = require("fs");
+    content = fs.readFileSync(filePath, (err) => {
+      if (err)
+        console.error(err);
+    });
+
+    return content;
+  }
 }

@@ -19,7 +19,7 @@ export class ChapterEntity {
   @PrimaryGeneratedColumn('increment')
   chapterId: number;
 
-  @ManyToOne(() => BooksEntity, book => book.chapters)
+  @ManyToOne(() => BooksEntity, book => book.chapters, {onDelete: "CASCADE"})
   @JoinColumn({ name: 'bookId' })  // Join with book ID
   book: BooksEntity;
 
