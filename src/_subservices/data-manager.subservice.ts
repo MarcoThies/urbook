@@ -106,16 +106,11 @@ export class DataManagerSubservice {
     return true;
   }
 
-  public readFile(filePath : string) : Promise<Uint8Array> {
+  public async readFile(filePath : string) : Promise<Uint8Array> {
 
-    var content;
     const fs = require("fs");
-    content = fs.readFileSync(filePath, (err) => {
-      if (err)
-        console.error(err);
-    });
+    return await fs.promises.readFile(filePath);
 
-    return content;
   }
 
   public resetFileStructure() : boolean {

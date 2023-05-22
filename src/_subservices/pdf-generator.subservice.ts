@@ -5,7 +5,7 @@ import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
 
 export class PdfGeneratorSubservice {
-  constructor() {
+  constructor(private readonly dataManager : DataManagerSubservice) {
   }
 
   // declare PDF attributes
@@ -59,7 +59,7 @@ export class PdfGeneratorSubservice {
       fs.mkdirSync(path, { recursive: true});
     }
 
-    const pdfSuccessfullySaved = await this.writeFile(pdfBytes, path, fileName);
+    const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved)
       console.log("PDF saved");
@@ -180,7 +180,8 @@ export class PdfGeneratorSubservice {
     if (imagePath.includes('https:'))
       pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer
     else {
-      pngImageBytes = await this.readFile(imagePath) as Buffer;
+      console.log(this.dataManager)
+      pngImageBytes = await this.dataManager.readFile(imagePath) as Buffer;
     }
     
     // embed image into PDF
