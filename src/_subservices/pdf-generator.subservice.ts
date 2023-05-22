@@ -180,7 +180,6 @@ export class PdfGeneratorSubservice {
     if (imagePath.includes('https:'))
       pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer
     else {
-      console.log(this.dataManager)
       pngImageBytes = await this.dataManager.readFile(imagePath) as Buffer;
     }
     
