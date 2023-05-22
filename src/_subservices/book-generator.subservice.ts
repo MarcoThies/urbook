@@ -201,7 +201,7 @@ export class BookGeneratorSubservice {
     return await this.dataManager.updateBookContent(book, true);
 
     // Leftover ToDos: 
-    // Find all characters in book
+    // Find all characters in book (Query for for all characters in current books chapters)
     // Check which characters appear in chapter 
     // Regenerate image?!
 
