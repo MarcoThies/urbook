@@ -9,7 +9,7 @@ export class CharacterEntity {
   @PrimaryGeneratedColumn('increment')
   characterId: number;
 
-  @ManyToMany(() => ChapterEntity, chapter => chapter.characters)
+  @ManyToMany(() => ChapterEntity, chapter => chapter.characters, {onDelete: "CASCADE"})
   chapter: ChapterEntity[];
 
   @Column({

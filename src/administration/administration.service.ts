@@ -5,12 +5,15 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
+import { DataManagerModule } from "src/_shared/data-manager.module";
+import { DataManagerSubservice } from "src/_subservices/data-manager.subservice";
 
 @Injectable()
 export class AdministrationService {
   constructor(
     @InjectRepository(ApiKeyEntity)
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
+    private readonly dataManager : DataManagerSubservice
   ) {}
 
   async createKey(): Promise<ApiKeyInterface> {
@@ -42,6 +45,12 @@ export class AdministrationService {
     if(!hashExists) throw new HttpException('API key not found', 404);
     await this.apiKeyRepo.delete(hashExists.apiId);
     return true;
+  }
+
+  public async clearData() : Promise<boolean> {
+    const clearedDb = await this.dataManager.resetDB();
+    this.dataManager.resetFileStructure();
+    return clearedDb;
   }
 
 }

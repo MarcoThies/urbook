@@ -11,6 +11,7 @@ import { Injectable } from "@nestjs/common";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -18,7 +19,8 @@ export class BookGeneratorSubservice {
     private readonly dataManager: DataManagerSubservice,
     private readonly imagePromptDesigner: ImagePromtDesignerSubservice,
     private readonly textPromtDesigner: TextPromptDesignerSubservice,
-    private readonly requestManager: RequestManagerSubservice
+    private readonly requestManager: RequestManagerSubservice,
+    private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
 
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
@@ -143,7 +145,10 @@ export class BookGeneratorSubservice {
 
     // 9. Request Story-Images from Image AI
     book.chapters = await this.requestManager.requestStoryImages(book.chapters);
-    await this.dataManager.updateBookContent(book, true);
+    await this.dataManager.updateBookContent(book);
+
+    // 10. Create Book PDF
+    await this.pdfGenerator.createA5Book(book);
 
     // update Book status 5 => Building Done
     await this.dataManager.updateBookState(book,  10);

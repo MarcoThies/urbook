@@ -3,9 +3,10 @@ import { AdministrationService } from './administration.service';
 import { AdministrationController } from './administration.controller';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { DataManagerModule } from 'src/_shared/data-manager.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ApiKeyEntity])],
+  imports: [DataManagerModule, TypeOrmModule.forFeature([ApiKeyEntity])], 
   providers: [AdministrationService],
   controllers: [AdministrationController],
 })

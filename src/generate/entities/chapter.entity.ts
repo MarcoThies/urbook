@@ -19,7 +19,7 @@ export class ChapterEntity {
   @PrimaryGeneratedColumn('increment')
   chapterId: number;
 
-  @ManyToOne(() => BooksEntity, book => book.chapters)
+  @ManyToOne(() => BooksEntity, book => book.chapters, {onDelete: "CASCADE"})
   @JoinColumn({ name: 'bookId' })  // Join with book ID
   book: BooksEntity;
 
@@ -48,7 +48,7 @@ export class ChapterEntity {
   @ManyToMany(
     () => CharacterEntity,
       character => character.chapter,
-    { cascade:true, eager: true}
+    { cascade: true, eager: true, onDelete: "CASCADE"}
   )
   @JoinTable({name: 'chapter_character'})
   characters: CharacterEntity[];
