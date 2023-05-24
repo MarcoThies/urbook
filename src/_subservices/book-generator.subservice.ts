@@ -73,7 +73,7 @@ export class BookGeneratorSubservice {
 
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
-    for(var x in story) {
+    for(let x in story) {
       // 2.1 Save Chapters to DB
       let chapter = story[x].trim();
       if (chapter.length < 1) continue;
@@ -105,11 +105,11 @@ export class BookGeneratorSubservice {
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
-    for(var ind in chapters) {
+    for(let ind in chapters) {
       const currChapter = chapters[ind];
 
       // Search for each character Name in Chapter Text
-      for(var n in fullAvatarGroup) {
+      for(let n in fullAvatarGroup) {
         const currAvatar = fullAvatarGroup[n];
         if(currChapter.paragraph.includes(currAvatar.name)) {
           // Character found in current Paragraph
@@ -175,7 +175,7 @@ export class BookGeneratorSubservice {
 
     // reassamble whole book text with paragraph numbers to be able to give it as context to AI for regeneration of chapter
 
-    var bookText : string = bookChapters.map(( item, index ) => "[" + (index + 1) + "]" + item.paragraph ).join("\n\n");
+    let bookText : string = bookChapters.map(( item, index ) => "[" + (index + 1) + "]" + item.paragraph ).join("\n\n");
     console.log(bookText);
 
     // get prompt for regenerating chapter
@@ -207,7 +207,7 @@ export class BookGeneratorSubservice {
     const book = existingBook as BooksEntity;
 
     // request new chapter image from image AI and save to DB
-    var newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
+    let newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
     book.chapters[chapterId] = newChapterArray[0];
     return await this.dataManager.updateBookContent(book, true);
   }

@@ -36,7 +36,7 @@ export class RequestManagerSubservice {
 
     // temp cleanup for demo method
     let chapterArr: string[] = []
-    for(var x in splittedTextReturn) {
+    for(let x in splittedTextReturn) {
       let chapter = splittedTextReturn[x].trim();
       if (chapter.length < 1) continue;
       chapterArr.push(chapter);
@@ -62,7 +62,7 @@ export class RequestManagerSubservice {
 
 
     const splitParagraphs = requestReturn.split("\n");
-    for(var x in splitParagraphs) {
+    for(let x in splitParagraphs) {
 
       // trim paragraph and skip if empty
       let paragraph = splitParagraphs[x].trim();
@@ -112,7 +112,7 @@ export class RequestManagerSubservice {
   public async requestCharacterImage(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
     // Todo make Request and handle queue
 
-    for(var x in AvatarList) {
+    for(let x in AvatarList) {
       AvatarList[x].avatarUrl = (AvatarList[x].name === "Tim") ? this.demoImages[0] : this.demoImages[1];
     }
     return AvatarList;
@@ -172,7 +172,7 @@ export class RequestManagerSubservice {
   public async requestStoryImages(chapters: ChapterEntity[]) : Promise<ChapterEntity[]> {
     // Todo make Request and handle queue
 
-    for(var x in chapters) {
+    for(let x in chapters) {
       chapters[x].imageUrl = this.demoStoryImages[x];
     }
     return chapters;

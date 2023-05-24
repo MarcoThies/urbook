@@ -35,7 +35,7 @@ export class PdfGeneratorSubservice {
     console.log("Cover generated");
 
     // add all pages with content
-    for (var i = 1; i <= this.numberOfPages; i++) {
+    for (let i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
     }
     console.log(this.numberOfPages, "content pages generated");
@@ -52,14 +52,11 @@ export class PdfGeneratorSubservice {
     const path = './exports/' + user_id + '/' + book_id + '/';
     const fileName = book.title + '-v2' + '.pdf'
 
-    if (!fs.existsSync(path)){
-      fs.mkdirSync(path, { recursive: true});
-    }
-
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
-    if (pdfSuccessfullySaved)
+    if (pdfSuccessfullySaved){
       console.log("PDF saved");
+    }
 
     return pdfSuccessfullySaved;
 
@@ -169,7 +166,7 @@ export class PdfGeneratorSubservice {
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
 
     // get image from either weblink or file
-    var pngImageBytes : Buffer;
+    let pngImageBytes : Buffer;
     if (imagePath.includes('https:'))
       pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer
     else {

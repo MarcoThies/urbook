@@ -44,7 +44,7 @@ export class DataManagerSubservice {
 
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
-    for (var ind in chapters) {
+    for (let ind in chapters) {
       const currImagePath = chapters[ind].imageUrl;
       console.log(currImagePath);
       if (typeof currImagePath === 'string' && currImagePath.includes('https:'))
@@ -85,10 +85,8 @@ export class DataManagerSubservice {
   public async fileExists(filePath : string, fileSystem: any) : Promise<Boolean> {
     try {
       await fileSystem.access(filePath);
-      console.log("File does exist", filePath);
       return true;
     } catch (error) {
-      console.log("File doesnt exist", filePath);
       return false;
     }
   }
