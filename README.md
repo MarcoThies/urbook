@@ -1,9 +1,9 @@
 # UrBook - Team 13
 
 ## Team
-[x] Theo Kolb
-[x] Marco Thies
-[x] Sönke Tenckhoff
+- [x] Theo Kolb
+- [x] Marco Thies
+- [x] Sönke Tenckhoff
 
 ## System
 - Nest.js (Node.js)
@@ -12,10 +12,11 @@
 ***
 
 ## Installation and requirements
-1. Clone the repository
-2. Ask the team for the .env file -> contains live db-credentials
+1) Clone the repository
+2) Ask the team for the .env file -> contains live db-credentials
    - Place the .env file in the root directory
-   - (optional) create your own .env file:
+   - (optional) create your own .env file:#
+   
    ```
     SECRETKEY=  [your_secret_key]
     PORT=       [dev_port]
@@ -30,11 +31,13 @@
     TYPEORM_SYNC=           true
 
    ```
-3. Run 'npm install' in the root directory to solve dependencies
+3) Run 'npm install' in the root directory to solve dependencies
 
 ## Usage and Testing
 - Run `npm run dev:start` to start the server in development mode
 - Use our [Postman-collection](https://lunar-rocket-10344.postman.co/workspace/7e704c2b-6900-4e9a-bcc4-36b2ea9c021f) to test the API
+  - Make sure to select the `Development Env`-Environment in Postman to make use of the variables
+  - Try `Collections` for different server test
 
 ## Deployment
 - Run `npm run build` to build a deployable version of the server
