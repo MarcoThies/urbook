@@ -5,12 +5,16 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
+import { BookIdDto } from "src/_shared/dto/book-id.dto";
+import { DataManagerModule } from "../_shared/data-manager.module";
+import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
 
 @Injectable()
 export class AdministrationService {
   constructor(
     @InjectRepository(ApiKeyEntity)
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
+    private readonly dataManager : DataManagerSubservice
   ) {}
 
   async createKey(): Promise<ApiKeyInterface> {
@@ -44,4 +48,7 @@ export class AdministrationService {
     return true;
   }
 
+  public async deleteBook(bookIdDto: BookIdDto): Promise<boolean> {
+    return await this.dataManager.deleteBook(false, bookIdDto);
+  }
 }
