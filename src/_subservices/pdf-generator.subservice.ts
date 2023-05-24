@@ -214,37 +214,4 @@ export class PdfGeneratorSubservice {
         return 'text_right';
     }
   }
-
-  // method to be migrated to data manager
-  public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
-   
-    // generate folder structure if it doesn't exist yet
-    const fs = require("fs");
-    if (!fs.existsSync(path)){
-      fs.mkdirSync(path, { recursive: true});
-    }
-
-    // write file
-    await fs.writeFile(path + fileName, content, err => {
-      if (err) {
-        console.error(err);
-        return false;
-      }
-    });
-
-    return true;
-  }
-
-  // method to be migtrated to data manager
-  public readFile(filePath : string) : Promise<Uint8Array> {
-
-    var content;
-    const fs = require("fs");
-    content = fs.readFileSync(filePath, (err) => {
-      if (err)
-        console.error(err);
-    });
-
-    return content;
-  }
 }

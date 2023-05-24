@@ -6,6 +6,7 @@ import { Injectable } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
+import fs from "fs";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -74,7 +75,7 @@ export class DataManagerSubservice {
     const path = './exports/' + user_id + '/' + book_id + '/img/';
     const fileName = chapterId + '.png'
 
-    this.writeFile(buffer, path, fileName)
+    await this.writeFile(buffer, path, fileName)
 
     return path + fileName;
   }
@@ -82,33 +83,27 @@ export class DataManagerSubservice {
   public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
    
     // generate folder structure if it doesn't exist yet
-    const fs = require("fs");
-    if (!fs.existsSync(path)){
-      fs.mkdirSync(path, { recursive: true});
-    }
+    const fs = require("fs").promises;
+    const path_exists = await fs.exists(path);
 
+    if (!path_exists){
+      await fs.mkdir(path, {recursive: true});
+    }
     // write file
-    await fs.writeFile(path + fileName, content, err => {
-      if (err) {
-        console.error(err);
-        return false;
-      }
-    });
+    await fs.writeFile(path + fileName, content);
 
     return true;
   }
 
   public async readFile(filePath : string) : Promise<Uint8Array> {
-
-    const fs = require("fs");
-    return await fs.promises.readFile(filePath);
-
+    const fs = require("fs").promises;
+    return await fs.readFile(filePath);
   }
 
-  public resetFileStructure() : void {
-    const fs = require("fs");
-    fs.rmSync('./exports/', { recursive : true, force: true });
-    fs.mkdirSync('./exports/');
+  public async resetFileStructure() : Promise<void> {
+    const fs = require("fs").promises;
+    await fs.rm('./exports/', { recursive : true, force: true })
+    await fs.mkdir('./exports/');
   }
 
   public async resetDB() : Promise<boolean> {
