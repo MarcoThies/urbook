@@ -7,6 +7,7 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
+import { RegenerateChapterDto } from "src/generate/dto/regenerate-chapter.dto";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -57,4 +58,12 @@ export class DataManagerSubservice {
     book.state = state;
     await this.booksRepo.save(book);
   }
+
+  public async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
+
+    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }});
+    return (result) ? result : false;
+  }
+
+
 }

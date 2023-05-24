@@ -28,25 +28,25 @@ export class GenerateService {
     } as BookIdInterface;
   } 
 
-  public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BookIdInterface> {
-
-    const newBook = await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
+  public regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
+ 
+    this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {
-      bookId: newBook.isbn,
+      bookId: regenerateChapterDto.bookId,
       status: true,
-      timeStamp: newBook.createdAt.toUTCString()
+      timeStamp: new Date().toUTCString
     } as BookIdInterface;
   }
 
-  public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BookIdInterface> {
+  public regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
 
-    const newBook = await this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
+    const newBook = this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
 
     return {
-      bookId: newBook.isbn,
+      bookId: regenerateChapterDto.bookId,
       status: true,
-      timeStamp: newBook.createdAt.toUTCString()
+      timeStamp: new Date().toUTCString
     } as BookIdInterface;
   }
 
