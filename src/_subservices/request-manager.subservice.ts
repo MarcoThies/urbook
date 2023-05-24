@@ -27,6 +27,26 @@ export class RequestManagerSubservice {
     return fullTextReturn.split("\n");
   }
 
+  public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
+
+    console.log("Request new chapter text from Text-KI");
+    // temp text generation
+    const fullTextReturn = this.demoStoryResponse;
+    const splittedTextReturn = fullTextReturn.split("\n");
+
+    // temp cleanup for demo method
+    let chapterArr: string[] = []
+    for(var x in splittedTextReturn) {
+      let chapter = splittedTextReturn[x].trim();
+      if (chapter.length < 1) continue;
+      chapterArr.push(chapter);
+    }
+    
+    // return same chapter text as before but add " - regereated -" tag in the end, to identify it as regenerated
+    return chapterArr[tempChapterId] + ' - regenerated -';
+  }
+
+
   private demoCharacterisationResponse: string = ""+
     "[Tim]: Tim war ein kleiner Piratenjunge mit wilden, braunen Locken, die im Wind flatterten, während er auf dem Boot stand. Seine Augen leuchteten vor Abenteuerlust und seine braune Haut glänzte in der Sonne. Er trug ein zerfetztes, gestreiftes Hemd und eine abgenutzte Piratenhose, die von vielen vergangenen Entdeckungsreisen erzählte. Mit seinem mutigen Blick und einem frechen Grinsen auf den Lippen war er stets bereit, sich den Gefahren der Meere zu stellen.\n\n" +
     "[Mia]: Mia war ein kleines Piratenmädchen mit langen, kastanienbraunen Haaren, die in sanften Wellen über ihre Schultern fielen. Ihre Augen hatten die Farbe des Ozeans, und ihre Gesichtsfarbe zeugte von vielen Tagen unter der Sonne. Mia trug eine verzierte Piratenbluse und eine knielange Hose mit unzähligen Taschen, in denen sie ihre Schätze aufbewahrte. Ihr zartes Lächeln verriet ihre fröhliche und abenteuerliche Natur, und ihre kleinen Hände waren immer bereit, sich in jede Herausforderung zu stürzen.\n\n" +

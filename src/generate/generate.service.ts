@@ -9,12 +9,12 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 // Sub-Services
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
 import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
+import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 
 @Injectable()
 export class GenerateService {
   constructor(
     private readonly bookGenSubservice : BookGeneratorSubservice,
-    private readonly dataManager: DataManagerSubservice,
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
@@ -30,5 +30,27 @@ export class GenerateService {
   }
 
 
+
+  public regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
+ 
+    this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
+
+    return {
+      bookId: regenerateChapterDto.bookId,
+      status: true,
+      timeStamp: new Date().toUTCString
+    } as BookIdInterface;
+  }
+
+  public regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
+
+    const newBook = this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
+
+    return {
+      bookId: regenerateChapterDto.bookId,
+      status: true,
+      timeStamp: new Date().toUTCString
+    } as BookIdInterface;
+  }
 
 }

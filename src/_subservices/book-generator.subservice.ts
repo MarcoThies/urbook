@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
@@ -5,6 +6,7 @@ import { ImagePromtDesignerSubservice } from "./image-promt-designer.subservice"
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { generateId } from "../_shared/utils";
 import { CreateBookDto } from "../generate/dto/create-book.dto";
+import { RegenerateChapterDto } from "../generate/dto/regenerate-chapter.dto";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
@@ -153,5 +155,60 @@ export class BookGeneratorSubservice {
     // update Book status 5 => Building Done
     await this.dataManager.updateBookState(book,  10);
 
+  }
+
+
+  public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
+    const chapterId = regenerateChapterDto.chapterId - 1;
+    const bookId = regenerateChapterDto.bookId;
+
+    // get book if found and owned by user
+    const existingBook = await this.dataManager.getBookIfOwned(user, bookId);
+    if (existingBook === false) {
+      throw new NotFoundException(`Book with ID ${bookId} not found!`);
+    }
+    const book = existingBook as BooksEntity;
+    const bookChapters = book.chapters;
+    if(typeof bookChapters[bookId] === "undefined") {
+      throw new NotFoundException(`Chapter with ID ${chapterId + 1} doesn't exist!`);
+    }
+
+    // reassamble whole book text with paragraph numbers to be able to give it as context to AI for regeneration of chapter
+
+    var bookText : string = bookChapters.map(( item, index ) => "[" + (index + 1) + "]" + item.paragraph ).join("\n\n");
+    console.log(bookText);
+
+    // get prompt for regenerating chapter
+    const regenerationPrompt = this.textPromtDesigner.generateChapterTextPrompt(chapterId, bookText)
+
+    // generate new chapter text utilising prompt
+    const newChapterText = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
+
+    // alter chapter text in book and update database entry 
+    book.chapters[chapterId].paragraph = newChapterText;
+    return await this.dataManager.updateBookContent(book, true);
+
+    // Leftover ToDos: 
+    // Find all characters in book (Query for for all characters in current books chapters)
+    // Check which characters appear in chapter 
+    // Regenerate image?!
+
+  }
+
+  public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {
+    const chapterId = regenerateChapterDto.chapterId;
+    const bookId = regenerateChapterDto.bookId;
+
+    // get book if found and owned by user
+    const existingBook = await this.dataManager.getBookIfOwned(user, bookId);
+    if (existingBook === false) {
+      throw new NotFoundException(`Book with ID ${bookId} not found!`);
+    }
+    const book = existingBook as BooksEntity;
+
+    // request new chapter image from image AI and save to DB
+    var newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
+    book.chapters[chapterId] = newChapterArray[0];
+    return await this.dataManager.updateBookContent(book, true);
   }
 }

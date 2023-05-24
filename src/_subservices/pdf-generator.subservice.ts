@@ -30,8 +30,6 @@ export class PdfGeneratorSubservice {
     this.numberOfPages = book.chapters.length * 2 - 2; /// -2 is workaround for last chapter of dummy book not having imageURL yet, must get udpted!!!!!!!!!!
     this.book = book;
 
-    console.log(this.numberOfPages)
-
     // add cover page
     await this.addCoverPage();
     console.log("Cover generated");
@@ -39,9 +37,8 @@ export class PdfGeneratorSubservice {
     // add all pages with content
     for (var i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
-      console.log('page', i)
     }
-    console.log("Content pages generated");
+    console.log(this.numberOfPages, "content pages generated");
       
     // add backside of book
     await this.addLastPage();
@@ -87,7 +84,6 @@ export class PdfGeneratorSubservice {
         const pageText = this.book.chapters[(pageNumber - 1) / 2].paragraph
         const bgImageUrl = "https://i.postimg.cc/nzGFWnVy/bg-text-l.png"
         const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
-        console.log('text left', (pageNumber - 1) / 2, chapterImageUrl)
         await this.addTextPage(pageNumber, pageText, this.pageDimensions[0]-180, 80, 100, bgImageUrl, chapterImageUrl);
         break;
       }
@@ -95,19 +91,16 @@ export class PdfGeneratorSubservice {
         const pageText = this.book.chapters[(pageNumber - 2) / 2].paragraph
         const bgImageUrl = "https://i.postimg.cc/MHZ62gvv/bg-text-r.png"
         const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
-        console.log('text right', (pageNumber - 2) / 2, chapterImageUrl)
         await this.addTextPage(pageNumber, pageText, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, bgImageUrl, chapterImageUrl);
         break;
       }
       case 'image_left': {
         const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
         await this.addImagePage(pageNumber, chapterImageUrl, 0, 100);
-        console.log('image left', (pageNumber - 1) / 2, chapterImageUrl)
         break;
       }
       case 'image_right': {
         const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
-        console.log('image right', (pageNumber - 2) / 2, chapterImageUrl)
         await this.addImagePage(pageNumber, chapterImageUrl, -180, this.pageDimensions[0] - 100);
         break;
       }

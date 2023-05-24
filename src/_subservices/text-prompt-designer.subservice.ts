@@ -13,6 +13,15 @@ export class TextPromptDesignerSubservice {
     return textPromt;
   }
 
+  public generateChapterTextPrompt(chapterId: number, currentStory: string) : string {
+    // generate text prompt for regeneration of particular chapter
+    const textPromt = "Gegeben ist die foglende Geschichte mit per [index] nummerierten Absätzen: " +
+    currentStory +
+    "\nGeneriere einen neuen Text für Absatz " + chapterId + " und gebe nur diesen als Antwort zurück. " +
+    "Im neu generierten Text müssen die gleichen Charaktere vorkommen wie im alten."
+    return textPromt;
+  }
+
   public generateCharacterDescriptionsPrompt(fullStory: string) : string {
     let characterPromt = "Schreibe jeweils eine sehr bildlich beschreibende Characterbeschreibung für jeden Character in diesem Text:\n\n";
     characterPromt += fullStory + "\n\n";
