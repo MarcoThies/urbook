@@ -80,13 +80,23 @@ export class DataManagerSubservice {
     return path + fileName;
   }
 
+  public async fileExists(filePath : string, fileSystem: any) : Promise<Boolean> {
+    try {
+      await fileSystem.access(filePath);
+      console.log("File does exist", filePath);
+      return true;
+    } catch (error) {
+      console.log("File doesnt exist", filePath);
+      return false;
+    }
+  }
+
   public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
    
     // generate folder structure if it doesn't exist yet
     const fs = require("fs").promises;
-    const path_exists = await fs.exists(path);
-
-    if (!path_exists){
+    const fileExists = await this.fileExists(path, fs);
+    if (!fileExists){
       await fs.mkdir(path, {recursive: true});
     }
     // write file

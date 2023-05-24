@@ -14,8 +14,7 @@ export class RequestManagerSubservice {
     "\n" + "Tim und Mia entschieden sich, der Schildkröte zu helfen. Gemeinsam schnitten sie vorsichtig das Netz auf und befreiten das hilflose Tier. Die Schildkröte bedankte sich mit einem fröhlichen Kopfnicken und erzählte den Piratenkindern von einem weiteren Schatz, der noch viel größer war als der, den sie gefunden hatten. Doch dieser Schatz gehörte einem gefährlichen Drachen, der auf einer einsamen Insel lebte.\n" +
     "\n" + "Die Piratenkinder überlegten lange, ob sie den gefährlichen Drachen herausfordern sollten. Schließlich entschieden sie sich dafür, das Abenteuer anzunehmen. Sie segelten mit ihrer kleinen Crew zur Insel des Drachen und wurden mit einem imposanten Anblick konfrontiert. Der Drache lag vor ihnen und bewachte einen riesigen Schatz.\n" +
     "\n" + "Wieder einmal standen Tim und Mia vor einer wichtigen Entscheidung. Sollten sie versuchen, den Schatz zu stehlen und zu fliehen oder sollten sie versuchen, mit dem Drachen zu verhandeln und eine friedliche Lösung zu finden? Nach einer kurzen Beratung beschlossen sie, den Drachen anzusprechen und um eine faire Aufteilung des Schatzes zu bitten.\n" +
-    "\n" + "Der Drache war überrascht von der mutigen und ehrlichen Bitte der Piratenkinder. Er erkannte ihre Tapferkeit und ihren guten Charakter an und war bereit, den Schatz gerecht zu teilen. Tim und Mia waren überglücklich und bedankten sich beim Drachen. Sie verließen die Insel mit einem Teil des Schatzes und einem wertvollen Gegenstand, der ihnen an ihre aufregende Reise erinnerte.\n" +
-    "\n" + "Diese Geschichte lehrte Tim und Mia eine wichtige Lektion: Es ist nicht immer der größte Schatz, der am wertvollsten ist. Manchmal ist es viel wichtiger, anderen zu helfen und gute Entscheidungen zu treffen. Mit diesem Gedanken im Herzen segelten die Piratenkinder zurück zur Insel Kunterbunt, bereit für neue Abenteuer und spannende Geschichten";
+    "\n" + "Der Drache war überrascht von der mutigen und ehrlichen Bitte der Piratenkinder. Er erkannte ihre Tapferkeit und ihren guten Charakter an und war bereit, den Schatz gerecht zu teilen. Tim und Mia waren überglücklich und bedankten sich beim Drachen. Sie verließen die Insel mit einem Teil des Schatzes und einem wertvollen Gegenstand, der ihnen an ihre aufregende Reise erinnerte.";
 
 
   public async requestStory(textPromt: string) : Promise<string[]> {
@@ -42,13 +41,14 @@ export class RequestManagerSubservice {
     let characterArray = [] as IImageAvatar[];
 
 
-    // TODO use DataFromResponse Functio instead of this
     const splitParagraphs = requestReturn.split("\n");
     for(var x in splitParagraphs) {
 
       // trim paragraph and skip if empty
       let paragraph = splitParagraphs[x].trim();
       if(paragraph.length < 1) continue;
+
+      // TODO: use dataFromAnswer-Function for this !!!
 
       // check if paragraph contains a character description
       if(paragraph.indexOf('[') < 0) continue;
@@ -105,8 +105,7 @@ export class RequestManagerSubservice {
     "[3] \"Rescuing::25 turtle, cutting net, grateful turtle, tale of bigger treasure, dangerous dragon, lonely island --ar 1:2 --niji 5 --style scenic\"\n\n" +
     "[4] \"Pirate children, challenging dragon, small crew, sailing to dragon's island, guarding massive treasure --ar 1:2 --niji 5 --style scenic\"\n\n" +
     "[5] \"Important decision, steal treasure or negotiate, peaceful::25 resolution, speaking to dragon, fair share of treasure --ar 1:2 --niji 5 --style scenic\"\n\n" +
-    "[6] \"Surprised dragon, brave and honest request, shared treasure, joyous pirate children, leaving island, treasure reminder of adventure --ar 1:2 --niji 5 --style scenic\"\n\n" +
-    "[7] \"Important lesson, value beyond treasures, helping others, good decisions, sailing back to colorful::30 island, ready for new adventures, heartwarming thoughts --ar 1:2 --niji 5 --style scenic\"";
+    "[6] \"Surprised dragon, brave and honest request, shared treasure, joyous pirate children, leaving island, treasure reminder of adventure --ar 1:2 --niji 5 --style scenic\"";
   public async requestImagePromptsForImage(storyImagePromptPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
     const requestReturn = this.demoImagePromptsResponse;
