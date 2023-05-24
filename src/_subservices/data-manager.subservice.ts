@@ -25,12 +25,12 @@ export class DataManagerSubservice {
     return await this.booksRepo.findOne({ where: { isbn: bookId }});
   }
 
-  public async getBookList(user: ApiKeyEntity): Promise<BooksEntity[]> {
-    return await this.booksRepo.find({ where: { apiKeyLink: user }});
+  public async getBookList(user: ApiKeyEntity | boolean): Promise<BooksEntity[]> {
+    if(user === false) return await this.booksRepo.find();
+    else return await this.booksRepo.find({ where: { apiKeyLink: user }});
   }
   public async saveNewBook(book:BooksEntity): Promise<BooksEntity> {
     // save new Parameter List
-
     const bookIdEntry = await this.booksRepo.create({
       ...book
     });

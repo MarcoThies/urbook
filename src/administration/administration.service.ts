@@ -7,6 +7,7 @@ import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
 import { DataManagerModule } from "src/_shared/data-manager.module";
 import { DataManagerSubservice } from "src/_subservices/data-manager.subservice";
+import { BooksEntity } from "../_shared/entities/books.entity";
 
 @Injectable()
 export class AdministrationService {
@@ -51,6 +52,10 @@ export class AdministrationService {
     const clearedDb = await this.dataManager.resetDB();
     this.dataManager.resetFileStructure();
     return clearedDb;
+  }
+
+  public async listBooks(): Promise<BooksEntity[]> {
+    return await this.dataManager.getBookList(false);
   }
 
 }
