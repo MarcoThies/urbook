@@ -5,7 +5,7 @@ import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 
 @Injectable()
-export class ImagePromtDesignerSubservice {
+export class ImagePromptDesignerSubservice {
   constructor(
     private readonly requestManager: RequestManagerSubservice
   ) {}
@@ -19,15 +19,15 @@ export class ImagePromtDesignerSubservice {
     const promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptText);
 
     // 3. Map the result to the characters
-    for(var i in characters) {
+    for(let i in characters) {
       const charName = characters[i].name;
 
-      const promtMatch = promptResultText.find((item: string[]) => {
+      const promptMatch = promptResultText.find((item: string[]) => {
         return item[0] === charName;
       });
 
-      if(promtMatch) {
-        characters[i].prompt = promtMatch[1];
+      if(promptMatch) {
+        characters[i].prompt = promptMatch[1];
       }
     }
 
@@ -35,18 +35,18 @@ export class ImagePromtDesignerSubservice {
   }
 
   private generateCharacterImagePrompt(characters: IImageAvatar[]): string {
-    let characterImagePromt = this.addImageAiInstruction();
+    let characterImagePrompt = this.addImageAiInstruction();
 
-    characterImagePromt += "Schreibe mit diesem Wissen für jeden der folgend genannten Charaktere jeweils genau einen 'Prompt' zur Erstellung eines Charakter-Portraits im Comic Stil mit der genannten Image-Ki:\n\n";
+    characterImagePrompt += "Schreibe mit diesem Wissen für jeden der folgend genannten Charaktere jeweils genau einen 'Prompt' zur Erstellung eines Charakter-Portraits im Comic Stil mit der genannten Image-Ki:\n\n";
 
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return char.description;
     });
-    characterImagePromt += charaTextJoin.join("\n\n");
+    characterImagePrompt += charaTextJoin.join("\n\n");
 
-    characterImagePromt += "\n\nSchreibe vor dem genierten Prompt immer den Namen der Person / Characters in eckigen Klammern, aber lasse den Namen auf jeden Fall aus den Prompts selbst aus!"
+    characterImagePrompt += "\n\nSchreibe vor dem genierten Prompt immer den Namen der Person / Characters in eckigen Klammern, aber lasse den Namen auf jeden Fall aus den Prompts selbst aus!"
 
-    return characterImagePromt;
+    return characterImagePrompt;
   }
 
   public async generateStoryImages(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
@@ -57,7 +57,7 @@ export class ImagePromtDesignerSubservice {
     const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
 
     // 3. Map the result to the chapters
-    for(var i in chapters) {
+    for(let i in chapters) {
       chapters[i].prompt = promptResultText[i][1];
       chapters[i].changed = new Date();
     }
@@ -66,35 +66,35 @@ export class ImagePromtDesignerSubservice {
   }
 
   private generateStoryImagePrompts(chapter: ChapterEntity[]): string {
-    let imageImagePromt = this.addImageAiInstruction("--ar 1:2 --niji 5 --style scenic");
-    imageImagePromt += "Schreibe mit diesem Wissen für jeden der folgendenden Absätze jeweils genau einen 'Prompt' zur Erstellung eines passenden Bildes:\n\n";
+    let imageImagePrompt = this.addImageAiInstruction("--ar 1:2 --niji 5 --style scenic");
+    imageImagePrompt += "Schreibe mit diesem Wissen für jeden der folgendenden Absätze jeweils genau einen 'Prompt' zur Erstellung eines passenden Bildes:\n\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity) => {
       return cpt.paragraph;
     });
-    imageImagePromt += storyTextJoin.join("\n\n");
+    imageImagePrompt += storyTextJoin.join("\n\n");
 
     // place paragraphs
-    imageImagePromt += "\n\nSchreibe vor den genierten Prompt immer den Index des Absatz in eckigen Klammern. (Bsp.: [1] Das ist ein Prompt). Gib außer der geforderten Antwort keinen weiteren Text aus"
+    imageImagePrompt += "\n\nSchreibe vor den genierten Prompt immer den Index des Absatz in eckigen Klammern. (Bsp.: [1] Das ist ein Prompt). Gib außer der geforderten Antwort keinen weiteren Text aus"
 
-    return imageImagePromt;
+    return imageImagePrompt;
   }
 
 
   private addImageAiInstruction(imageAiSuffix = "--ar 1:1 --niji 5"): string{
-    let characterImagePromt = "Hier ist eine Anleitung für die Verfassung von Prompts für eine Image-KI:\n\n";
+    let characterImagePrompt = "Hier ist eine Anleitung für die Verfassung von Prompts für eine Image-KI:\n\n";
 
-    // characterImagePromt += "<<Load some File content here>>";
+    // characterImagePrompt += "<<Load some File content here>>";
 
-    characterImagePromt += "\n\n"+
+    characterImagePrompt += "\n\n"+
       "- keine ganzen Sätze bilden, sondern nur Kurzbeschreibung durch Komma getrennt\n" +
       "- Füllwörter weglassen\n" +
       "- verwende \"weights\" um wichtige Eigenschaften hervorzuheben. Lege die Wichtung für ein Wort fest, indem du es mit zwei doppelpunkten und folgend dem gewünschten Wert makierst. Beispiel: \"..er fährt mit einem roten::30 Auto::25 nach hause\"\n" +
-      "- Beschreibende infos zur verschönerung, wie zb \"cinematic\", \"4k\", \"high detail\" an den promt anfügen\n" +
+      "- Beschreibende infos zur verschönerung, wie zb \"cinematic\", \"4k\", \"high detail\" an den prompt anfügen\n" +
       "- ans Ende jeden Prompt folgend suffix anhängen: '"+imageAiSuffix+"'\n" +
       "- schreibe ausschließlich auf Englisch \n\n";
 
-    return characterImagePromt
+    return characterImagePrompt
   }
 
 }

@@ -2,7 +2,7 @@ import { NotFoundException } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
-import { ImagePromtDesignerSubservice } from "./image-promt-designer.subservice";
+import { ImagePromptDesignerSubservice } from "./image-prompt-designer.subservice";
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { generateId } from "../_shared/utils";
 import { CreateBookDto } from "../generate/dto/create-book.dto";
@@ -19,8 +19,8 @@ import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 export class BookGeneratorSubservice {
   constructor(
     private readonly dataManager: DataManagerSubservice,
-    private readonly imagePromptDesigner: ImagePromtDesignerSubservice,
-    private readonly textPromtDesigner: TextPromptDesignerSubservice,
+    private readonly imagePromptDesigner: ImagePromptDesignerSubservice,
+    private readonly textPromptDesigner: TextPromptDesignerSubservice,
     private readonly requestManager: RequestManagerSubservice,
     private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
@@ -66,7 +66,7 @@ export class BookGeneratorSubservice {
 
   private async startGenerationPipeline(book: BooksEntity) {
     // 1. Generate Story from Book-Parameters
-    const storyPrompt: string = this.textPromtDesigner.generateStoryPrompt(book.parameterLink);
+    const storyPrompt: string = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
@@ -88,7 +88,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookContent(book);
 
     // 3.Generate Characters-Descriptions from Story
-    const characterPrompt: string = this.textPromtDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
+    const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
 
     // 4. Generate Character-Description from Character-Prompt
     const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(characterPrompt);
@@ -179,7 +179,7 @@ export class BookGeneratorSubservice {
     console.log(bookText);
 
     // get prompt for regenerating chapter
-    const regenerationPrompt = this.textPromtDesigner.generateChapterTextPrompt(chapterId, bookText)
+    const regenerationPrompt = this.textPromptDesigner.generateChapterTextPrompt(chapterId, bookText)
 
     // generate new chapter text utilising prompt
     const newChapterText = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);

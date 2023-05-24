@@ -27,7 +27,7 @@ export class PdfGeneratorSubservice {
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.TimesRoman);
     this.titleFont = await this.pdfDoc.embedFont(StandardFonts.TimesRomanBold);
     this.pageDimensions = [PageSizes.A5[1], PageSizes.A5[0] ] as [number, number];
-    this.numberOfPages = book.chapters.length * 2 - 2; /// -2 is workaround for last chapter of dummy book not having imageURL yet, must get udpted!!!!!!!!!!
+    this.numberOfPages = book.chapters.length * 2;
     this.book = book;
 
     // add cover page

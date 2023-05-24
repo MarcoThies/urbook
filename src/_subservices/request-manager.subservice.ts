@@ -17,7 +17,7 @@ export class RequestManagerSubservice {
     "\n" + "Der Drache war überrascht von der mutigen und ehrlichen Bitte der Piratenkinder. Er erkannte ihre Tapferkeit und ihren guten Charakter an und war bereit, den Schatz gerecht zu teilen. Tim und Mia waren überglücklich und bedankten sich beim Drachen. Sie verließen die Insel mit einem Teil des Schatzes und einem wertvollen Gegenstand, der ihnen an ihre aufregende Reise erinnerte.";
 
 
-  public async requestStory(textPromt: string) : Promise<string[]> {
+  public async requestStory(textPrompt: string) : Promise<string[]> {
 
     // Todo: Create Request and wait for response
 
@@ -92,7 +92,7 @@ export class RequestManagerSubservice {
     return characterArray;
   }
 
-  private demoCharacterImagePromtResponse: string = ""+
+  private demoCharacterImagePromptResponse: string = ""+
     "Sicher, ich werde nun für Tim und Mia jeweils einen Prompt erstellen, basierend auf den bereitgestellten Charakterbeschreibungen und den gegebenen Anweisungen:\n\n" +
     "Für Tim:\n" +
     "[Tim] \"pirate boy:30, wild brown curls:25, windswept, eyes:20, glowing with adventure, sun-kissed skin, ragged striped shirt:15, worn-out pirate pants, brave gaze, mischievous grin, ready to face sea dangers, comic style, high detail --ar 2:1 --niji 5 --style scenic\"\n\n" +
@@ -100,7 +100,7 @@ export class RequestManagerSubservice {
     "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 2:1 --niji 5 --style scenic\"";
   public async requestCharacterPromptsForImage(characterAvatarPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
-    const requestReturn = this.demoCharacterImagePromtResponse;
+    const requestReturn = this.demoCharacterImagePromptResponse;
 
     return this.dataFromAnswer(requestReturn);
   }
@@ -140,15 +140,15 @@ export class RequestManagerSubservice {
     let timeout = 100;
 
     while(timeout > 0){
-      const nextCharacterPromt = str.indexOf("[", offset);
-      if(nextCharacterPromt < 0) break;
+      const nextCharacterPrompt = str.indexOf("[", offset);
+      if(nextCharacterPrompt < 0) break;
 
-      const nextCharacterNameEnd = str.indexOf("]", nextCharacterPromt+1)
+      const nextCharacterNameEnd = str.indexOf("]", nextCharacterPrompt+1)
       const paragrapghEnd = str.indexOf("\n", nextCharacterNameEnd+1);
 
       const endPointer = paragrapghEnd < 0 ? str.length : paragrapghEnd;
 
-      const IndexValue = str.substring(nextCharacterPromt + 1, nextCharacterNameEnd).trim();
+      const IndexValue = str.substring(nextCharacterPrompt + 1, nextCharacterNameEnd).trim();
       const Value = str.substring(nextCharacterNameEnd + 1, endPointer).trim();
       result.push([IndexValue, Value.replace(/"/g, "")]);
 
