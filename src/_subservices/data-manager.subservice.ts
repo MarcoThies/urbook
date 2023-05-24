@@ -58,9 +58,20 @@ export class DataManagerSubservice {
   }
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<boolean> {
-    const isbnExists = await this.booksRepo.findOne({ where: { ...bookIdDto } });
-    if(!isbnExists) throw new HttpException('Book ID not found', 404);
-    await this.booksRepo.delete(isbnExists.isbn);
+    if( /*user = admin */false) {
+      const isbnExists = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn }});
+      if(!isbnExists) throw new HttpException('Book ID not found', 404);
+      await this.parameterRepo.delete(isbnExists.parameterLink);
+      //await this.chapterRepo.delete(isbnExists.chapters);
+      await this.booksRepo.delete(isbnExists);
+    } 
+    else {
+      const isbnExists = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn } && { apiKeyLink: user}});
+      if(!isbnExists) throw new HttpException('Book ID not found or not your Book ID', 404);
+      await this.parameterRepo.delete(isbnExists.parameterLink);
+      //await this.chapterRepo.delete(isbnExists.chapters);
+      await this.booksRepo.delete(isbnExists);
+    }
     return true;
   }
 }
