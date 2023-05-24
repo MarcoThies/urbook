@@ -25,7 +25,7 @@ export class ManageService {
     return {
       deletedBookId: bookIdDto.isbn,
       status: isBookDeleted,
-      //timeStamp: isBookDeleted.createdAt.toUTCString()
+      timeStamp: new Date().toUTCString()
     } as DeletedBookInterface;
   }
 }
