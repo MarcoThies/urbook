@@ -19,7 +19,7 @@ export class GenerateService {
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
 
-    // now start the generation process
+    // start the generation process
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
 
     return {
@@ -29,11 +29,9 @@ export class GenerateService {
     } as BookIdInterface;
   }
 
-
-
-  public regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
+  public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
  
-    this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
+    await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {
       bookId: regenerateChapterDto.bookId,
@@ -42,9 +40,9 @@ export class GenerateService {
     } as BookIdInterface;
   }
 
-  public regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
+  public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
 
-    const newBook = this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
+    await this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
 
     return {
       bookId: regenerateChapterDto.bookId,

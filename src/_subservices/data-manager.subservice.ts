@@ -40,7 +40,7 @@ export class DataManagerSubservice {
     return await this.booksRepo.save(book);
   }
 
-  public async updateBookContent(book: BooksEntity, createPdf=false): Promise<BooksEntity> {
+  public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
 
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
@@ -64,15 +64,16 @@ export class DataManagerSubservice {
   }
 
   private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
-    
+
     // download image and convert it to be writabel to a file
     const response = await fetch(book.chapters[chapterId].imageUrl);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    
-    // generate path and filename 
+
+    // generate path and filename
     const user_id = book.apiKeyLink.apiId;
+
     const book_id = book.isbn;
     const path = './exports/' + user_id + '/' + book_id + '/img/';
     const fileName = chapterId + '.png'
@@ -130,7 +131,7 @@ export class DataManagerSubservice {
   }
 
   public async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
-    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }});
+    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink'] });
     return (result) ? result : false;
   }
 }
