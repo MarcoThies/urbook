@@ -16,14 +16,15 @@ import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { BookIdDto } from "../_shared/dto/book-id.dto";
 import { DeletedBookInterface } from "./interfaces/delete-book.interface";
 
+@UseGuards(
+  AuthGuard('jwt'),
+  UserTypeGuard('admin', 'user')
+)
 @Controller('manage')
 export class ManageController {
   constructor(private readonly manageService: ManageService) {}
 
-  @UseGuards(
-    AuthGuard('jwt'),
-    UserTypeGuard('admin', 'user')
-  )
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
   public async listBooks(@Request() req) : Promise<BooksEntity[]> {
@@ -31,6 +32,7 @@ export class ManageController {
     if(!currUser) new UnauthorizedException('User missing');
     return await this.manageService.listBooks(currUser);
   }
+
   @Post('delete-book')
   public async deleteBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<DeletedBookInterface> {
     const currUser = req.user;
