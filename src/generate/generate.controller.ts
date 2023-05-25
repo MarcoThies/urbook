@@ -25,12 +25,12 @@ export class GenerateController {
     public async regenerateChapterText(@Body() regenerateChapterDto: RegenerateChapterDto, @Request() req): Promise<BookIdInterface> {
       const currUser = req.user;
       if(!currUser) new UnauthorizedException('User missing');
-      return this.generateService.regenerateChapterText(regenerateChapterDto, currUser);
+      return await this.generateService.regenerateChapterText(regenerateChapterDto, currUser);
     }
     @Post("regenerate-chapter-image")
     public async regenerateChapterImage(@Body() regenerateChapterDto: RegenerateChapterDto, @Request() req): Promise<BookIdInterface> {
       const currUser = req.user;
       if(!currUser) new UnauthorizedException('User missing');
-      return this.generateService.regenerateChapterImage(regenerateChapterDto, currUser);
+      return await this.generateService.regenerateChapterImage(regenerateChapterDto, currUser);
     }
 }

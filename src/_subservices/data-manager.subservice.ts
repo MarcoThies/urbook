@@ -6,9 +6,7 @@ import { Injectable } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
-import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
-import { RegenerateChapterDto } from "src/generate/dto/regenerate-chapter.dto";
-import fs from "fs";
+import FileSystem from "fs";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -59,6 +57,7 @@ export class DataManagerSubservice {
   }
 
   public async updateBookState(book: BooksEntity, state: number) {
+    // TODO: Check if book generation was aborted, if yes, cancle pipeline
     book.state = state;
     await this.booksRepo.save(book);
   }
@@ -95,7 +94,7 @@ export class DataManagerSubservice {
   public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
    
     // generate folder structure if it doesn't exist yet
-    const fs = require("fs").promises;
+    const fs = FileSystem.promises;
     const fileExists = await this.fileExists(path, fs);
     if (!fileExists){
       await fs.mkdir(path, {recursive: true});
@@ -107,12 +106,12 @@ export class DataManagerSubservice {
   }
 
   public async readFile(filePath : string) : Promise<Uint8Array> {
-    const fs = require("fs").promises;
+    const fs = FileSystem.promises;
     return await fs.readFile(filePath);
   }
 
   public async resetFileStructure() : Promise<void> {
-    const fs = require("fs").promises;
+    const fs = FileSystem.promises;
     await fs.rm('./exports/', { recursive : true, force: true })
     await fs.mkdir('./exports/');
   }
