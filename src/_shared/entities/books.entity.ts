@@ -16,8 +16,8 @@ export class BooksEntity {
   apiKeyLink: ApiKeyEntity
 
   @Exclude()
-  @OneToOne(() => ParameterEntity, { cascade : true, onDelete: "CASCADE"})
-  @JoinColumn({ name: "paraId"})
+  @OneToOne(type => ParameterEntity, params => params.bookLink, { cascade : true, onDelete: "CASCADE"})
+  @JoinColumn()
   parameterLink: ParameterEntity
 
   @Column({

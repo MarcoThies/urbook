@@ -13,7 +13,7 @@ const config: TypeOrmModuleOptions = {
   password: process.env.TYPEORM_PASSWORD,
   database: process.env.TYPEORM_DATABASE,
   synchronize: process.env.TYPEORM_SYNC === 'true',
-  logging: false,
+  logging: true,
   entities: [ApiKeyEntity, BooksEntity, ParameterEntity, ChapterEntity, CharacterEntity]
 };
 export = config;

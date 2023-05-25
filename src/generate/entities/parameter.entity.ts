@@ -1,9 +1,14 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BooksEntity } from "../../_shared/entities/books.entity";
+import { Exclude } from "class-transformer";
 
 @Entity('parameter')
 export class ParameterEntity {
   @PrimaryGeneratedColumn('increment')
   paraId: number;
+
+  @OneToOne(type => BooksEntity, book => book.parameterLink, { eager: true })
+  bookLink: BooksEntity;
 
   @Column({
     type: 'varchar',

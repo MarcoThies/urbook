@@ -1,12 +1,13 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { Repository } from "typeorm";
+import { getConnection, getConnectionManager, Repository } from "typeorm";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
-import FileSystem from "fs";
+import fs from "fs";
+import { BookIdDto } from "../_shared/dto/book-id.dto";
 
 @Injectable()
 export class DataManagerSubservice {
@@ -92,9 +93,9 @@ export class DataManagerSubservice {
   }
 
   public async writeFile(content : Uint8Array, path : string, fileName : string) : Promise<boolean> {
-   
+
     // generate folder structure if it doesn't exist yet
-    const fs = FileSystem.promises;
+    const fs = require("fs").promises;
     const fileExists = await this.fileExists(path, fs);
     if (!fileExists){
       await fs.mkdir(path, {recursive: true});
@@ -106,14 +107,14 @@ export class DataManagerSubservice {
   }
 
   public async readFile(filePath : string) : Promise<Uint8Array> {
-    const fs = FileSystem.promises;
+    const fs = require("fs").promises;
     return await fs.readFile(filePath);
   }
 
-  public async resetFileStructure() : Promise<void> {
-    const fs = FileSystem.promises;
-    await fs.rm('./exports/', { recursive : true, force: true })
-    await fs.mkdir('./exports/');
+  public async resetFileStructure(folder="./exports/") : Promise<void> {
+    const fs = require("fs").promises;
+    await fs.rm(folder, { recursive : true, force: true })
+    await fs.mkdir(folder);
   }
 
   public async resetDB() : Promise<boolean> {
@@ -132,5 +133,37 @@ export class DataManagerSubservice {
   public async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
     const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink'] });
     return (result) ? result : false;
+  }
+
+  public async deleteBook(user: ApiKeyEntity | boolean, bookIdDto: BookIdDto): Promise<boolean> {
+    let getUserBook: BooksEntity | boolean | undefined;
+    if( user === false) {
+      // Admin is deleting book -> can delete any
+      getUserBook = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn }});
+      if(!getUserBook) getUserBook = false;
+    } else {
+      getUserBook = await this.getBookIfOwned(user as ApiKeyEntity, bookIdDto.isbn);
+    }
+
+    if(getUserBook === false) {
+      throw new HttpException(`Book with ID ${bookIdDto.isbn} not found`, HttpStatus.NOT_FOUND);
+    }
+    const authBook = getUserBook as BooksEntity;
+    const bookId = authBook.id;
+    // remove all Characters of book
+    const characters = await this.characterRepo
+      .createQueryBuilder('character')
+      .innerJoin('character.chapter', 'chapter')  // character has 'chapter' property
+      .innerJoin('chapter.book', 'book')         // chapter has 'book' property
+      .where('book.id = :bookId', { bookId })
+      .getMany();
+    await this.characterRepo.remove(characters);
+
+    // find book relational
+    const book = await this.booksRepo.findOne({ where: { id: bookId }, relations: ['chapters', 'parameterLink'] });
+    await this.parameterRepo.remove(book.parameterLink);
+    await this.booksRepo.remove(book);
+
+    return true;
   }
 }

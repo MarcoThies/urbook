@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
 
 export interface statusObj {
   status: boolean,
@@ -9,8 +10,8 @@ export interface statusObj {
 export class AppService {
   requestStatus(): statusObj {
     return {
-      status: true,
-      timestamp: (new Date()).toLocaleDateString()
+      timestamp: (new Date()).toLocaleDateString(),
+      status: true
     };
   }
 }

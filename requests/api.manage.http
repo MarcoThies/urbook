@@ -3,3 +3,6 @@
 GET http://localhost:3000/api/manage/list-books
 Content-Type: application/json
 Authorization: Bearer {{session}}
+
+POST http://localhost:3000/api/manage/delete-book
+Content-Type: application/json

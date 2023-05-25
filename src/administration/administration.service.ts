@@ -5,9 +5,9 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
-import { DataManagerModule } from "src/_shared/data-manager.module";
 import { DataManagerSubservice } from "src/_subservices/data-manager.subservice";
 import { BooksEntity } from "../_shared/entities/books.entity";
+import { BookIdDto } from "src/_shared/dto/book-id.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -58,4 +58,7 @@ export class AdministrationService {
     return await this.dataManager.getBookList(false);
   }
 
+  public async deleteBook(bookIdDto: BookIdDto): Promise<boolean> {
+    return await this.dataManager.deleteBook(false, bookIdDto);
+  }
 }
