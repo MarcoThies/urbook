@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './roles/jwt.strategy';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { DatabaseLoggerModule } from "../_shared/database-logger.module";
 
 @Module({
   providers: [
@@ -13,6 +14,7 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
     JwtStrategy
   ],
   imports: [
+    DatabaseLoggerModule,
     PassportModule.register({
       defaultStrategy: 'jwt',
       session: true

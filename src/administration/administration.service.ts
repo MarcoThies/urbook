@@ -5,16 +5,18 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
 import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
-import { DataManagerSubservice } from "src/_subservices/data-manager.subservice";
+import { DataManagerSubservice } from "src/_shared/data-manager.subservice";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { BookIdDto } from "src/_shared/dto/book-id.dto";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class AdministrationService {
   constructor(
     @InjectRepository(ApiKeyEntity)
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
-    private readonly dataManager : DataManagerSubservice
+    private readonly dataManager : DataManagerSubservice,
+    private readonly logsManager : DatabaseLoggerService,
   ) {}
 
   async createKey(): Promise<ApiKeyInterface> {

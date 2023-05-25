@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerSubservice } from "./data-manager.subservice";
-import * as fs from "fs";
+import { DataManagerSubservice } from "../_shared/data-manager.subservice";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class PdfGeneratorSubservice {
-  constructor(private readonly dataManager : DataManagerSubservice) {}
+  constructor(
+    private readonly dataManager : DataManagerSubservice,
+    private readonly databaseLogger : DatabaseLoggerService,
+  ) {}
 
   // declare PDF attributes
   private pdfDoc;
@@ -32,14 +35,14 @@ export class PdfGeneratorSubservice {
 
     // add cover page
     await this.addCoverPage();
-    console.log("Cover generated");
+    this.databaseLogger.log(`Cover generated ${book.title}-${book.apiKeyLink.apiId}`);
 
     // add all pages with content
     for (let i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
     }
-    console.log(this.numberOfPages, "content pages generated");
-      
+    this.databaseLogger.log(`${this.numberOfPages} where generated for ${book.title}-${book.apiKeyLink.apiId}`);
+
     // add backside of book
     await this.addLastPage();
     console.log("Last page generated");

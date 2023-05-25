@@ -8,11 +8,12 @@ import { TextPromptDesignerSubservice } from "../_subservices/text-prompt-design
 import { RequestManagerSubservice } from "../_subservices/request-manager.subservice";
 import { PdfGeneratorSubservice } from '../_subservices/pdf-generator.subservice';
 import { DataManagerModule } from "../_shared/data-manager.module";
+import { DatabaseLoggerModule } from "../_shared/database-logger.module";
 
 
 // Generate-Service Module
 @Module({
-  imports: [DataManagerModule],
+  imports: [DataManagerModule, DatabaseLoggerModule],
   controllers: [GenerateController],
   providers: [
     GenerateService,

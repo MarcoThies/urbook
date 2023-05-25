@@ -1,10 +1,12 @@
 import { ParameterEntity } from "../generate/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class TextPromptDesignerSubservice {
-  constructor() {
-  }
+  constructor(
+    private readonly logsManager : DatabaseLoggerService,
+  ) {}
 
   public generateStoryPrompt(parameter: ParameterEntity) : string {
     // generate Text-Prompt from Child Parameters

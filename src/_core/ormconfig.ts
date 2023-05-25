@@ -4,6 +4,7 @@ import { BooksEntity } from "../_shared/entities/books.entity";
 import { ParameterEntity } from "../generate/entities/parameter.entity";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
+import { LogEntity } from "../_shared/entities/log.entity";
 
 const config: TypeOrmModuleOptions = {
   type: "mariadb",
@@ -14,6 +15,6 @@ const config: TypeOrmModuleOptions = {
   database: process.env.TYPEORM_DATABASE,
   synchronize: process.env.TYPEORM_SYNC === 'true',
   logging: true,
-  entities: [ApiKeyEntity, BooksEntity, ParameterEntity, ChapterEntity, CharacterEntity]
+  entities: [ApiKeyEntity, LogEntity, BooksEntity, ParameterEntity, ChapterEntity, CharacterEntity]
 };
 export = config;

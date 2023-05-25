@@ -3,10 +3,12 @@ import { RequestManagerSubservice } from "./request-manager.subservice";
 import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {
   constructor(
+    private readonly logsManager : DatabaseLoggerService,
     private readonly requestManager: RequestManagerSubservice
   ) {}
 

@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerSubservice } from "./data-manager.subservice";
+import { DataManagerSubservice } from "../_shared/data-manager.subservice";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
 import { ImagePromptDesignerSubservice } from "./image-prompt-designer.subservice";
 import { RequestManagerSubservice } from "./request-manager.subservice";
@@ -14,11 +14,14 @@ import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { CharacterEntity } from "../generate/entities/character.entity";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class BookGeneratorSubservice {
   constructor(
     private readonly dataManager: DataManagerSubservice,
+    private readonly logsManager : DatabaseLoggerService,
+
     private readonly imagePromptDesigner: ImagePromptDesignerSubservice,
     private readonly textPromptDesigner: TextPromptDesignerSubservice,
     private readonly requestManager: RequestManagerSubservice,

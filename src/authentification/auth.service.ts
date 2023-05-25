@@ -6,6 +6,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { Repository } from "typeorm";
 import { hash } from "../_shared/utils";
+import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @InjectRepository(ApiKeyEntity)
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
+    private readonly logsManager : DatabaseLoggerService,
   ) {}
 
   async login(apiKeyDto: ApiKeyDto): Promise<any> {
