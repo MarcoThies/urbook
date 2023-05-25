@@ -46,9 +46,9 @@ export class DataManagerSubservice {
     const chapters = book.chapters;
     for (let ind in chapters) {
       const currImagePath = chapters[ind].imageUrl;
-      console.log(currImagePath);
-      if (typeof currImagePath === 'string' && currImagePath.includes('https:'))
+      if (typeof currImagePath === 'string' && currImagePath.includes('https:')){
         chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
+      }
     }
 
     return await this.booksRepo.save(book);
