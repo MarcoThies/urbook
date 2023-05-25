@@ -72,16 +72,24 @@ export class DataManagerSubservice {
     const buffer = Buffer.from(arrayBuffer);
 
     // generate path and filename
-    const user_id = book.apiKeyLink.apiId;
-
-    const book_id = book.isbn;
-    const path = './exports/' + user_id + '/' + book_id + '/img/';
+    const path = this.getBookPath(book) + '/img/';
     const fileName = chapterId + '.png'
 
     await this.writeFile(buffer, path, fileName)
 
     return path + fileName;
   }
+
+  public getBookPath(book : BooksEntity) : string {
+    const book_id = book.isbn;
+    return this.getUserPath(book) + book_id + '/';
+  }
+
+  private getUserPath(book : BooksEntity) : string {
+    const user_id = book.apiKeyLink.apiId;
+    return './exports/' + user_id + '/';
+  }
+
 
   public async fileExists(filePath : string, fileSystem: any) : Promise<Boolean> {
     try {
@@ -111,10 +119,12 @@ export class DataManagerSubservice {
     return await fs.readFile(filePath);
   }
 
-  public async resetFileStructure(folder="./exports/") : Promise<void> {
+  public async resetFileStructure(folder="./exports/", recreate=true) : Promise<void> {
     const fs = require("fs").promises;
     await fs.rm(folder, { recursive : true, force: true })
-    await fs.mkdir(folder);
+    if(recreate) {
+      await fs.mkdir(folder);
+    }
   }
 
   public async resetDB() : Promise<boolean> {
@@ -131,7 +141,7 @@ export class DataManagerSubservice {
   }
 
   public async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
-    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink'] });
+    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink', 'chapters', 'parameterLink'] });
     return (result) ? result : false;
   }
 
@@ -139,7 +149,7 @@ export class DataManagerSubservice {
     let getUserBook: BooksEntity | boolean | undefined;
     if( user === false) {
       // Admin is deleting book -> can delete any
-      getUserBook = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn }});
+      getUserBook = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn }, relations: ['chapters', 'parameterLink']});
       if(!getUserBook) getUserBook = false;
     } else {
       getUserBook = await this.getBookIfOwned(user as ApiKeyEntity, bookIdDto.isbn);
@@ -160,9 +170,10 @@ export class DataManagerSubservice {
     await this.characterRepo.remove(characters);
 
     // find book relational
-    const book = await this.booksRepo.findOne({ where: { id: bookId }, relations: ['chapters', 'parameterLink'] });
-    await this.parameterRepo.remove(book.parameterLink);
-    await this.booksRepo.remove(book);
+    await this.parameterRepo.remove(authBook.parameterLink);
+    await this.booksRepo.remove(authBook);
+
+    await this.resetFileStructure(this.getBookPath(authBook), false);
 
     return true;
   }
