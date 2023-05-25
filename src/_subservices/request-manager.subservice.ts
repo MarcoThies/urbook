@@ -53,41 +53,19 @@ export class RequestManagerSubservice {
     "Die Charaktere in diesem Absatz sind Tim und Mia. Tim wird als abenteuerlustig, mutig und frech beschrieben, während Mia als fröhlich, abenteuerlustig und geschickt dargestellt wird. Ihre physischen Merkmale wie Haarfarbe, Augenfarbe und Hautfarbe werden hervorgehoben, um den Lesern ein lebhaftes Bild von den Charakteren zu vermitteln. Ihre Kleidung und ihre Körperhaltung geben einen weiteren Einblick in ihre Persönlichkeiten und ihren Piratenlebensstil.";
 
   public async requestCharacterDescription(charactersPrompt: string) : Promise<IImageAvatar[]> {
-    // Todo: Create Request and wait for response
     console.log("Request Character Description from Text-KI");
 
     const requestReturn = this.demoCharacterisationResponse;
     // clean outpout
-    let characterArray = [] as IImageAvatar[];
 
+    let splitData = this.dataFromAnswer(requestReturn);
 
-    const splitParagraphs = requestReturn.split("\n");
-    for(let x in splitParagraphs) {
-
-      // trim paragraph and skip if empty
-      let paragraph = splitParagraphs[x].trim();
-      if(paragraph.length < 1) continue;
-
-      // TODO: use dataFromAnswer-Function for this !!!
-
-      // check if paragraph contains a character description
-      if(paragraph.indexOf('[') < 0) continue;
-
-      const nameTags = [paragraph.indexOf('['), paragraph.indexOf(']')];
-      // obtain character name
-      const characterName = paragraph.substring(nameTags[0] + 1, nameTags[1]);
-
-      // obtain character description
-      const characterDescription = paragraph.substring(nameTags[1] + 2, paragraph.length);
-
-      // create character entity object interface
-      const characterAvatar = {
-        name: characterName.trim(),
-        description: characterDescription.trim()
-      } as IImageAvatar;
-
-      characterArray.push(characterAvatar);
-    }
+    const characterArray: IImageAvatar[] = splitData.map((char)=>{
+      return {
+        name: char[0].trim(),
+        description: char[1].trim()
+      } as IImageAvatar
+    });
 
     return characterArray;
   }
@@ -143,12 +121,23 @@ export class RequestManagerSubservice {
       const nextCharacterPrompt = str.indexOf("[", offset);
       if(nextCharacterPrompt < 0) break;
 
-      const nextCharacterNameEnd = str.indexOf("]", nextCharacterPrompt+1)
+      let nextCharacterNameEnd = str.indexOf("]", nextCharacterPrompt+1)
+
       const paragrapghEnd = str.indexOf("\n", nextCharacterNameEnd+1);
 
       const endPointer = paragrapghEnd < 0 ? str.length : paragrapghEnd;
 
       const IndexValue = str.substring(nextCharacterPrompt + 1, nextCharacterNameEnd).trim();
+
+      // check if there is a ":" after the brackets
+      const nextColon = str.indexOf(":", nextCharacterNameEnd+1);
+      if(nextColon > 0){
+        if(nextCharacterNameEnd+1 - nextColon < 2) {
+          // colon in proximity to brackets, so we skip this one
+          nextCharacterNameEnd = nextColon;
+        }
+      }
+
       const Value = str.substring(nextCharacterNameEnd + 1, endPointer).trim();
       result.push([IndexValue, Value.replace(/"/g, "")]);
 

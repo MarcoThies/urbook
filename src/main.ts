@@ -3,6 +3,7 @@ import 'dotenv/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from "./_core/http-exception.filter";
 
 const port = process.env.PORT;
 
@@ -27,6 +28,8 @@ async function bootstrap() {
   app.enableCors();
 
   app.setGlobalPrefix('api/');
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // /**
   //  * we need this because "cookie" is true in csrfProtection

@@ -187,12 +187,6 @@ export class BookGeneratorSubservice {
     // alter chapter text in book and update database entry 
     book.chapters[chapterId].paragraph = newChapterText;
     return await this.dataManager.updateBookContent(book, true);
-
-    // Leftover ToDos: 
-    // Find all characters in book (Query for for all characters in current books chapters)
-    // Check which characters appear in chapter 
-    // Regenerate image?!
-
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<BooksEntity> {

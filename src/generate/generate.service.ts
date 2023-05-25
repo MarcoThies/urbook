@@ -29,8 +29,6 @@ export class GenerateService {
     } as BookIdInterface;
   }
 
-
-
   public regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): BookIdInterface {
  
     this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
