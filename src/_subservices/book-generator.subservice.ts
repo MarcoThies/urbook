@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerSubservice } from "../_shared/data-manager.subservice";
+import { DataManagerService } from "../_shared/data-manager.service";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
 import { ImagePromptDesignerSubservice } from "./image-prompt-designer.subservice";
 import { RequestManagerSubservice } from "./request-manager.subservice";
@@ -19,7 +19,7 @@ import { DatabaseLoggerService } from "../_shared/database-logger.service";
 @Injectable()
 export class BookGeneratorSubservice {
   constructor(
-    private readonly dataManager: DataManagerSubservice,
+    private readonly dataManager: DataManagerService,
     private readonly logsManager : DatabaseLoggerService,
 
     private readonly imagePromptDesigner: ImagePromptDesignerSubservice,

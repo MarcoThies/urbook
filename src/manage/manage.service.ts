@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerSubservice } from "../_shared/data-manager.subservice";
+import { DataManagerService } from "../_shared/data-manager.service";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { BookIdDto } from '../_shared/dto/book-id.dto';
 import { DeletedBookInterface } from './interfaces/delete-book.interface';
@@ -12,7 +12,7 @@ import { DatabaseLoggerService } from "../_shared/database-logger.service";
 @Injectable()
 export class ManageService {
   constructor(
-    private readonly dataManager: DataManagerSubservice,
+    private readonly dataManager: DataManagerService,
     private readonly logsManager : DatabaseLoggerService,
   ) {}
 

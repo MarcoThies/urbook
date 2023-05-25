@@ -11,7 +11,7 @@ import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
 
 @Injectable()
-export class DataManagerSubservice {
+export class DataManagerService {
   constructor(
     @InjectRepository(BooksEntity)
     private readonly booksRepo : Repository<BooksEntity>,

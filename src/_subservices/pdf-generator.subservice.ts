@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerSubservice } from "../_shared/data-manager.subservice";
+import { DataManagerService } from "../_shared/data-manager.service";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 @Injectable()
 export class PdfGeneratorSubservice {
   constructor(
-    private readonly dataManager : DataManagerSubservice,
+    private readonly dataManager : DataManagerService,
     private readonly databaseLogger : DatabaseLoggerService,
   ) {}
 
