@@ -8,7 +8,6 @@ import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 // Sub-Services
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
-import { DataManagerSubservice } from "../_subservices/data-manager.subservice";
 import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 
 @Injectable()

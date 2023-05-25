@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, NotFoundException } from "@nestjs/common";
+import { HttpException, HttpStatus } from "@nestjs/common";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerSubservice } from "./data-manager.subservice";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
