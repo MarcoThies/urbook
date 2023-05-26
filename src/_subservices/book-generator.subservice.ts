@@ -58,7 +58,6 @@ export class BookGeneratorSubservice {
       } as ParameterEntity
     } as BooksEntity;
 
-
     const newBookEntry = await this.dataManager.saveNewBook(newBook);
 
     // do some async stuff with the new Book
@@ -160,13 +159,15 @@ export class BookGeneratorSubservice {
 
   }
 
-
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<void> {
     const chapterId = regenerateChapterDto.chapterId - 1;
     const bookId = regenerateChapterDto.bookId;
 
     // get book if found and owned by user
-    const book = await this.checkOwnBookStatus(user, bookId, chapterId);
+    const book = await this.checkBookStatus(user, bookId, chapterId);
+
+    // set Book state to regenerating Text
+    await this.dataManager.updateBookState(book, 5);
 
     // make async call in bg to regenerate text
     console.log(`Book ${book.title} regenerating chapter ${chapterId+1} text...`);
@@ -190,6 +191,9 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
+    // set book state to done
+    await this.dataManager.updateBookState(book, 10);
+
     console.log("New chapter text generated and saved to database:", newPara);
   }
 
@@ -198,7 +202,10 @@ export class BookGeneratorSubservice {
     const bookId = regenerateChapterDto.bookId;
 
     // get book if found and owned by user
-    const book = await this.checkOwnBookStatus(user, bookId, chapterId);
+    const book = await this.checkBookStatus(user, bookId, chapterId);
+
+    // set Book state to regenerating Image
+    await this.dataManager.updateBookState(book, 6);
 
     // make async call in bg to regenerate image
     console.log(`Book ${book.title} regenerating chapter ${chapterId+1} image...`);
@@ -214,21 +221,25 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
+    // set book state to done
+    await this.dataManager.updateBookState(book, 10);
+
     console.log("New chapter image generated and saved to database:", newChapterArray[0].imageUrl);
   }
 
-  private async checkOwnBookStatus(user: ApiKeyEntity, bookId: string, chapterId: number): Promise<BooksEntity>{
+  private async checkBookStatus(user: ApiKeyEntity, bookId: string, chapterId: number): Promise<BooksEntity>{
     // get book if found and owned by user
-    const existingBook = await this.dataManager.getBookIfOwned(user, bookId);
-    if (existingBook === false) {
-      throw new HttpException(`Book with ID ${bookId} not found!`, HttpStatus.NOT_FOUND);
-    }
-    const book = existingBook as BooksEntity;
+    const existingBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
 
-    if(typeof book.chapters[chapterId] === "undefined") {
+    // check if book is in state 10 (finished)
+    if(existingBook.state < 10){
+      throw new HttpException(`Book with ID ${chapterId + 1} is still processing. Abort...!`, HttpStatus.CONFLICT);
+    }
+
+    if(typeof existingBook.chapters[chapterId] === "undefined") {
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.NOT_FOUND);
     }
 
-    return book;
+    return existingBook;
   }
 }

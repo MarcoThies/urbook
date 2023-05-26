@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { BooksEntity } from "../_shared/entities/books.entity";
@@ -22,12 +22,26 @@ export class ManageService {
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<DeletedBookInterface> {
 
-    const isBookDeleted = await this.dataManager.deleteBook(user, bookIdDto);
+    const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
+
+    if(myBook.state < 9) {
+      // TODO: Stop all processes that are still generating this book
+    }
+
+    const isBookDeleted = await this.dataManager.deleteBook(myBook);
 
     return {
       deletedBookId: bookIdDto.isbn,
       status: isBookDeleted,
       timeStamp: new Date().toUTCString()
     } as DeletedBookInterface;
+  }
+
+  public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
+    return await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
+  }
+
+  public async getPdf(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<any> {
+    return await this.dataManager.getBookPdf(user, bookIdDto.isbn);
   }
 }

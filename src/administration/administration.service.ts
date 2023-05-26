@@ -59,8 +59,4 @@ export class AdministrationService {
   public async listBooks(): Promise<BooksEntity[]> {
     return await this.dataManager.getBookList(false);
   }
-
-  public async deleteBook(bookIdDto: BookIdDto): Promise<boolean> {
-    return await this.dataManager.deleteBook(false, bookIdDto);
-  }
 }

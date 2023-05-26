@@ -13,7 +13,6 @@ export class AppController {
   status(@Request() req): statusObj {
     let currUser: ApiKeyEntity | undefined = req.user;
     console.log(currUser);
-
     return this.appService.requestStatus();
   }
 
