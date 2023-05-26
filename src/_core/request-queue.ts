@@ -14,7 +14,6 @@ export class RequestQueue {
     }
   
     async runNextJob() {
-        console.log(this.queue.length);
         if (this.queue.length === 0) {
             this.isRunning = false;
             return;
@@ -32,9 +31,5 @@ export class RequestQueue {
 
     clearQueue() {
         this.queue = [] as Function[];
-    }
-  
-    delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
     }
   }
