@@ -34,8 +34,8 @@ export class GenerateController {
       return await this.generateService.checkStatus(bookIdDto.bookId, req.user);
     }
 
-  @Post("abort")
-  public async abortGeneration(@Body() bookIdDto: BookIdInterface, @Request() req): Promise<Boolean> {
-    return await this.generateService.abort(bookIdDto.bookId, req.user);
-  }
+    @Post("abort")
+    public async abortGeneration(@Body() bookIdDto: BookIdInterface, @Request() req): Promise<Boolean> {
+      return await this.generateService.abort(bookIdDto.bookId, req.user);
+    }
 }

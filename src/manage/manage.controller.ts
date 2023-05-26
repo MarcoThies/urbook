@@ -27,30 +27,22 @@ export class ManageController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
   public async listBooks(@Request() req) : Promise<BooksEntity[]> {
-    const currUser = req.user;
-    if(!currUser) new UnauthorizedException('User missing');
-    return await this.manageService.listBooks(currUser);
+    return await this.manageService.listBooks(req.user);
   }
 
   @Post('delete-book')
   public async deleteBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<DeletedBookInterface> {
-    const currUser = req.user;
-    if(!currUser) new UnauthorizedException('User missing');
-    return await this.manageService.deleteBook(currUser, bookIdDto);
+    return await this.manageService.deleteBook(req.user, bookIdDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('book')
   public async getBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
-    const currUser = req.user;
-    if(!currUser) new UnauthorizedException('User missing');
-    return await this.manageService.getBook(currUser, bookIdDto);
+    return await this.manageService.getBook(req.user, bookIdDto);
   }
 
   @Post('pdf')
   public async getPdf(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
-    const currUser = req.user;
-    if(!currUser) new UnauthorizedException('User missing');
-    return await this.manageService.getPdf(currUser, bookIdDto);
+    return await this.manageService.getPdf(req.user, bookIdDto);
   }
 }
