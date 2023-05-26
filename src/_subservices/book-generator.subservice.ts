@@ -15,6 +15,8 @@ import { CharacterEntity } from "../generate/entities/character.entity";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { RequestQueue } from "../_core/request-queue";
+import { clear } from "console";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -27,9 +29,14 @@ export class BookGeneratorSubservice {
     private readonly requestManager: RequestManagerSubservice,
     private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
-
+  
+  avatarImage = new RequestQueue();
+  chapterImage = new RequestQueue();
+  abortFlag = false;
+  
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
     // begin Book generation Process
+    this.abortFlag = false;
     const newBookId = generateId(3,4);
 
     const bookIdExists = await this.dataManager.getBookById(newBookId);
@@ -72,6 +79,7 @@ export class BookGeneratorSubservice {
 
     // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
+    if(this.abortFlag) {return;}
 
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
@@ -86,7 +94,8 @@ export class BookGeneratorSubservice {
     // set new Chapter content to book entity
     book.chapters = chapterArr;
     // update Book status 2 => Story generated | Now generating Characters-Descriptions
-    book.state = 2;
+    if(this.abortFlag) {return;}
+    book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
     // 3.Generate Characters-Descriptions from Story
@@ -96,14 +105,16 @@ export class BookGeneratorSubservice {
     const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(characterPrompt);
 
     // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
+    if(this.abortFlag) {return;}
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
     // 6. Request Avatar Images from Image AI
-    const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImage(characterImagePrompts);
+    const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
 
+    if(this.abortFlag) {return;}
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
@@ -140,6 +151,7 @@ export class BookGeneratorSubservice {
     }
 
     // update Book status 4 => Character Avatars Done | Now generating Story Images
+    if(this.abortFlag) {return;}
     await this.dataManager.updateBookState(book, 4);
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
@@ -151,6 +163,7 @@ export class BookGeneratorSubservice {
     book.chapters = await this.requestManager.requestStoryImages(book.chapters);
     await this.dataManager.updateBookContent(book);
 
+    if(this.abortFlag) {return;}
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
 
@@ -233,7 +246,7 @@ export class BookGeneratorSubservice {
 
     // check if book is in state 10 (finished)
     if(existingBook.state < 10){
-      throw new HttpException(`Book with ID ${chapterId + 1} is still processing. Abort...!`, HttpStatus.CONFLICT);
+      throw new HttpException(`Book with ID ${bookId} is still processing. Abort...!`, HttpStatus.CONFLICT);
     }
 
     if(typeof existingBook.chapters[chapterId] === "undefined") {
@@ -242,4 +255,21 @@ export class BookGeneratorSubservice {
 
     return existingBook;
   }
+
+  public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
+    // get book if found and owned by user
+    const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+
+    // check if book is in state 10 (finished)
+    if(myBook.state == 10){
+      throw new HttpException(`Generation of book with ID ${bookId} is already completed. Nothing to abort!`, HttpStatus.CONFLICT);
+    }
+    this.abortFlag = true;
+    this.requestManager.avatarImageQueue.clearQueue();
+    this.requestManager.chapterImageQueue.clearQueue();
+    
+    this.dataManager.deleteBook(myBook);
+    return true;
+  }
+
 }
