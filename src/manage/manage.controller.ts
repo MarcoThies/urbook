@@ -24,7 +24,6 @@ import { DeletedBookInterface } from "./interfaces/delete-book.interface";
 export class ManageController {
   constructor(private readonly manageService: ManageService) {}
 
-
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
   public async listBooks(@Request() req) : Promise<BooksEntity[]> {
@@ -38,5 +37,20 @@ export class ManageController {
     const currUser = req.user;
     if(!currUser) new UnauthorizedException('User missing');
     return await this.manageService.deleteBook(currUser, bookIdDto);
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('book')
+  public async getBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
+    const currUser = req.user;
+    if(!currUser) new UnauthorizedException('User missing');
+    return await this.manageService.getBook(currUser, bookIdDto);
+  }
+
+  @Post('pdf')
+  public async getPdf(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
+    const currUser = req.user;
+    if(!currUser) new UnauthorizedException('User missing');
+    return await this.manageService.getPdf(currUser, bookIdDto);
   }
 }

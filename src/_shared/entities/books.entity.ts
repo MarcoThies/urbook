@@ -7,6 +7,7 @@ import { ChapterEntity } from "../../generate/entities/chapter.entity";
 
 @Entity('books')
 export class BooksEntity {
+  @Exclude()
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -27,6 +28,7 @@ export class BooksEntity {
   })
   isbn: string;
 
+  @Exclude()
   @Column({
     type: 'tinyint',
     nullable: false,

@@ -5,6 +5,7 @@ import { BookIdInterface } from "./interfaces/book-id.interface";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { RegenerateChapterDto } from "./dto/regenerate-chapter.dto";
+import { IBookState } from "./interfaces/book-state.interface";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -17,20 +18,24 @@ export class GenerateController {
     ) {}
     @Post('create-new')
     public async create(@Body() createBookDto: CreateBookDto, @Request() req): Promise<BookIdInterface> {
-      const currUser = req.user;
-      if(!currUser) new UnauthorizedException('User missing');
-      return await this.generateService.create(createBookDto, currUser);
+      return await this.generateService.create(createBookDto, req.user);
     }
     @Post("regenerate-chapter-text")
     public async regenerateChapterText(@Body() regenerateChapterDto: RegenerateChapterDto, @Request() req): Promise<BookIdInterface> {
-      const currUser = req.user;
-      if(!currUser) new UnauthorizedException('User missing');
-      return await this.generateService.regenerateChapterText(regenerateChapterDto, currUser);
+      return await this.generateService.regenerateChapterText(regenerateChapterDto, req.user);
     }
     @Post("regenerate-chapter-image")
     public async regenerateChapterImage(@Body() regenerateChapterDto: RegenerateChapterDto, @Request() req): Promise<BookIdInterface> {
-      const currUser = req.user;
-      if(!currUser) new UnauthorizedException('User missing');
-      return await this.generateService.regenerateChapterImage(regenerateChapterDto, currUser);
+      return await this.generateService.regenerateChapterImage(regenerateChapterDto, req.user);
     }
+
+    @Post("check-status")
+    public async checkStatus(@Body() bookIdDto: BookIdInterface, @Request() req): Promise<IBookState> {
+      return await this.generateService.checkStatus(bookIdDto.bookId, req.user);
+    }
+
+  @Post("abort")
+  public async abortGeneration(@Body() bookIdDto: BookIdInterface, @Request() req): Promise<Boolean> {
+    return await this.generateService.abort(bookIdDto.bookId, req.user);
+  }
 }

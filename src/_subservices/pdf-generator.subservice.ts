@@ -51,7 +51,7 @@ export class PdfGeneratorSubservice {
     const pdfBytes = await this.pdfDoc.save();
 
     const fileName = book.title + '-v2' + '.pdf'
-    const path = this.dataManager.getBookPath(book);
+    const path = "."+this.dataManager.getBookPath(book);
 
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
