@@ -35,6 +35,8 @@ export class BookGeneratorSubservice {
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
+    await this.logsManager.log(`Generate new Book started. Book: ${newBookId} - User: ${user.apiId}`)
+
     const newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;
 
     // Generate new Book & Parameter entity-data-object
@@ -169,7 +171,7 @@ export class BookGeneratorSubservice {
     const book = await this.checkOwnBookStatus(user, bookId, chapterId);
 
     // make async call in bg to regenerate text
-    console.log(`Book ${book.title} regenerating chapter ${chapterId+1} text...`);
+    this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
     this.newChapterText(chapterId, book);
   }
 
@@ -190,7 +192,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    console.log("New chapter text generated and saved to database:", newPara);
+    this.logsManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<void> {
@@ -201,7 +203,7 @@ export class BookGeneratorSubservice {
     const book = await this.checkOwnBookStatus(user, bookId, chapterId);
 
     // make async call in bg to regenerate image
-    console.log(`Book ${book.title} regenerating chapter ${chapterId+1} image...`);
+    this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} image - User: ${book.apiKeyLink.apiId}`);
     this.newChapterImage(chapterId, book);
   }
 
@@ -214,18 +216,22 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    console.log("New chapter image generated and saved to database:", newChapterArray[0].imageUrl);
+    this.logsManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
   }
 
   private async checkOwnBookStatus(user: ApiKeyEntity, bookId: string, chapterId: number): Promise<BooksEntity>{
     // get book if found and owned by user
     const existingBook = await this.dataManager.getBookIfOwned(user, bookId);
     if (existingBook === false) {
+
+      await this.logsManager.error(`Book with ID ${bookId} not found! - User: ${user.apiId}`, HttpStatus.NOT_FOUND.toString());
       throw new HttpException(`Book with ID ${bookId} not found!`, HttpStatus.NOT_FOUND);
     }
     const book = existingBook as BooksEntity;
 
     if(typeof book.chapters[chapterId] === "undefined") {
+
+      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${book.title} User: ${book.apiKeyLink.apiId}`, HttpStatus.NOT_FOUND.toString());
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.NOT_FOUND);
     }
 

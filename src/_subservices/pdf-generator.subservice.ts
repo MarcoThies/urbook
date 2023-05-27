@@ -45,7 +45,8 @@ export class PdfGeneratorSubservice {
 
     // add backside of book
     await this.addLastPage();
-    console.log("Last page generated");
+    //console.log("Last page generated");
+    this.databaseLogger.log(`Last page generated ${book.title}-${book.apiKeyLink.apiId}`);
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
@@ -56,7 +57,8 @@ export class PdfGeneratorSubservice {
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved){
-      console.log("PDF saved");
+      //console.log("PDF saved");
+      this.databaseLogger.log(`PDF saved ${book.title}-${book.apiKeyLink.apiId}`);
     }
 
     return pdfSuccessfullySaved;
