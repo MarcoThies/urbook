@@ -185,8 +185,8 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 5);
 
     // make async call in bg to regenerate text
-    this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
-    this.newChapterText(chapterId, book);
+    await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
+    await this.newChapterText(chapterId, book);
   }
 
   private async newChapterText(chapterId: number, book: BooksEntity): Promise<void> {
@@ -243,18 +243,13 @@ export class BookGeneratorSubservice {
   private async checkBookStatus(user: ApiKeyEntity, bookId: string, chapterId: number): Promise<BooksEntity>{
     // get book if found and owned by user
     const existingBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    // check if book is found
-    if (existingBook === false) {
-      await this.logsManager.error(`Book with ID ${bookId} not found! - User: ${user.apiId}`, HttpStatus.NOT_FOUND.toString());
-      throw new HttpException(`Book with ID ${bookId} not found!`, HttpStatus.NOT_FOUND);
-    }
     // check if book is in state 10 (finished)
     if(existingBook.state < 10){
       throw new HttpException(`Book with ID ${bookId} is still processing. Abort...!`, HttpStatus.CONFLICT);
     }
     // check if chapter exists
     if(typeof existingBook.chapters[chapterId] === "undefined") {
-      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${existingBook.apiKeyLink.apiId}`, HttpStatus.NOT_FOUND.toString());
+      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, HttpStatus.NOT_FOUND.toString());
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.NOT_FOUND);
     }
 
