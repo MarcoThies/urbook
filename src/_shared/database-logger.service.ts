@@ -37,4 +37,10 @@ export class DatabaseLoggerService implements LoggerService {
     logEntry.trace = trace;
     this.logRepo.save(logEntry);
   }
+
+  public async clearLogs() : Promise<boolean> {
+    const dataset = await this.logRepo.find();
+    await this.logRepo.remove(dataset);
+    return true;
+  }
 }

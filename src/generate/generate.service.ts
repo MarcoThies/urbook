@@ -59,9 +59,7 @@ export class GenerateService {
   }
 
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
-    const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    // TODO: implement abort in BookGeneratorSubservice
-    // TODO: remove book from file system / database
+    await this.bookGenSubservice.abort(bookId, user);
     return true;
   }
 

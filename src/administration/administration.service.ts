@@ -56,6 +56,10 @@ export class AdministrationService {
     return clearedDb;
   }
 
+  public async clearLogs() : Promise<boolean> {
+    return await this.logsManager.clearLogs();
+  }
+
   public async listBooks(): Promise<BooksEntity[]> {
     return await this.dataManager.getBookList(false);
   }
