@@ -7,8 +7,9 @@ import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
 import { DataManagerService } from "src/_shared/data-manager.service";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { BookIdDto } from "src/_shared/dto/book-id.dto";
+import { BookIdDto } from "../_shared/dto/book-id.dto";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { StatisticService } from "../_shared/statistic.service";
 
 @Injectable()
 export class AdministrationService {
@@ -17,6 +18,7 @@ export class AdministrationService {
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
     private readonly dataManager : DataManagerService,
     private readonly logsManager : DatabaseLoggerService,
+    private readonly statisticService : StatisticService
   ) {}
 
   async createKey(): Promise<ApiKeyInterface> {
@@ -62,5 +64,21 @@ export class AdministrationService {
 
   public async listBooks(): Promise<BooksEntity[]> {
     return await this.dataManager.getBookList(false);
+  }
+
+  async getStatistics(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
+    let statistic;
+    if(apiKeyHashDto.apiHash == "all"){
+      //get Statistic of all Users
+      statistic = await this.statisticService.getStatisticsOfAll();
+    } else {
+      const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
+      if(!hashExists){
+        throw new HttpException('API key not found', 404);
+      }
+      //get Statistic of this user
+      statistic = this.statisticService.getStatisticsOfUser(hashExists);
+    }
+    return statistic;
   }
 }

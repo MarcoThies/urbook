@@ -48,7 +48,9 @@ export class AdministrationController {
     return await this.adminService.listBooks();
   }
 
-  
-
+  @Post('statistic')
+  async getStatistics(@Body() apiKeyHashDto: ApiKeyHashDto): Promise<any> {
+    return await this.adminService.getStatistics(apiKeyHashDto);
+  }
 
 }

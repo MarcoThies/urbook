@@ -5,11 +5,13 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { DataManagerModule } from 'src/_shared/data-manager.module';
 import { DatabaseLoggerModule } from "../_shared/database-logger.module";
+import { StatisticModule } from '../_shared/statistic.module';
 
 @Module({
   imports: [
     DataManagerModule,
     DatabaseLoggerModule,
+    StatisticModule,
     TypeOrmModule.forFeature([ApiKeyEntity])
   ],
   providers: [AdministrationService],
