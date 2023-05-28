@@ -11,3 +11,11 @@ Authorization: Bearer {{session}}
 {
   "apiHash": "$2b$10$hrktKS1dV8EQDK9VOfh6IOoWnUbJMkXmzut5ctiH8mI4kN.nlmtqK"
 }
+
+### Request fo statistics of User or of all Users
+POST http://localhost:3000/api/admin/statistic
+Content-Type: application/json
+
+{
+  "apiHash": "$2b$10$hrktKS1dV8EQDK9VOfh6IOoWnUbJMkXmzut5ctiH8mI4kN.nlmtqK"
+}
