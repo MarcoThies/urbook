@@ -26,11 +26,16 @@ export class RequestQueue {
         } catch (error) {
             console.error("Job in request queue failed with error: ", error);
         }
-        if (this.queue.length == 3) { await new Promise(f => setTimeout(f, 15000)); }
+        // only for testing: if (this.queue.length == 1) { await new Promise(f => setTimeout(f, 25000)); }
         await this.runNextJob();
+    }
+
+    public getCurrentQueueLength() : number {
+        return this.queue.length;
     }
 
     clearQueue() {
         this.queue = [] as Function[];
     }
+    
   }

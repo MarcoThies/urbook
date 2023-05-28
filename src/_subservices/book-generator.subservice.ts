@@ -256,6 +256,10 @@ export class BookGeneratorSubservice {
     return existingBook;
   }
 
+  public getCurrentRequestQueueLength(book : BooksEntity) {
+    return this.requestManager.getCurrentRequestQueueLength(book);
+  }
+
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     // get book if found and owned by user
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
@@ -265,8 +269,7 @@ export class BookGeneratorSubservice {
       throw new HttpException(`Generation of book with ID ${bookId} is already completed. Nothing to abort!`, HttpStatus.CONFLICT);
     }
     this.abortFlag = true;
-    this.requestManager.avatarImageQueue.clearQueue();
-    this.requestManager.chapterImageQueue.clearQueue();
+    this.requestManager.clearQueues();
     
     this.dataManager.deleteBook(myBook);
     return true;

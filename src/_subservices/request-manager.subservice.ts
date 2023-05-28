@@ -3,6 +3,7 @@ import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { RequestQueue } from "../_core/request-queue";
+import { BooksEntity } from "../_shared/entities/books.entity";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -181,4 +182,19 @@ export class RequestManagerSubservice {
     chapter.imageUrl = this.demoStoryImages[chapterId];
     return chapter;
   }
+
+  public getCurrentRequestQueueLength(book : BooksEntity) : number {
+    switch (book.state) {
+      case 10 : {return 0;}
+      case 3  : {return this.avatarImageQueue.getCurrentQueueLength();}
+      case 4  : {return this.chapterImageQueue.getCurrentQueueLength();}
+      default : {return 0;}
+    }
+  }
+
+  public clearQueues() {
+    this.avatarImageQueue.clearQueue();
+    this.chapterImageQueue.clearQueue();
+  }
+  
 }
