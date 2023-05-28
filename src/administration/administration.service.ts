@@ -56,11 +56,11 @@ export class AdministrationService {
     return clearedDb;
   }
 
-  public async listBooks(): Promise<BooksEntity[]> {
-    return await this.dataManager.getBookList(false);
+  public async clearLogs() : Promise<boolean> {
+    return await this.logsManager.clearLogs();
   }
 
-  public async deleteBook(bookIdDto: BookIdDto): Promise<boolean> {
-    return await this.dataManager.deleteBook(false, bookIdDto);
+  public async listBooks(): Promise<BooksEntity[]> {
+    return await this.dataManager.getBookList(false);
   }
 }

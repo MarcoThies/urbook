@@ -35,30 +35,29 @@ export class PdfGeneratorSubservice {
 
     // add cover page
     await this.addCoverPage();
-    this.databaseLogger.log(`Cover generated ${book.title}-${book.apiKeyLink.apiId}`);
+    this.databaseLogger.log(`PDF: Cover generated for "${book.title}-${book.apiKeyLink.apiId}"`);
 
     // add all pages with content
     for (let i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
     }
-    this.databaseLogger.log(`${this.numberOfPages} where generated for ${book.title}-${book.apiKeyLink.apiId}`);
+    this.databaseLogger.log(`PDF: ${this.numberOfPages} pages where generated for "${book.title}-${book.apiKeyLink.apiId}"`);
 
     // add backside of book
     await this.addLastPage();
-    //console.log("Last page generated");
-    this.databaseLogger.log(`Last page generated ${book.title}-${book.apiKeyLink.apiId}`);
+    this.databaseLogger.log(`PDF: Last page generated for "${book.title}-${book.apiKeyLink.apiId}"`);
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
 
     const fileName = book.title + '-v2' + '.pdf'
-    const path = this.dataManager.getBookPath(book);
+    const path = "."+this.dataManager.getBookPath(book);
 
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved){
-      //console.log("PDF saved");
-      this.databaseLogger.log(`PDF saved ${book.title}-${book.apiKeyLink.apiId}`);
+      this.databaseLogger.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`);
+      console.log("PDF saved");
     }
 
     return pdfSuccessfullySaved;

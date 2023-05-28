@@ -9,6 +9,7 @@ import { CharacterEntity } from "../generate/entities/character.entity";
 import fs from "fs";
 import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
+import { urlencoded } from "express";
 
 @Injectable()
 export class DataManagerService {
@@ -38,6 +39,27 @@ export class DataManagerService {
     });
     // save new Book
     return await this.booksRepo.save(book);
+  }
+
+  public async getBookPdf(user: ApiKeyEntity, bookId: string): Promise<any> {
+    const myBook = await this.getBookWithAccessCheck(user, bookId);
+    // check if status is ready
+    if(myBook.state < 9){
+      throw new HttpException('Book is still generating. Abort...', HttpStatus.CONFLICT);
+    }
+
+    // check if pdf exists
+    const pdfPath = this.getBookPath(myBook) + myBook.title + '-v2.pdf';
+    const fs = require("fs").promises;
+    const fileExists = await this.fileExists("."+pdfPath, fs);
+
+    if(!fileExists){
+      throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.NOT_FOUND);
+    }
+
+    return {
+      pdfUrl: 'http://localhost:3000' + encodeURI(pdfPath)
+    };
   }
 
   public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
@@ -73,7 +95,7 @@ export class DataManagerService {
     const buffer = Buffer.from(arrayBuffer);
 
     // generate path and filename
-    const path = this.getBookPath(book) + '/img/';
+    const path = "."+this.getBookPath(book) + 'img/';
     const fileName = chapterId + '.png'
 
     await this.writeFile(buffer, path, fileName)
@@ -88,7 +110,7 @@ export class DataManagerService {
 
   private getUserPath(book : BooksEntity) : string {
     const user_id = book.apiKeyLink.apiId;
-    return './exports/' + user_id + '/';
+    return '/exports/' + user_id + '/';
   }
 
 
@@ -141,26 +163,32 @@ export class DataManagerService {
     return;
   }
 
-  public async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
+  private async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
     const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink', 'chapters', 'parameterLink'] });
     return (result) ? result : false;
   }
 
-  public async deleteBook(user: ApiKeyEntity | boolean, bookIdDto: BookIdDto): Promise<boolean> {
-    let getUserBook: BooksEntity | boolean | undefined;
-    if( user === false) {
-      // Admin is deleting book -> can delete any
-      getUserBook = await this.booksRepo.findOne({ where: { isbn: bookIdDto.isbn }, relations: ['chapters', 'parameterLink']});
-      if(!getUserBook) getUserBook = false;
-    } else {
-      getUserBook = await this.getBookIfOwned(user as ApiKeyEntity, bookIdDto.isbn);
+  public async getBookWithAccessCheck(user: ApiKeyEntity, bookIsbn: string): Promise<BooksEntity> {
+    if(user.admin === true) {
+      // Admin can access any book
+      const anyBook = await this.getBookById(bookIsbn);
+      if(!anyBook){
+        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.NOT_FOUND);
+      }
+      return anyBook
+    }else{
+      // check if user is allowed to access this book
+      const myBook = await this.getBookIfOwned(user, bookIsbn);
+      if(myBook === false){
+        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.NOT_FOUND);
+      }
+      return myBook as BooksEntity;
     }
+  }
 
-    if(getUserBook === false) {
-      throw new HttpException(`Book with ID ${bookIdDto.isbn} not found`, HttpStatus.NOT_FOUND);
-    }
-    const authBook = getUserBook as BooksEntity;
-    const bookId = authBook.id;
+  public async deleteBook(book: BooksEntity): Promise<boolean> {
+
+    const bookId = book.id;
     // remove all Characters of book
     const characters = await this.characterRepo
       .createQueryBuilder('character')
@@ -171,10 +199,10 @@ export class DataManagerService {
     await this.characterRepo.remove(characters);
 
     // find book relational
-    await this.parameterRepo.remove(authBook.parameterLink);
-    await this.booksRepo.remove(authBook);
+    await this.parameterRepo.remove(book.parameterLink);
+    await this.booksRepo.remove(book);
 
-    await this.resetFileStructure(this.getBookPath(authBook), false);
+    await this.resetFileStructure("."+this.getBookPath(book), false);
 
     return true;
   }

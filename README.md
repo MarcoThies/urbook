@@ -15,7 +15,7 @@
 1) Clone the repository
 2) Ask the team for the .env file -> contains live db-credentials
    - Place the .env file in the root directory
-   - (optional) create your own .env file:#
+   - (optional) create your own .env file with the following attributes:
    
    ```
     SECRETKEY=  [your_secret_key]
@@ -60,11 +60,10 @@ For support and questions email us at info@urbook.com
 After the MVP we plan to further develop the software into a proper commercial service.
 
 - [x] Authentication
-- [x] Book generation in db and to pdf
-- [ ] Requests to AIs
+- [x] Dummybook generation in db and to pdf
 - [ ] Book generation with AI data
 - [ ] Prompt-optimisation
 - [ ] Book-Quality control
 
 ## Project status
-The project is currently in development. The MVP is finished and the next steps are being planned.
+The project is currently in development. We antivipate that the MVP will be ready for demonstration by and the next steps are being planned.
