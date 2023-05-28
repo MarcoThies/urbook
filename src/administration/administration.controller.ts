@@ -37,6 +37,10 @@ export class AdministrationController {
   async clearData(): Promise<any> {
     return await this.adminService.clearData();
   }
+  @Get('clear-logs')
+  async clearLogs(): Promise<any> {
+    return await this.adminService.clearLogs();
+  }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')

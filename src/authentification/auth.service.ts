@@ -24,8 +24,10 @@ export class AuthService {
       // find api hash in db
       const keyValid = await this.apiKeyRepo.findOne({ where: { apiHash: apiKeyHash } });
 
-      if(!keyValid) throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
-
+      if(!keyValid){
+        await this.logsManager.error(`Invalid API key. - used key: ${apiKeyDto.apiKey}`, HttpStatus.UNAUTHORIZED.toString());
+        throw new HttpException('Invalid API key', HttpStatus.UNAUTHORIZED);
+      }
       // update database lastUse
       keyValid.lastUse = new Date();
       await this.apiKeyRepo.save(keyValid);
@@ -45,7 +47,10 @@ export class AuthService {
 
   async validateSession(payload: JwtPayload): Promise<ApiKeyEntity> {
     const apiUser = await this.apiKeyRepo.findOne({ where: { apiHash: payload.userId } });
-    if (!apiUser) throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    if (!apiUser){
+      await this.logsManager.error(`Invalid token.`, HttpStatus.UNAUTHORIZED.toString());
+      throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
+    }
     return apiUser;
   }
 

@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "../generate/entities/chapter.entity";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { RequestQueue } from "../_core/request-queue";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -10,6 +11,8 @@ export class RequestManagerSubservice {
     private readonly logsManager : DatabaseLoggerService
   ) {}
 
+  avatarImageQueue = new RequestQueue();
+  chapterImageQueue = new RequestQueue();
 
   private demoStoryResponse: string = "" +
     "Es war einmal eine kleine Insel namens Kunterbunt, auf der lebten Piraten. Eines Tages machten sich die mutigen Piratenkinder Tim und Mia auf den Weg zu einem geheimnisvollen Schatz. Sie segelten mit ihrem kleinen Boot über das funkelnde Meer, immer auf der Suche nach Abenteuern. Plötzlich entdeckten sie eine Flaschenpost, die am Strand angespült wurde. Neugierig öffneten sie die Flasche und lasen den Brief darin. Ein geheimnisvoller Hinweis führte sie zu einer versteckten Höhle auf einer nahen Insel.\n" +
@@ -24,7 +27,7 @@ export class RequestManagerSubservice {
 
     // Todo: Create Request and wait for response
 
-    console.log("Request new Story from Text-KI");
+    this.logsManager.log(`Request new Story from Text-KI.`);
     const fullTextReturn = this.demoStoryResponse;
 
     return fullTextReturn.split("\n");
@@ -32,7 +35,7 @@ export class RequestManagerSubservice {
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
 
-    console.log("Request new chapter text from Text-KI");
+    this.logsManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`);
     // temp text generation
     const fullTextReturn = this.demoStoryResponse;
     const splittedTextReturn = fullTextReturn.split("\n");
@@ -56,7 +59,7 @@ export class RequestManagerSubservice {
     "Die Charaktere in diesem Absatz sind Tim und Mia. Tim wird als abenteuerlustig, mutig und frech beschrieben, während Mia als fröhlich, abenteuerlustig und geschickt dargestellt wird. Ihre physischen Merkmale wie Haarfarbe, Augenfarbe und Hautfarbe werden hervorgehoben, um den Lesern ein lebhaftes Bild von den Charakteren zu vermitteln. Ihre Kleidung und ihre Körperhaltung geben einen weiteren Einblick in ihre Persönlichkeiten und ihren Piratenlebensstil.";
 
   public async requestCharacterDescription(charactersPrompt: string) : Promise<IImageAvatar[]> {
-    console.log("Request Character Description from Text-KI");
+    this.logsManager.log("Request Character Description from Text-KI");
 
     const requestReturn = this.demoCharacterisationResponse;
     // clean outpout
@@ -90,13 +93,17 @@ export class RequestManagerSubservice {
     "https://cdn.discordapp.com/attachments/1099720790330585188/1108425206596390962/Storgi_pirate_boy30_wild_brown_curls25_windswept_eyes20_glowing_00fea585-cab3-4da2-bdfa-abd49b5db026.png",
     "https://cdn.discordapp.com/attachments/1099720790330585188/1108430341053632672/Storgi_pirate_girl30_long_chestnut_hair25_ocean-colored_eyes20__443ae9ba-ed9f-4b0d-88f7-d8439a66a72d.png"
   ];
-  public async requestCharacterImage(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
-    // Todo make Request and handle queue
-
+  public async requestCharacterImages(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
     for(let x in AvatarList) {
-      AvatarList[x].avatarUrl = (AvatarList[x].name === "Tim") ? this.demoImages[0] : this.demoImages[1];
+      this.avatarImageQueue.addJob(async () => await this.requestCharacterImage(AvatarList[x]));
     }
+    await this.avatarImageQueue.runNextJob();
     return AvatarList;
+  }
+
+  public async requestCharacterImage(avatar: IImageAvatar) : Promise<IImageAvatar> {
+    avatar.avatarUrl = (avatar.name === "Tim") ? this.demoImages[0] : this.demoImages[1];
+    return avatar;
   }
 
 
@@ -162,11 +169,16 @@ export class RequestManagerSubservice {
     "https://media.discordapp.net/attachments/1099720790330585188/1108531516260221008/Storgi_Important_lesson_value_beyond_treasures_helping_others_g_b9752ec2-4851-4bd9-9281-ab43a8865539.png?width=3072&height=1537"
   ]
   public async requestStoryImages(chapters: ChapterEntity[]) : Promise<ChapterEntity[]> {
-    // Todo make Request and handle queue
-
     for(let x in chapters) {
-      chapters[x].imageUrl = this.demoStoryImages[x];
+      
+      this.chapterImageQueue.addJob(async() => await this.requestStoryImage(chapters[x], x));
     }
+    await this.chapterImageQueue.runNextJob();
     return chapters;
+  }
+
+  public async requestStoryImage(chapter: ChapterEntity, chapterId) : Promise<ChapterEntity> {
+    chapter.imageUrl = this.demoStoryImages[chapterId];
+    return chapter;
   }
 }
