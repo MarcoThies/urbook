@@ -63,17 +63,18 @@ export class AdministrationService {
   }
 
   async getStatistics(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
+    let statistic;
     if(apiKeyHashDto.apiHash == "all"){
       //get Statistic of all Users
-      await this.statisticService.getStatisticsOfAll();
+      statistic = await this.statisticService.getStatisticsOfAll();
     } else {
       const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
       if(!hashExists){
         throw new HttpException('API key not found', 404);
       }
       //get Statistic of this user
-      this.statisticService.getStatisticsOfUser(hashExists);
+      statistic = this.statisticService.getStatisticsOfUser(hashExists);
     }
-    return true;
+    return statistic;
   }
 }

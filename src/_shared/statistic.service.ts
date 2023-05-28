@@ -13,8 +13,6 @@ import { Repository } from "typeorm";
 @Injectable()
 export class StatisticService {
   constructor(
-    private readonly dataManager: DataManagerService,
-    private readonly logsManager : DatabaseLoggerService,
     @InjectRepository(BooksEntity)
     private readonly booksRepo : Repository<BooksEntity>,
     @InjectRepository(ApiKeyEntity)
@@ -22,18 +20,18 @@ export class StatisticService {
   ) {}
 
   public async getStatisticsOfAll(): Promise<StatisticInterface>{
-    const users: string = await this.apiKeyRepo.count().toString();
-    const books: string = await this.booksRepo.count().toString();
+    const users = await this.apiKeyRepo.count();
+    const books = await this.booksRepo.count();
     return{
-      numberOfUsers: users,
-      numberOfBooks: books
+      numberOfUsers: users.toString(),
+      numberOfBooks: books.toString()
     } as StatisticInterface
   }
 
   public async getStatisticsOfUser(user: ApiKeyEntity): Promise<UserStatisticInterface>{
 
     return{
-
+      
     } as UserStatisticInterface;
   }
 }
