@@ -26,6 +26,7 @@ export class RequestQueue {
         } catch (error) {
             console.error("Job in request queue failed with error: ", error);
         }
+        if (this.queue.length == 3) { await new Promise(f => setTimeout(f, 15000)); }
         await this.runNextJob();
     }
 
