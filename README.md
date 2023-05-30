@@ -26,7 +26,7 @@
     TYPEORM_HOST=           [db_host]
     TYPEORM_PORT=           [db_port]
     TYPEORM_USERNAME=       [db_user]
-    TYPEORM_PASSWORD=       [db_password
+    TYPEORM_PASSWORD=       [db_password]
     TYPEORM_DATABASE=       [db_name]
     TYPEORM_SYNC=           true
 

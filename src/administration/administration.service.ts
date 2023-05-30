@@ -7,7 +7,6 @@ import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
 import { DataManagerService } from "src/_shared/data-manager.service";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { BookIdDto } from "../_shared/dto/book-id.dto";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { StatisticService } from "../_shared/statistic.service";
 
