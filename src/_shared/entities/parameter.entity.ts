@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { BooksEntity } from "../../_shared/entities/books.entity";
+import { BooksEntity } from "./books.entity";
 import { Exclude } from "class-transformer";
 
 @Entity('parameter')

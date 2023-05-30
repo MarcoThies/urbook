@@ -1,11 +1,11 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "./entities/books.entity";
 import { getConnection, getConnectionManager, Repository } from "typeorm";
-import { ParameterEntity } from "../generate/entities/parameter.entity";
+import { ParameterEntity } from "./entities/parameter.entity";
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
-import { ChapterEntity } from "../generate/entities/chapter.entity";
-import { CharacterEntity } from "../generate/entities/character.entity";
+import { ChapterEntity } from "./entities/chapter.entity";
+import { CharacterEntity } from "./entities/character.entity";
 import fs from "fs";
 import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";

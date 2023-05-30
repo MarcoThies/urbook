@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { BooksEntity } from "../../_shared/entities/books.entity";
+import { BooksEntity } from "./books.entity";
 import { ChapterEntity } from "./chapter.entity";
 import { Exclude } from "class-transformer";
 

@@ -8,8 +8,8 @@ import { UserStatisticInterface } from "./interfaces/user-statistic.interface";
 import { BooksEntity } from "./entities/books.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { ChapterEntity } from "../generate/entities/chapter.entity";
-import { CharacterEntity } from "../generate/entities/character.entity";
+import { ChapterEntity } from "./entities/chapter.entity";
+import { CharacterEntity } from "./entities/character.entity";
 
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
-import { ChapterEntity } from "../generate/entities/chapter.entity";
+import { ChapterEntity } from "../_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { RequestQueue } from "../_core/request-queue";
 import { BooksEntity } from "../_shared/entities/books.entity";

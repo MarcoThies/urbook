@@ -1,4 +1,4 @@
-import { ParameterEntity } from "../generate/entities/parameter.entity";
+import { ParameterEntity } from "../_shared/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 

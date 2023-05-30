@@ -9,9 +9,9 @@ import {
   PrimaryGeneratedColumn
 } from "typeorm";
 import { Exclude } from "class-transformer";
-import { ApiKeyEntity } from "../../_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "./api-keys.entity";
 import { CharacterEntity } from "./character.entity";
-import { BooksEntity } from "../../_shared/entities/books.entity";
+import { BooksEntity } from "./books.entity";
 
 @Entity('chapter')
 export class ChapterEntity {

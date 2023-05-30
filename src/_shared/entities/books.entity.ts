@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ApiKeyEntity } from "./api-keys.entity";
-import { ParameterEntity } from "../../generate/entities/parameter.entity";
+import { ParameterEntity } from "./parameter.entity";
 import { Exclude } from "class-transformer";
-import { CharacterEntity } from "../../generate/entities/character.entity";
-import { ChapterEntity } from "../../generate/entities/chapter.entity";
+import { CharacterEntity } from "./character.entity";
+import { ChapterEntity } from "./chapter.entity";
 
 @Entity('books')
 export class BooksEntity {

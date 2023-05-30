@@ -1,9 +1,9 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { BooksEntity } from "../_shared/entities/books.entity";
-import { ParameterEntity } from "../generate/entities/parameter.entity";
-import { ChapterEntity } from "../generate/entities/chapter.entity";
-import { CharacterEntity } from "../generate/entities/character.entity";
+import { ParameterEntity } from "../_shared/entities/parameter.entity";
+import { ChapterEntity } from "../_shared/entities/chapter.entity";
+import { CharacterEntity } from "../_shared/entities/character.entity";
 import { LogEntity } from "../_shared/entities/log.entity";
 
 const config: TypeOrmModuleOptions = {
