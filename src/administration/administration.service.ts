@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
-import { ApiKeyInterface } from "./interface/api-key.interface";
+import { IApiKey } from "./interface/api-key.interface";
 import { generateId, hash } from "../_shared/utils";
 import { DataManagerService } from "../_shared/data-manager.service";
 import { BooksEntity } from "../_shared/entities/books.entity";
@@ -10,7 +10,7 @@ import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { StatisticSubservice } from "../_subservices/statistic.subservice";
 import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IStatistic } from "./interface/statistic.interface";
-import { BookInfo, IUserData } from "./interface/user-data.interface";
+import { IBookInfo, IUserData } from "./interface/user-data.interface";
 import { UserIdDto } from "./dto/user-id.dto";
 
 @Injectable()
@@ -23,7 +23,7 @@ export class AdministrationService {
     private readonly statisticService : StatisticSubservice
   ) {}
 
-  async createKey(): Promise<ApiKeyInterface> {
+  async createKey(): Promise<IApiKey> {
     // create new API key
     const newKey = generateId(4,4);
 
@@ -45,7 +45,7 @@ export class AdministrationService {
     return {
       apiKey: newKey,
       userId: newUser.apiId
-    } as ApiKeyInterface;
+    } as IApiKey;
   }
 
   async removeKey(userIdDto: UserIdDto): Promise<any> {
@@ -95,7 +95,7 @@ export class AdministrationService {
             created: book.createdAt.toUTCString(),
             chapterCount: book.chapters.length,
             state: book.state
-          } as BookInfo;
+          } as IBookInfo;
         })
       } as IUserData);
     }

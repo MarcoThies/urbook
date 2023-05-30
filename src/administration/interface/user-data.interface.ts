@@ -4,10 +4,10 @@ export interface IUserData{
   admin: boolean,
   lastUsed: string,
   created: string,
-  books: BookInfo[]
+  books: IBookInfo[]
 }
 
-export interface BookInfo{
+export interface IBookInfo {
   title: string,
   isbn: string,
   created: string,

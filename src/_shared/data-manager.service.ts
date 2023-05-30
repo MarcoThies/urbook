@@ -25,7 +25,7 @@ export class DataManagerService {
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
-    const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }});
+    const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink'] });
     return myBook;
   }
 

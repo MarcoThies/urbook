@@ -11,7 +11,7 @@ import {
 import { AdministrationService } from "./administration.service";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
-import { ApiKeyInterface } from "./interface/api-key.interface";
+import { IApiKey } from "./interface/api-key.interface";
 import { IStatistic } from "./interface/statistic.interface";
 import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IUserData } from "./interface/user-data.interface";
@@ -26,7 +26,7 @@ export class AdministrationController {
   constructor(private readonly adminService: AdministrationService ) {}
 
   @Get('create-key')
-  async createKey(): Promise<ApiKeyInterface> {
+  async createKey(): Promise<IApiKey> {
     return await this.adminService.createKey();
   }
 
