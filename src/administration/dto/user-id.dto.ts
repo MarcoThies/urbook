@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class ApiKeyHashDto {
-  @IsNotEmpty() apiHash: string;
+export class UserIdDto {
+  @IsNotEmpty() userId: number;
 }

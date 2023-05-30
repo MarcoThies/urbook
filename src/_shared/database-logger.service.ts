@@ -34,7 +34,9 @@ export class DatabaseLoggerService implements LoggerService {
     const logEntry = new LogEntity();
     logEntry.level = level;
     logEntry.message = message;
-    logEntry.trace = trace;
+    if(typeof trace !== "undefined"){
+      logEntry.trace = trace;
+    }
     this.logRepo.save(logEntry);
   }
 

@@ -12,7 +12,6 @@ import { GenerateModule } from './generate/generate.module';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { DataManagerModule } from "./_shared/data-manager.module";
 import { DatabaseLoggerModule } from "./_shared/database-logger.module";
-import { StatisticModule } from './_shared/statistic.module';
 
 @Module({
   providers: [
@@ -26,8 +25,7 @@ import { StatisticModule } from './_shared/statistic.module';
     ManageModule,
     GenerateModule,
     DataManagerModule,
-    DatabaseLoggerModule,
-    StatisticModule,
+    DatabaseLoggerModule
   ],
   controllers: [AppController],
 })

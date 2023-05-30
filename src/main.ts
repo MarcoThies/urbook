@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from "./_core/http-exception.filter";
 
-const port = process.env.PORT;
+const port: string | number = (!process.env.PORT) ? 3000 : process.env.PORT;
 
 async function bootstrap() {
   const app = await NestFactory.create( AppModule,

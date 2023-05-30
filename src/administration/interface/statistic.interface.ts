@@ -1,4 +1,5 @@
-export interface StatisticInterface{
-    numberOfUsers: number;
-    numberOfBooks: number;
+export interface IStatistic{
+    totalUsers: number;
+    totalAdmins: number;
+    totalBooks: number;
 }

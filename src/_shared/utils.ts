@@ -37,5 +37,6 @@ export const generateId = (segments= 3, length:number = 8, delimiter:string = "-
 };
 
 export const hash = async (value: string) : Promise<string> => {
+  if(!process.env.API_SALT) throw new Error("No salt defined");
   return await bcrypt.hash(value, process.env.API_SALT);
 }

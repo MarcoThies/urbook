@@ -1,14 +1,17 @@
-import { HttpException, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { ApiKeyInterface } from "./interface/api-key.interface";
-import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
 import { generateId, hash } from "../_shared/utils";
-import { DataManagerService } from "src/_shared/data-manager.service";
+import { DataManagerService } from "../_shared/data-manager.service";
 import { BooksEntity } from "../_shared/entities/books.entity";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
-import { StatisticService } from "../_shared/statistic.service";
+import { StatisticSubservice } from "../_subservices/statistic.subservice";
+import { IUserStatistic } from "./interface/user-statistic.interface";
+import { IStatistic } from "./interface/statistic.interface";
+import { BookInfo, IUserData } from "./interface/user-data.interface";
+import { UserIdDto } from "./dto/user-id.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -17,7 +20,7 @@ export class AdministrationService {
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
     private readonly dataManager : DataManagerService,
     private readonly logsManager : DatabaseLoggerService,
-    private readonly statisticService : StatisticService
+    private readonly statisticService : StatisticSubservice
   ) {}
 
   async createKey(): Promise<ApiKeyInterface> {
@@ -36,18 +39,19 @@ export class AdministrationService {
     const apiKeyEntry = await this.apiKeyRepo.create({
       apiHash: apiKeyHash
     });
-    await this.apiKeyRepo.save(apiKeyEntry);
+    const newUser = await this.apiKeyRepo.save(apiKeyEntry);
 
     // return API key to admin
     return {
-      apiKey: newKey
-    }
+      apiKey: newKey,
+      userId: newUser.apiId
+    } as ApiKeyInterface;
   }
 
-  async removeKey(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
-    const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
-    if(!hashExists) throw new HttpException('API key not found', 404);
-    await this.apiKeyRepo.delete(hashExists.apiId);
+  async removeKey(userIdDto: UserIdDto): Promise<any> {
+    const userExists = await this.apiKeyRepo.findOne({ where: { apiId : userIdDto.userId } });
+    if(!userExists) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    await this.apiKeyRepo.delete(userExists.apiId);
     return true;
   }
 
@@ -61,23 +65,65 @@ export class AdministrationService {
     return await this.logsManager.clearLogs();
   }
 
-  public async listBooks(): Promise<BooksEntity[]> {
-    return await this.dataManager.getBookList(false);
+  public async listBooks(): Promise<IUserData[]> {
+    // get all Books
+    const allBooks = await this.dataManager.getBookList(false);
+    // get all Users
+    const apiUsers = await this.apiKeyRepo.find();
+
+    // Map books to users
+    let userList: IUserData[] = [];
+
+    for(let u of apiUsers){
+      // get all books of this user
+      const assignedBooks = allBooks.filter((book: BooksEntity)=>{
+        return book.apiKeyLink.apiId === u.apiId;
+      });
+
+      const lastUsed = (!u.lastUse) ? "no use" : u.lastUse.toUTCString();
+      const registered = u.createdAt.toUTCString();
+
+      userList.push({
+        userId: u.apiId,
+        admin: u.admin,
+        lastUsed: lastUsed,
+        created: registered,
+        books: assignedBooks.map((book: BooksEntity)=>{
+          return {
+            title: book.title,
+            isbn: book.isbn,
+            created: book.createdAt.toUTCString(),
+            chapterCount: book.chapters.length,
+            state: book.state
+          } as BookInfo;
+        })
+      } as IUserData);
+    }
+    return userList;
   }
 
-  async getStatistics(apiKeyHashDto: ApiKeyHashDto): Promise<any> {
-    let statistic;
-    if(apiKeyHashDto.apiHash == "all"){
-      //get Statistic of all Users
-      statistic = await this.statisticService.getStatisticsOfAll();
-    } else {
-      const hashExists = await this.apiKeyRepo.findOne({ where: { ...apiKeyHashDto } });
-      if(!hashExists){
-        throw new HttpException('API key not found', 404);
-      }
-      //get Statistic of this user
-      statistic = this.statisticService.getStatisticsOfUser(hashExists);
+  async getStatistic(): Promise<IStatistic> {
+    // get general statistic
+
+    //get number of users / admins
+    const userCount = await this.apiKeyRepo.count( { where: { admin: false }});
+    const adminCount = await this.apiKeyRepo.count({ where: { admin: true }});
+    const bookCount = await this.statisticService.getBookCount(false)
+
+    return {
+      totalUsers: userCount,
+      totalAdmins: adminCount,
+      totalBooks: bookCount
+    } as IStatistic;
+  }
+
+  async userStatistic(userIdDto: UserIdDto): Promise<IUserStatistic>{
+    // check if hash exists
+    const user = await this.apiKeyRepo.findOne({ where: { apiId : userIdDto.userId } });
+    if(!user) {
+      throw new HttpException('API user not found', HttpStatus.NOT_FOUND);
     }
-    return statistic;
+    // get Statistic of this user
+    return this.statisticService.getStatisticsOfUser(user);
   }
 }

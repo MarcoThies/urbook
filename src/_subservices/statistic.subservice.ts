@@ -1,64 +1,49 @@
 import { Injectable } from "@nestjs/common";
-import { DataManagerService } from "./data-manager.service";
-import { DatabaseLoggerService } from "./database-logger.service";
-import { ApiKeyDto } from "./dto/api-key.dto";
-import { ApiKeyEntity } from "./entities/api-keys.entity";
-import { StatisticInterface } from "./interfaces/statistic.interface";
-import { UserStatisticInterface } from "./interfaces/user-statistic.interface";
-import { BooksEntity } from "./entities/books.entity";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { ChapterEntity } from "./entities/chapter.entity";
-import { CharacterEntity } from "./entities/character.entity";
-
+import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { DataManagerService } from "../_shared/data-manager.service";
+import { IUserStatistic } from "../administration/interface/user-statistic.interface";
 
 @Injectable()
-export class StatisticService {
+export class StatisticSubservice {
   constructor(
-    @InjectRepository(BooksEntity)
-    private readonly booksRepo : Repository<BooksEntity>,
-    @InjectRepository(ApiKeyEntity)
-    private readonly apiKeyRepo : Repository<ApiKeyEntity>,
-    @InjectRepository(ChapterEntity)
-    private readonly chapterRepo : Repository<ChapterEntity>,
-    @InjectRepository(CharacterEntity)
-    private readonly characterRepo : Repository<CharacterEntity>
+    private readonly dataManager : DataManagerService,
   ) {}
 
-  public async getStatisticsOfAll(): Promise<StatisticInterface>{
-    const users = await this.apiKeyRepo.count();
-    const books = await this.booksRepo.count();
-    return{
-      numberOfUsers: users.toString(),
-      numberOfBooks: books.toString()
-    } as StatisticInterface
+
+  public async getBookCount(user: boolean | ApiKeyEntity): Promise<number> {
+    const bookList = await this.dataManager.getBookList(user);
+    return bookList.length;
   }
 
-  public async getStatisticsOfUser(user: ApiKeyEntity): Promise<UserStatisticInterface>{
+  public async getTextRequestCount(user: ApiKeyEntity): Promise<number> {
+    return 0;
+  }
+
+  public async getStatisticsOfUser(user: ApiKeyEntity): Promise<IUserStatistic>{
     
-    const books = await this.booksRepo.find({ where: { apiKeyLink: user }});
+    const books = await this.dataManager.getBookList(user);
     let imageJobs: number = 0;
     let textJobs: number = 0;
-    let temp: number = 0;
 
-    for (const element of books) {
-      const temp = await this.chapterRepo.count({ where: { book: element }});
+    // Todo also check character and all other stuff
+    for (let book of books) {
+      const temp = book.chapters.length;
       imageJobs += temp;
       textJobs += temp * 2;
     }
 
-    const createdBooks = await this.booksRepo.count({ where: { apiKeyLink: user }});
-    const regestration = await user.createdAt;
-    const lastLogin = await user.lastUse;
+    const createdBooks = books.length;
+    const registration = user.createdAt;
+    const lastLogin = (!user.lastUse) ? "not used yet" : user.lastUse.toUTCString();
 
     return {
-    numberOfImageJobs: imageJobs.toString(),
-    numberOfTextJobs: textJobs.toString(),
-    numberOfBooksCreated: createdBooks.toString(),
-    numberOfBooksBought: "kein einziges",
-    profitable: "neeeeeee, noch lange nicht",
-    dateOfRegistration: regestration.toString(),
-    dateOfLastLogin: lastLogin.toString()
-    } as UserStatisticInterface
+      numberOfImageJobs: imageJobs,
+      numberOfTextJobs: textJobs,
+      numberOfBooksCreated: createdBooks,
+      numberOfBooksBought: 0,
+      profitable: "neeeeeee, noch lange nicht",
+      dateOfRegistration: registration.toUTCString(),
+      dateOfLastLogin: lastLogin
+    } as IUserStatistic;
   }
 }

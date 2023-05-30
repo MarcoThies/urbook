@@ -10,7 +10,7 @@ export interface statusObj {
 export class AppService {
   requestStatus(): statusObj {
     return {
-      timestamp: (new Date()).toLocaleDateString(),
+      timestamp: (new Date()).toUTCString(),
       status: true
     };
   }

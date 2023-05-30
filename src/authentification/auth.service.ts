@@ -40,7 +40,7 @@ export class AuthService {
     const user: JwtPayload = { userId:identityHash };
     const accessToken = this.jwtService.sign(user);
     return {
-      timestamp: (new Date()).toLocaleDateString(),
+      timestamp: (new Date()).toUTCString(),
       accessToken
     };
   }
