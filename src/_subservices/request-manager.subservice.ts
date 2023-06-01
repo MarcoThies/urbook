@@ -12,8 +12,8 @@ export class RequestManagerSubservice {
     private readonly logsManager : DatabaseLoggerService
   ) {}
 
-  avatarImageQueue = new RequestQueue();
-  chapterImageQueue = new RequestQueue();
+  private avatarImageQueue = new RequestQueue();
+  private chapterImageQueue = new RequestQueue();
 
   private demoStoryResponse: string = "" +
     "Es war einmal eine kleine Insel namens Kunterbunt, auf der lebten Piraten. Eines Tages machten sich die mutigen Piratenkinder Tim und Mia auf den Weg zu einem geheimnisvollen Schatz. Sie segelten mit ihrem kleinen Boot über das funkelnde Meer, immer auf der Suche nach Abenteuern. Plötzlich entdeckten sie eine Flaschenpost, die am Strand angespült wurde. Neugierig öffneten sie die Flasche und lasen den Brief darin. Ein geheimnisvoller Hinweis führte sie zu einer versteckten Höhle auf einer nahen Insel.\n" +

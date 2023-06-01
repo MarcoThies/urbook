@@ -12,6 +12,7 @@ import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { DataManagerService } from "../_shared/data-manager.service";
 import { IBookState } from "./interfaces/book-state.interface";
+import { RequestManagerSubservice } from 'src/_subservices/request-manager.subservice';
 
 @Injectable()
 export class GenerateService {
@@ -19,6 +20,7 @@ export class GenerateService {
     private readonly dataManager: DataManagerService,
     private readonly bookGenSubservice : BookGeneratorSubservice,
     private readonly logsManager : DatabaseLoggerService,
+    private readonly requestManager : RequestManagerSubservice
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
@@ -36,7 +38,7 @@ export class GenerateService {
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    const currentQueueLength = this.bookGenSubservice.getCurrentRequestQueueLength(myBook); 
+    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook); 
 
     let statusDict = {
       0: { code: 0,  status: "waiting to start...", kiHelper: "none" },

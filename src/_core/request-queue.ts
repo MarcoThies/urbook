@@ -34,7 +34,7 @@ export class RequestQueue {
         return this.queue.length;
     }
 
-    clearQueue() {
+    public clearQueue() {
         this.queue = [] as Function[];
     }
     

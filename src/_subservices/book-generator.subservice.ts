@@ -81,7 +81,9 @@ export class BookGeneratorSubservice {
 
     // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
 
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
@@ -96,7 +98,9 @@ export class BookGeneratorSubservice {
     // set new Chapter content to book entity
     book.chapters = chapterArr;
     // update Book status 2 => Story generated | Now generating Characters-Descriptions
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
@@ -107,7 +111,9 @@ export class BookGeneratorSubservice {
     const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(characterPrompt);
 
     // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
@@ -116,7 +122,9 @@ export class BookGeneratorSubservice {
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
 
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
@@ -153,7 +161,9 @@ export class BookGeneratorSubservice {
     }
 
     // update Book status 4 => Character Avatars Done | Now generating Story Images
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
     await this.dataManager.updateBookState(book, 4);
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
@@ -165,7 +175,9 @@ export class BookGeneratorSubservice {
     book.chapters = await this.requestManager.requestStoryImages(book.chapters);
     await this.dataManager.updateBookContent(book);
 
-    if(this.abortFlag) {return;}
+    if(this.abortFlag) {
+      return;
+    }
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
 
@@ -254,10 +266,6 @@ export class BookGeneratorSubservice {
     }
 
     return existingBook;
-  }
-
-  public getCurrentRequestQueueLength(book : BooksEntity) {
-    return this.requestManager.getCurrentRequestQueueLength(book);
   }
 
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
