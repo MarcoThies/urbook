@@ -124,6 +124,6 @@ export class AdministrationService {
       throw new HttpException('API user not found', HttpStatus.NOT_FOUND);
     }
     // get Statistic of this user
-    return this.statisticService.getStatisticsOfUser(user);
+    return await this.statisticService.getStatisticsOfUser(user);
   }
 }

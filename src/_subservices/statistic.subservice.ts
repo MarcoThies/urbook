@@ -33,7 +33,7 @@ export class StatisticSubservice {
     }
 
     const createdBooks = books.length;
-    const registration = user.createdAt;
+    const registration = user.createdAt.toUTCString();
     const lastLogin = (!user.lastUse) ? "not used yet" : user.lastUse.toUTCString();
 
     return {
@@ -42,7 +42,7 @@ export class StatisticSubservice {
       numberOfBooksCreated: createdBooks,
       numberOfBooksBought: 0,
       profitable: "neeeeeee, noch lange nicht",
-      dateOfRegistration: registration.toUTCString(),
+      dateOfRegistration: registration,
       dateOfLastLogin: lastLogin
     } as IUserStatistic;
   }
