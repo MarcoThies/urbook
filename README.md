@@ -18,7 +18,10 @@
    - (optional) create your own .env file with the following attributes:
    
    ```
-    SECRETKEY=  [your_secret_key]
+    JWT_SECRETKEY=       [your_secret_key]
+    JWT_EXPIRATION=         1h
+    JWT_IGNORE_EXPIRATION=  false
+   
     PORT=       [dev_port]
 
     API_SALT=    [some_bcrypt_balt]

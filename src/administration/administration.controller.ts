@@ -11,9 +11,11 @@ import {
 import { AdministrationService } from "./administration.service";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
-import { ApiKeyHashDto } from "./dto/api-key-hash.dto";
-import { ApiKeyInterface } from "./interface/api-key.interface";
-import { BooksEntity } from "../_shared/entities/books.entity";
+import { IApiKey } from "./interface/api-key.interface";
+import { IStatistic } from "./interface/statistic.interface";
+import { IUserStatistic } from "./interface/user-statistic.interface";
+import { IUserData } from "./interface/user-data.interface";
+import { UserIdDto } from "./dto/user-id.dto";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -24,13 +26,13 @@ export class AdministrationController {
   constructor(private readonly adminService: AdministrationService ) {}
 
   @Get('create-key')
-  async createKey(): Promise<ApiKeyInterface> {
+  async createKey(): Promise<IApiKey> {
     return await this.adminService.createKey();
   }
 
   @Post('remove-key')
-  async removeKey(@Body() apiKeyHashDto: ApiKeyHashDto): Promise<any> {
-    return await this.adminService.removeKey(apiKeyHashDto);
+  async removeKey(@Body() userIdDto: UserIdDto): Promise<any> {
+    return await this.adminService.removeKey(userIdDto);
   }
 
   @Get('clear-data')
@@ -44,13 +46,19 @@ export class AdministrationController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
-  public async listBooks(@Request() req) : Promise<BooksEntity[]> {
+  public async listBooks(@Request() req) : Promise<IUserData[]> {
     return await this.adminService.listBooks();
   }
 
-  @Post('statistic')
-  async getStatistics(@Body() apiKeyHashDto: ApiKeyHashDto): Promise<any> {
-    return await this.adminService.getStatistics(apiKeyHashDto);
+  @Get('statistic')
+  async statistics(): Promise<IStatistic> {
+    return await this.adminService.getStatistic();
   }
+
+  @Post('user-statistic')
+  async userStatistics(@Body() userIdDto: UserIdDto): Promise<IUserStatistic> {
+    return await this.adminService.userStatistic(userIdDto);
+  }
+
 
 }

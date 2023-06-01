@@ -24,13 +24,21 @@ export class DataManagerService {
     private readonly characterRepo : Repository<CharacterEntity>
   ) {}
 
-  public async getBookById(bookId: string): Promise<BooksEntity> {
-    return await this.booksRepo.findOne({ where: { isbn: bookId }});
+  public async getBookById(bookId: string): Promise<BooksEntity | null> {
+    const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink'] });
+    return myBook;
   }
 
   public async getBookList(user: ApiKeyEntity | boolean): Promise<BooksEntity[]> {
-    if(user === false) return await this.booksRepo.find();
-    else return await this.booksRepo.find({ where: { apiKeyLink: user }});
+    if(user === false) {
+      return await this.booksRepo.find({
+        relations: ['apiKeyLink']
+      });
+    } else {
+      return await this.booksRepo.find({
+        where: { apiKeyLink: user }
+      });
+    }
   }
   public async saveNewBook(book:BooksEntity): Promise<BooksEntity> {
     // save new Parameter List

@@ -1,8 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Request } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
 import { AuthService } from "./auth.service";
-import { RegistrationStatus } from "./interfaces/registration-status.interface";
-import { LoginStatus } from "./interfaces/login-status.interface";
-import { JwtPayload } from "./interfaces/payload.interface";
+import { ILoginStatus } from "./interfaces/login-status.interface";
 import { ApiKeyDto } from "../_shared/dto/api-key.dto";
 
 @Controller('auth')
@@ -11,7 +9,7 @@ export class AuthController {
   }
 
   @Post('signin')
-  public async login(@Body() apiKeyDto: ApiKeyDto): Promise<LoginStatus> {
+  public async login(@Body() apiKeyDto: ApiKeyDto): Promise<ILoginStatus> {
     return await this.authService.login(apiKeyDto);
   }
 

@@ -45,6 +45,7 @@ export class ChapterEntity {
   })
   prompt: string
 
+  @Exclude()
   @ManyToMany(
     () => CharacterEntity,
       character => character.chapter,

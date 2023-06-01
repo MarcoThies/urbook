@@ -20,9 +20,9 @@ import { DatabaseLoggerModule } from "../_shared/database-logger.module";
       session: true
     }),
     JwtModule.register({
-      secret: process.env.SECRETKEY,
+      secret: process.env.JWT_SECRETKEY,
       signOptions: {
-        expiresIn: "10min"
+        expiresIn: process.env.JWT_EXPIRATION
       },
     }),
     TypeOrmModule.forFeature([ApiKeyEntity])

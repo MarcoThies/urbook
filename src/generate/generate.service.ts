@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 // Interface & DTO
 import { CreateBookDto } from "./dto/create-book.dto";
-import { BookIdInterface } from "./interfaces/book-id.interface";
+import { IBookId } from "./interfaces/book-id.interface";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 
 // Sub-Services
@@ -23,7 +23,7 @@ export class GenerateService {
     private readonly requestManager : RequestManagerSubservice
   ) {}
 
-  public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<BookIdInterface> {
+  public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<IBookId> {
 
     // start the generation process
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
@@ -32,7 +32,7 @@ export class GenerateService {
         bookId: newBook.isbn,
         status: true,
         timeStamp: newBook.createdAt.toUTCString()
-    } as BookIdInterface;
+    } as IBookId;
   }
 
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
@@ -74,7 +74,7 @@ export class GenerateService {
       bookId: regenerateChapterDto.bookId,
       status: true,
       timeStamp: new Date().toUTCString
-    } as BookIdInterface;
+    } as IBookId;
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
@@ -85,7 +85,7 @@ export class GenerateService {
       bookId: regenerateChapterDto.bookId,
       status: true,
       timeStamp: new Date().toUTCString
-    } as BookIdInterface;
+    } as IBookId;
   }
 
 

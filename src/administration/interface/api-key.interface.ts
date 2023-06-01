@@ -1,3 +1,4 @@
-export interface ApiKeyInterface {
+export interface IApiKey {
   apiKey: string;
+  userId: number;
 }

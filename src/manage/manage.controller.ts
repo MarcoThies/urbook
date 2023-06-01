@@ -14,7 +14,7 @@ import { BooksEntity } from "../_shared/entities/books.entity";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { BookIdDto } from "../_shared/dto/book-id.dto";
-import { DeletedBookInterface } from "./interfaces/delete-book.interface";
+import { IDeletedBook } from "./interfaces/delete-book.interface";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -31,7 +31,7 @@ export class ManageController {
   }
 
   @Post('delete-book')
-  public async deleteBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<DeletedBookInterface> {
+  public async deleteBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IDeletedBook> {
     return await this.manageService.deleteBook(req.user, bookIdDto);
   }
 

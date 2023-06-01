@@ -194,16 +194,22 @@ export class PdfGeneratorSubservice {
 
   // provide schematics of how content pages are organised in book
   private getCurrentPageType_alternating(pageNumber : number) : string {
-
+    let returnPosition = "";
     switch(pageNumber % 4) {
       case 1:
-        return 'text_left';
+        returnPosition= 'text_left';
+        break;
       case 2:
-        return 'image_right';
+        returnPosition= 'image_right';
+        break;
       case 3:
-        return 'image_left';
+        returnPosition= 'image_left';
+        break;
       case 0:
-        return 'text_right';
+        returnPosition= 'text_right';
+        break;
     }
+
+    return returnPosition;
   }
 }

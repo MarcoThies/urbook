@@ -5,7 +5,7 @@ import { BooksEntity } from "../_shared/entities/books.entity";
 import { DataManagerService } from "../_shared/data-manager.service";
 import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
 import { BookIdDto } from '../_shared/dto/book-id.dto';
-import { DeletedBookInterface } from './interfaces/delete-book.interface';
+import { IDeletedBook } from './interfaces/delete-book.interface';
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 
 
@@ -20,7 +20,7 @@ export class ManageService {
     return await this.dataManager.getBookList(user);
   }
 
-  public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<DeletedBookInterface> {
+  public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<IDeletedBook> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
 
@@ -34,7 +34,7 @@ export class ManageService {
       deletedBookId: bookIdDto.isbn,
       status: isBookDeleted,
       timeStamp: new Date().toUTCString()
-    } as DeletedBookInterface;
+    } as IDeletedBook;
   }
 
   public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
