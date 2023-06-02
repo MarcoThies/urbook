@@ -38,7 +38,7 @@ export class GenerateService {
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook); 
+    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state); 
 
     let statusDict = {
       0: { code: 0,  status: "waiting to start...", kiHelper: "none" },

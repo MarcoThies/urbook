@@ -183,12 +183,12 @@ export class RequestManagerSubservice {
     return chapter;
   }
 
-  public getCurrentRequestQueueLength(book : BooksEntity) : number {
-    switch (book.state) {
-      case 10 : {return 0;}
-      case 3  : {return this.avatarImageQueue.getCurrentQueueLength();}
-      case 4  : {return this.chapterImageQueue.getCurrentQueueLength();}
-      default : {return 0;}
+  public getCurrentRequestQueueLength(state : number) : number {
+    switch (state) {
+      case 10 : return 0; break;
+      case 3  : return this.avatarImageQueue.getCurrentQueueLength(); break;
+      case 4  : return this.chapterImageQueue.getCurrentQueueLength(); break;
+      default : return 0; break;
     }
   }
 
