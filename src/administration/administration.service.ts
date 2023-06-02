@@ -50,7 +50,9 @@ export class AdministrationService {
 
   async removeKey(userIdDto: UserIdDto): Promise<any> {
     const userExists = await this.apiKeyRepo.findOne({ where: { apiId : userIdDto.userId } });
-    if(!userExists) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    if(!userExists) {
+      throw new HttpException('User not found', HttpStatus.CONFLICT);
+    }
     await this.apiKeyRepo.delete(userExists.apiId);
     return true;
   }
@@ -121,7 +123,7 @@ export class AdministrationService {
     // check if hash exists
     const user = await this.apiKeyRepo.findOne({ where: { apiId : userIdDto.userId } });
     if(!user) {
-      throw new HttpException('API user not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('API user not found', HttpStatus.CONFLICT);
     }
     // get Statistic of this user
     return await this.statisticService.getStatisticsOfUser(user);

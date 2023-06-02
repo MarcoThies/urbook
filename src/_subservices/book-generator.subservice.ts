@@ -261,8 +261,8 @@ export class BookGeneratorSubservice {
     }
     // check if chapter exists
     if(typeof existingBook.chapters[chapterId] === "undefined") {
-      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, HttpStatus.NOT_FOUND.toString());
-      throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.NOT_FOUND);
+      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename);
+      throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.CONFLICT);
     }
 
     return existingBook;

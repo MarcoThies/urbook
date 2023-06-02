@@ -28,7 +28,11 @@ export class DataManagerService {
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
-    const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink'] });
+    const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink', 'parameterLink'] });
+    if(!myBook){
+      this.logsManager.warn(`No book found with isbn ${bookId}`);
+      throw new HttpException(`No book found with isbn ${bookId}`, HttpStatus.CONFLICT);
+    }
     return myBook;
   }
 
@@ -67,7 +71,7 @@ export class DataManagerService {
 
     if(!fileExists){
       this.logsManager.warn(`No book PDF-found at ${pdfPath}`);
-      throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.NOT_FOUND);
+      throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
     }
 
     return {
@@ -186,14 +190,15 @@ export class DataManagerService {
       // Admin can access any book
       const anyBook = await this.getBookById(bookIsbn);
       if(!anyBook){
-        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.NOT_FOUND);
+        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
       }
-      return anyBook
+      return anyBook;
+
     }else{
       // check if user is allowed to access this book
       const myBook = await this.getBookIfOwned(user, bookIsbn);
       if(myBook === false){
-        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.NOT_FOUND);
+        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
       }
       return myBook as BooksEntity;
     }
@@ -213,8 +218,8 @@ export class DataManagerService {
 
     // find book relational
     await this.parameterRepo.remove(book.parameterLink);
-    await this.booksRepo.remove(book);
 
+    await this.booksRepo.remove(book);
     await this.resetFileStructure("."+this.getBookPath(book), false);
 
     return true;
