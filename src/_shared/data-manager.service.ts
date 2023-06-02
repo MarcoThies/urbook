@@ -10,6 +10,7 @@ import fs from "fs";
 import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
 import { urlencoded } from "express";
+import { DatabaseLoggerService } from "./database-logger.service";
 
 @Injectable()
 export class DataManagerService {
@@ -21,7 +22,9 @@ export class DataManagerService {
     @InjectRepository(ChapterEntity)
     private readonly chapterRepo : Repository<ChapterEntity>,
     @InjectRepository(CharacterEntity)
-    private readonly characterRepo : Repository<CharacterEntity>
+    private readonly characterRepo : Repository<CharacterEntity>,
+
+    private readonly logsManager : DatabaseLoggerService
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
@@ -53,6 +56,7 @@ export class DataManagerService {
     const myBook = await this.getBookWithAccessCheck(user, bookId);
     // check if status is ready
     if(myBook.state < 9){
+      this.logsManager.warn('Book is still generating. Abort...');
       throw new HttpException('Book is still generating. Abort...', HttpStatus.CONFLICT);
     }
 
@@ -62,6 +66,7 @@ export class DataManagerService {
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
     if(!fileExists){
+      this.logsManager.warn(`No book PDF-found at ${pdfPath}`);
       throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.NOT_FOUND);
     }
 

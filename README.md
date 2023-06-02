@@ -66,6 +66,7 @@ After the MVP we plan to further develop the software into a proper commercial s
 - [x] Dummybook generation in db and to pdf
 - [ ] Book generation with AI data
 - [ ] Prompt-optimisation
+- [ ] Upload photo of child for story main character similarity
 - [ ] Book-Quality control
 
 ## Project status

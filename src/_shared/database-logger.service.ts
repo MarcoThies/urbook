@@ -10,32 +10,35 @@ export class DatabaseLoggerService implements LoggerService {
     private readonly logRepo : Repository<LogEntity>,
   ) {}
 
-  log(message: string) {
-    this.writeLog('info', message);
+  log(message: string, context?: string) {
+    this.writeLog('info', message, undefined, context);
   }
 
-  error(message: string, trace: string) {
-    this.writeLog('error', message, trace);
+  error(message: string, trace: string, context?: string) {
+    this.writeLog('error', message, trace, context);
   }
 
-  warn(message: string) {
-    this.writeLog('warning', message);
+  warn(message: string, context?: string) {
+    this.writeLog('warning', message, undefined, context);
   }
 
-  debug(message: string) {
-    this.writeLog('debug', message);
+  debug(message: string, context?: string) {
+    this.writeLog('debug', message, undefined, context);
   }
 
-  verbose(message: string) {
-    this.writeLog('verbose', message);
+  verbose(message: string, context?: string) {
+    this.writeLog('verbose', message, undefined, context);
   }
 
-  private writeLog(level: string, message: string, trace?: string) {
+  private writeLog(level: string, message: string, trace?: string, origin?: string) {
     const logEntry = new LogEntity();
     logEntry.level = level;
     logEntry.message = message;
     if(typeof trace !== "undefined"){
       logEntry.trace = trace;
+    }
+    if(typeof origin !== "undefined"){
+      logEntry.context = origin;
     }
     this.logRepo.save(logEntry);
   }

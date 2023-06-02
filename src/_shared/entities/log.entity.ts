@@ -14,6 +14,9 @@ export class LogEntity {
   @Column({ nullable: true })
   trace: string;
 
+  @Column({ nullable: true })
+  context: string;
+
   @Column({
     type: 'timestamp',
     unique: false,

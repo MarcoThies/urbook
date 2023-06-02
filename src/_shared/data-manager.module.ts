@@ -6,7 +6,7 @@ import { BooksEntity } from "./entities/books.entity";
 import { ParameterEntity } from "./entities/parameter.entity";
 import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
-import { LogEntity } from "./entities/log.entity";
+import { DatabaseLoggerModule } from "./database-logger.module";
 
 @Module({
     imports: [
@@ -14,6 +14,7 @@ import { LogEntity } from "./entities/log.entity";
           BooksEntity,
           ParameterEntity, ChapterEntity, CharacterEntity
       ]),
+      DatabaseLoggerModule
     ],
     providers: [ DataManagerService ],
     exports: [ DataManagerService ],
