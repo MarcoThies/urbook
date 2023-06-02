@@ -15,7 +15,7 @@ import { CharacterEntity } from "../_shared/entities/character.entity";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
-import { RequestQueue } from "../_core/request-queue";
+import { RequestQueue } from "../_shared/request-queue";
 import { clear } from "console";
 
 @Injectable()
