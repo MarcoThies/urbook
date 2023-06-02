@@ -29,10 +29,6 @@ export class DataManagerService {
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
     const myBook = await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink', 'parameterLink'] });
-    if(!myBook){
-      this.logsManager.warn(`No book found with isbn ${bookId}`);
-      throw new HttpException(`No book found with isbn ${bookId}`, HttpStatus.CONFLICT);
-    }
     return myBook;
   }
 
