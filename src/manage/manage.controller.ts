@@ -10,10 +10,10 @@ import {
   Post
 } from "@nestjs/common";
 import { ManageService } from "./manage.service";
-import { BooksEntity } from "../_shared/entities/books.entity";
+import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
-import { BookIdDto } from "../_shared/dto/book-id.dto";
+import { BookIdDto } from "../_subservices/_shared/dto/book-id.dto";
 import { IDeletedBook } from "./interfaces/delete-book.interface";
 
 @UseGuards(

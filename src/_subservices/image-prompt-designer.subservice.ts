@@ -1,9 +1,9 @@
-import { CharacterEntity } from "../_shared/entities/character.entity";
+import { CharacterEntity } from "./_shared/entities/character.entity";
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
-import { ChapterEntity } from "../_shared/entities/chapter.entity";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { ChapterEntity } from "./_shared/entities/chapter.entity";
+import { DatabaseLoggerService } from "./_shared/database-logger.service";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {

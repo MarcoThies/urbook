@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "./_subservices/_shared/entities/api-keys.entity";
 
 export interface statusObj {
   status: boolean,

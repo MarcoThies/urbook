@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
-import { DataManagerService } from "../_shared/data-manager.service";
+import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
+import { DataManagerService } from "./_shared/data-manager.service";
 import { IUserStatistic } from "../administration/interface/user-statistic.interface";
 
 @Injectable()

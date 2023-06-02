@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
-import { ChapterEntity } from "../_shared/entities/chapter.entity";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { ChapterEntity } from "./_shared/entities/chapter.entity";
+import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { RequestQueue } from "../_shared/request-queue";
-import { BooksEntity } from "../_shared/entities/books.entity";
+import { BooksEntity } from "./_shared/entities/books.entity";
 
 @Injectable()
 export class RequestManagerSubservice {

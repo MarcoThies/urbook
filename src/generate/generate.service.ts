@@ -4,13 +4,13 @@ import { Injectable } from '@nestjs/common';
 // Interface & DTO
 import { CreateBookDto } from "./dto/create-book.dto";
 import { IBookId } from "./interfaces/book-id.interface";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 
 // Sub-Services
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
 import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
-import { DataManagerService } from "../_shared/data-manager.service";
+import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
+import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { IBookState } from "./interfaces/book-state.interface";
 import { RequestManagerSubservice } from 'src/_subservices/request-manager.subservice';
 

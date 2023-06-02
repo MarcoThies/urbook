@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerService } from "../_shared/data-manager.service";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
-import { BookIdDto } from '../_shared/dto/book-id.dto';
+import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
+import { DataManagerService } from "../_subservices/_shared/data-manager.service";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
+import { BookIdDto } from '../_subservices/_shared/dto/book-id.dto';
 import { IDeletedBook } from './interfaces/delete-book.interface';
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 
 
 @Injectable()

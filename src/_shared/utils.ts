@@ -2,8 +2,8 @@ import { createConnection, ConnectionOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
 import * as bcrypt from 'bcrypt';
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
-import { ApiKeyEntity } from "./entities/api-keys.entity";
-import { BooksEntity } from "./entities/books.entity";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
+import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
 
 export const toPromise = <T>(data: T): Promise<T> => {
   return new Promise<T>(resolve => {

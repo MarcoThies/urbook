@@ -1,20 +1,20 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { BooksEntity } from "../_shared/entities/books.entity";
-import { DataManagerService } from "../_shared/data-manager.service";
+import { BooksEntity } from "./_shared/entities/books.entity";
+import { DataManagerService } from "./_shared/data-manager.service";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
 import { ImagePromptDesignerSubservice } from "./image-prompt-designer.subservice";
 import { RequestManagerSubservice } from "./request-manager.subservice";
 import { generateId } from "../_shared/utils";
 import { CreateBookDto } from "../generate/dto/create-book.dto";
 import { RegenerateChapterDto } from "../generate/dto/regenerate-chapter.dto";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
-import { ParameterEntity } from "../_shared/entities/parameter.entity";
+import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
+import { ParameterEntity } from "./_shared/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
-import { ChapterEntity } from "../_shared/entities/chapter.entity";
-import { CharacterEntity } from "../_shared/entities/character.entity";
+import { ChapterEntity } from "./_shared/entities/chapter.entity";
+import { CharacterEntity } from "./_shared/entities/character.entity";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { RequestQueue } from "../_shared/request-queue";
 import { clear } from "console";
 

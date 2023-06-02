@@ -5,8 +5,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './roles/jwt.strategy';
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
-import { DatabaseLoggerModule } from "../_shared/database-logger.module";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
+import { DatabaseLoggerModule } from "../_subservices/_shared/database-logger.module";
 
 @Module({
   providers: [

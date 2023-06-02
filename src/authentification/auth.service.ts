@@ -1,12 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { JwtService } from '@nestjs/jwt';
 import { IJwtPayload } from "./interfaces/jwt-payload.interface";
-import { ApiKeyDto } from "../_shared/dto/api-key.dto";
+import { ApiKeyDto } from "../_subservices/_shared/dto/api-key.dto";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { Repository } from "typeorm";
 import { hash } from "../_shared/utils";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 
 @Injectable()
 export class AuthService {

@@ -7,8 +7,8 @@ import { ImagePromptDesignerSubservice } from "../_subservices/image-prompt-desi
 import { TextPromptDesignerSubservice } from "../_subservices/text-prompt-designer.subservice";
 import { RequestManagerSubservice } from "../_subservices/request-manager.subservice";
 import { PdfGeneratorSubservice } from '../_subservices/pdf-generator.subservice';
-import { DataManagerModule } from "../_shared/data-manager.module";
-import { DatabaseLoggerModule } from "../_shared/database-logger.module";
+import { DataManagerModule } from "../_subservices/_shared/data-manager.module";
+import { DatabaseLoggerModule } from "../_subservices/_shared/database-logger.module";
 
 
 // Generate-Service Module

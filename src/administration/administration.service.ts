@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { ApiKeyEntity } from "../_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
 import { generateId, hash } from "../_shared/utils";
-import { DataManagerService } from "../_shared/data-manager.service";
-import { BooksEntity } from "../_shared/entities/books.entity";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { DataManagerService } from "../_subservices/_shared/data-manager.service";
+import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
+import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 import { StatisticSubservice } from "../_subservices/statistic.subservice";
 import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IStatistic } from "./interface/statistic.interface";

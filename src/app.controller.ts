@@ -1,7 +1,7 @@
 import { Controller, Get, Request, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { AppService, statusObj } from "./app.service";
 import { request } from "express";
-import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
+import { ApiKeyEntity } from "./_subservices/_shared/entities/api-keys.entity";
 import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "./authentification/roles/type.guard";
 
