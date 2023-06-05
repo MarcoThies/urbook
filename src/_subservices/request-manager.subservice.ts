@@ -4,16 +4,20 @@ import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { RequestQueue } from "../_shared/request-queue";
 import { BooksEntity } from "./_shared/entities/books.entity";
+import { OpenAi } from "./openai.subservice";
+import { AiContent } from "./interfaces/ai-content.interface";
 
 @Injectable()
 export class RequestManagerSubservice {
 
   constructor(
-    private readonly logsManager : DatabaseLoggerService
+    private readonly logsManager : DatabaseLoggerService,
+    private readonly openAi : OpenAi
   ) {}
 
   private avatarImageQueue = new RequestQueue();
   private chapterImageQueue = new RequestQueue();
+  private textGenerationQueue = new RequestQueue();
 
   private demoStoryResponse: string = "" +
     "Es war einmal eine kleine Insel namens Kunterbunt, auf der lebten Piraten. Eines Tages machten sich die mutigen Piratenkinder Tim und Mia auf den Weg zu einem geheimnisvollen Schatz. Sie segelten mit ihrem kleinen Boot über das funkelnde Meer, immer auf der Suche nach Abenteuern. Plötzlich entdeckten sie eine Flaschenpost, die am Strand angespült wurde. Neugierig öffneten sie die Flasche und lasen den Brief darin. Ein geheimnisvoller Hinweis führte sie zu einer versteckten Höhle auf einer nahen Insel.\n" +
@@ -26,18 +30,35 @@ export class RequestManagerSubservice {
 
   public async requestStory(textPrompt: string) : Promise<string[]> {
 
-    // Todo: Create Request and wait for response
+    let aiContent = {text : ""};
+    this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(textPrompt, aiContent));
+    await this.textGenerationQueue.runNextJob();
+    console.log("DEUBG Prompt: \n" + textPrompt);
+    console.log("DEUBG Story: \n" + aiContent.text);
 
-    this.logsManager.log(`Request new Story from Text-KI.`);
-    const fullTextReturn = this.demoStoryResponse;
+    // Dummverison:
+    //this.logsManager.log(`Request new Story from Text-KI.`);
+    //const fullTextReturn = this.demoStoryResponse;
 
-    return fullTextReturn.split("\n");
+    if(aiContent.text) {
+      return (aiContent.text as string).split("\n");
+    }
+    console.log("Story generation failed!");
+    return this.demoStoryResponse.split("\n");
   }
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
 
     this.logsManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`);
-    // temp text generation
+    
+    // get new chapter text from text AI
+    let aiContent = {text : ""};
+    this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(textPrompt, aiContent));
+    await this.textGenerationQueue.runNextJob();
+    console.log("DEUBG Prompt: \n" + textPrompt);
+    console.log("DEUBG New Chaptertext: \n" + aiContent.text);
+
+    /* Dummyversion:
     const fullTextReturn = this.demoStoryResponse;
     const splittedTextReturn = fullTextReturn.split("\n");
 
@@ -51,6 +72,11 @@ export class RequestManagerSubservice {
     
     // return same chapter text as before but add " - regereated -" tag in the end, to identify it as regenerated
     return chapterArr[tempChapterId] + ' - regenerated -';
+    */
+    if(aiContent.text) {
+      return (aiContent.text as string);
+    }
+    return "Chaptertext regeneration failed";
   }
 
 
