@@ -60,6 +60,7 @@ export class ImagePromptDesignerSubservice {
 
     // 3. Map the result to the chapters
     for(let i in chapters) {
+      // TODO: Check if the prompt has the right format before accessing
       chapters[i].prompt = promptResultText[i][1];
       chapters[i].changed = new Date();
     }

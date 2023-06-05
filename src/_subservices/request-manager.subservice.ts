@@ -33,8 +33,6 @@ export class RequestManagerSubservice {
     let aiContent = {text : ""};
     this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(textPrompt, aiContent));
     await this.textGenerationQueue.runNextJob();
-    console.log("DEUBG Prompt: \n" + textPrompt);
-    console.log("DEUBG Story: \n" + aiContent.text);
 
     // Dummverison:
     //this.logsManager.log(`Request new Story from Text-KI.`);
@@ -88,10 +86,14 @@ export class RequestManagerSubservice {
   public async requestCharacterDescription(charactersPrompt: string) : Promise<IImageAvatar[]> {
     this.logsManager.log("Request Character Description from Text-KI");
 
-    const requestReturn = this.demoCharacterisationResponse;
+    let aiContent = {text : ""};
+    this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(charactersPrompt, aiContent));
+    await this.textGenerationQueue.runNextJob();
+
+    // const requestReturn = this.demoCharacterisationResponse;
     // clean outpout
 
-    let splitData = this.dataFromAnswer(requestReturn);
+    let splitData = this.dataFromAnswer(aiContent.text);
 
     const characterArray: IImageAvatar[] = splitData.map((char)=>{
       return {
@@ -111,9 +113,13 @@ export class RequestManagerSubservice {
     "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 2:1 --niji 5 --style scenic\"";
   public async requestCharacterPromptsForImage(characterAvatarPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
-    const requestReturn = this.demoCharacterImagePromptResponse;
+    // const requestReturn = this.demoCharacterImagePromptResponse;
 
-    return this.dataFromAnswer(requestReturn);
+    let aiContent = {text : ""};
+    this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(characterAvatarPrompt, aiContent));
+    await this.textGenerationQueue.runNextJob();
+
+    return this.dataFromAnswer(aiContent.text);
   }
 
   private demoImages= [
@@ -142,10 +148,15 @@ export class RequestManagerSubservice {
     "[5] \"Important decision, steal treasure or negotiate, peaceful::25 resolution, speaking to dragon, fair share of treasure --ar 1:2 --niji 5 --style scenic\"\n\n" +
     "[6] \"Surprised dragon, brave and honest request, shared treasure, joyous pirate children, leaving island, treasure reminder of adventure --ar 1:2 --niji 5 --style scenic\"";
   public async requestImagePromptsForImage(storyImagePromptPrompt: string) : Promise<string[][]> {
-    // Todo: Create Request and wait for response
-    const requestReturn = this.demoImagePromptsResponse;
 
-    return this.dataFromAnswer(requestReturn);
+    // Todo: Create Request and wait for response
+    let aiContent = {text : ""};
+    this.textGenerationQueue.addJob(async () => await this.openAi.getResponse(storyImagePromptPrompt, aiContent));
+    await this.textGenerationQueue.runNextJob();
+
+    // const requestReturn = this.demoImagePromptsResponse;
+
+    return this.dataFromAnswer(aiContent.text);
   }
 
   // Some helper function to extract important data from the AIs response

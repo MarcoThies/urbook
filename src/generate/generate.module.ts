@@ -9,7 +9,6 @@ import { RequestManagerSubservice } from "../_subservices/request-manager.subser
 import { PdfGeneratorSubservice } from '../_subservices/pdf-generator.subservice';
 import { DataManagerModule } from "../_subservices/_shared/data-manager.module";
 import { DatabaseLoggerModule } from "../_subservices/_shared/database-logger.module";
-import { ChapterEntity } from 'src/_subservices/_shared/entities/chapter.entity';
 import { OpenAi } from 'src/_subservices/openai.subservice';
 
 
