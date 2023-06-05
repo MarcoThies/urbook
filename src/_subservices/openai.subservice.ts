@@ -17,7 +17,6 @@ export class OpenAi {
 
     // send text prompt to chatGpt and get response
     try {
-      console.log("creation triggered (" + prompt.substring(0,20) + "):\n");
         let completion = await this.openai.createChatCompletion( {
             model: "gpt-3.5-turbo",
             messages: [{role: "user", content: prompt}], 
@@ -26,9 +25,8 @@ export class OpenAi {
             presence_penalty: 0,
             frequency_penalty: 0
         });
-        console.log("generation completed: \n" + (completion.data.choices[0].message?.content as string).substring(0,100));
         aiContent.text = completion.data.choices[0].message?.content as string;
-        console.log(aiContent.text);
+        
         return aiContent.text;
 
     } catch (error) {
