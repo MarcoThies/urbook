@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn} from 'typeorm';
+import { Exclude } from "class-transformer";
+import { ApiKeyEntity } from './api-keys.entity';
 
 @Entity()
 export class LogEntity {
@@ -24,4 +26,9 @@ export class LogEntity {
     default: () => 'CURRENT_TIMESTAMP'
   })
   time: Date;
+
+  @Exclude()
+  @ManyToOne(() => ApiKeyEntity, { cascade : true, onDelete: "NO ACTION"})
+  @JoinColumn({ name: "apiId"})
+  apiKeyLink: ApiKeyEntity;
 }

@@ -2,6 +2,7 @@ import { Injectable, LoggerService, Module } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { LogEntity } from "./entities/log.entity";
+import { ApiKeyEntity } from "./entities/api-keys.entity";
 
 @Injectable()
 export class DatabaseLoggerService implements LoggerService {
@@ -10,27 +11,27 @@ export class DatabaseLoggerService implements LoggerService {
     private readonly logRepo : Repository<LogEntity>,
   ) {}
 
-  log(message: string, context?: string) {
-    this.writeLog('info', message, undefined, context);
+  log(message: string, context?: string, user?: ApiKeyEntity) {
+    this.writeLog('info', message, undefined, context, user);
   }
 
   error(message: string, trace: string, context?: string) {
-    this.writeLog('error', message, trace, context);
+    this.writeLog('error', message, trace, context, undefined);
   }
 
-  warn(message: string, context?: string) {
-    this.writeLog('warning', message, undefined, context);
+  warn(message: string, context?: string, user?: ApiKeyEntity) {
+    this.writeLog('warning', message, undefined, context, user);
   }
 
   debug(message: string, context?: string) {
-    this.writeLog('debug', message, undefined, context);
+    this.writeLog('debug', message, undefined, context, undefined);
   }
 
   verbose(message: string, context?: string) {
-    this.writeLog('verbose', message, undefined, context);
+    this.writeLog('verbose', message, undefined, context, undefined);
   }
 
-  private writeLog(level: string, message: string, trace?: string, origin?: string) {
+  private writeLog(level: string, message: string, trace?: string, origin?: string, user?: ApiKeyEntity) {
     const logEntry = new LogEntity();
     logEntry.level = level;
     logEntry.message = message;
@@ -39,6 +40,10 @@ export class DatabaseLoggerService implements LoggerService {
     }
     if(typeof origin !== "undefined"){
       logEntry.context = origin;
+    }
+    if(typeof user !== "undefined"){
+      logEntry.apiKeyLink = user;
+      console.log("hallo");
     }
     this.logRepo.save(logEntry);
   }

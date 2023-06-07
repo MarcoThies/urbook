@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 import { Exclude } from "class-transformer";
+import { LogEntity } from "./log.entity";
 
 @Entity('api-keys')
 export class ApiKeyEntity {
@@ -36,5 +37,4 @@ export class ApiKeyEntity {
     unique: false,
   })
   lastUse: Date;
-
 }

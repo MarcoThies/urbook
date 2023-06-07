@@ -66,7 +66,7 @@ export class DataManagerService {
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
     if(!fileExists){
-      this.logsManager.warn(`No book PDF-found at ${pdfPath}`);
+      this.logsManager.warn(`No book PDF-found at ${pdfPath}`,"test", user);
       throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
     }
 

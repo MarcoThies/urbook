@@ -56,7 +56,7 @@ export class PdfGeneratorSubservice {
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved){
-      this.databaseLogger.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`);
+      this.databaseLogger.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`,"test", book.apiKeyLink);
       console.log("PDF saved");
     }
 
