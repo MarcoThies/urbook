@@ -18,6 +18,7 @@ export class RequestManagerSubservice {
   private avatarImageQueue = new RequestQueue();
   private chapterImageQueue = new RequestQueue();
 
+
   private demoStoryResponse: string = "" +
     "Es war einmal eine kleine Insel namens Kunterbunt, auf der lebten Piraten. Eines Tages machten sich die mutigen Piratenkinder Tim und Mia auf den Weg zu einem geheimnisvollen Schatz. Sie segelten mit ihrem kleinen Boot über das funkelnde Meer, immer auf der Suche nach Abenteuern. Plötzlich entdeckten sie eine Flaschenpost, die am Strand angespült wurde. Neugierig öffneten sie die Flasche und lasen den Brief darin. Ein geheimnisvoller Hinweis führte sie zu einer versteckten Höhle auf einer nahen Insel.\n" +
     "\n" + "Als Tim und Mia die Höhle betraten, entdeckten sie einen Haufen funkelnder Goldmünzen. Aber neben dem Gold lag auch eine traurig dreinblickende Schildkröte. Die Piratenkinder merkten schnell, dass die Schildkröte in einem Netz gefangen war. Hier standen sie nun vor einer wichtigen Entscheidung. Sollten sie das Gold nehmen und die Schildkröte alleine zurücklassen oder sollten sie der Schildkröte helfen und das Gold zurücklassen?\n" +
@@ -83,9 +84,9 @@ export class RequestManagerSubservice {
   private demoCharacterImagePromptResponse: string = ""+
     "Sicher, ich werde nun für Tim und Mia jeweils einen Prompt erstellen, basierend auf den bereitgestellten Charakterbeschreibungen und den gegebenen Anweisungen:\n\n" +
     "Für Tim:\n" +
-    "[Tim] \"pirate boy:30, wild brown curls:25, windswept, eyes:20, glowing with adventure, sun-kissed skin, ragged striped shirt:15, worn-out pirate pants, brave gaze, mischievous grin, ready to face sea dangers, comic style, high detail --ar 1:1 --niji 5 --style expressive --q 0.25\"\n\n" +
+    "[Tim] \"pirate boy:30, wild brown curls:25, windswept, eyes:20, glowing with adventure, sun-kissed skin, ragged striped shirt:15, worn-out pirate pants, brave gaze, mischievous grin, ready to face sea dangers, comic style, high detail --ar 1:1 --niji 5 --style expressive\"\n\n" +
     "Für Mia:\n" +
-    "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 1:1 --niji 5 --style expressive --q 0.25\"";
+    "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 1:1 --niji 5 --style expressive\"";
   public async requestCharacterPromptsForImage(characterAvatarPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
     const requestReturn = this.demoCharacterImagePromptResponse;
@@ -120,9 +121,9 @@ export class RequestManagerSubservice {
 
 
   private demoImagePromptsResponse: string = ""+
-    "[1] \"Colorful::30 island, pirates, children adventurers, little boat, sparkling::25 sea, adventure search, bottle message on the beach, hidden cave on nearby island --ar 2:1 --niji 5 --style expressive --q 0.25\"\n\n" +
-    "[2] \"Entering cave, heap of sparkling::30 gold coins, sad::20 turtle in net, decision, gold or rescue turtle --ar 2:1 --niji 5 --style expressive --q 0.25\"\n\n" +
-    "[3] \"Surprised dragon, brave and honest request, shared treasure, joyous pirate children, leaving island, treasure reminder of adventure --ar 2:1 --niji 5 --style expressive --q 0.25\"";
+    "[1] \"Colorful::30 island, pirates, children adventurers, little boat, sparkling::25 sea, adventure search, bottle message on the beach, hidden cave on nearby island --ar 2:1 --niji 5 --style expressive\"\n\n" +
+    "[2] \"Entering cave, heap of sparkling::30 gold coins, sad::20 turtle in net, decision, gold or rescue turtle --ar 2:1 --niji 5 --style expressive\"\n\n" +
+    "[3] \"Surprised dragon, brave and honest request, shared treasure, joyous pirate children, leaving island, treasure reminder of adventure --ar 2:1 --niji 5 --style expressive\"";
   public async requestImagePromptsForImage(storyImagePromptPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
     const requestReturn = this.demoImagePromptsResponse;

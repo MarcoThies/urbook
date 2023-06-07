@@ -16,9 +16,11 @@ export class MidjourneyApiSubservice {
     });
   }
 
+  private imgQuality = 0.5 // 0.25 | 0.5 | 1
+
   async requestImage(prompt: string): Promise<string> {
 
-    const imgGrid =  await this.client.Imagine(prompt);
+    const imgGrid =  await this.client.Imagine(prompt+" --q "+this.imgQuality);
     if(!imgGrid) {
       throw new HttpException("Could not generate any Images", 500);
     }
