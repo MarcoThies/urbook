@@ -101,10 +101,11 @@ export class RequestManagerSubservice {
   public async requestCharacterImages(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
 
     for(let x in AvatarList) {
+
       this.avatarImageQueue.addJob(
         async () => await this.requestCharacterImage(AvatarList[x]),
          (imageURL: string) => {
-          // safe character Image to DB
+            // safe character Image to DB
            AvatarList[x].avatarUrl = imageURL;
         }
       );

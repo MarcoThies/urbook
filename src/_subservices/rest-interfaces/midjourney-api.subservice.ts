@@ -16,7 +16,7 @@ export class MidjourneyApiSubservice {
     });
   }
 
-  private imgQuality = 0.5 // 0.25 | 0.5 | 1
+  private imgQuality = .25 // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
 
   async requestImage(prompt: string): Promise<string> {
 
