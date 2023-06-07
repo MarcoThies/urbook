@@ -82,6 +82,7 @@ export class BookGeneratorSubservice {
       return;
     }
 
+
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
     for(let x in story) {
@@ -101,6 +102,7 @@ export class BookGeneratorSubservice {
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
+    /*
     // 3.Generate Characters-Descriptions from Story
     const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
 
@@ -118,7 +120,6 @@ export class BookGeneratorSubservice {
 
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
-
     if(this.abortFlag) {
       return;
     }
@@ -157,6 +158,7 @@ export class BookGeneratorSubservice {
       await this.dataManager.updateChapter(currChapter);
     }
 
+    */
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     if(this.abortFlag) {
       return;
@@ -165,6 +167,7 @@ export class BookGeneratorSubservice {
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
+    const chapters = book.chapters;
     book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);
     await this.dataManager.updateBookContent(book);
 

@@ -58,6 +58,8 @@ export class ImagePromptDesignerSubservice {
     // 2. Request Prompt from Request Manager to get single image prompts
     const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
     // 3. Map the result to the chapters
+    console.log(promptResultText);
+
     for(let i in chapters) {
       // TODO: Check if the prompt has the right format before accessing
       chapters[i].prompt = promptResultText[i][1];
@@ -69,7 +71,7 @@ export class ImagePromptDesignerSubservice {
 
   private generateStoryImagePrompts(chapter: ChapterEntity[]): string {
     let imageImagePrompt = this.addImageAiInstruction("--ar 1:2 --niji 5 --style scenic");
-    imageImagePrompt += "Schreibe mit diesem Wissen für jeden der folgendenden Absätze jeweils genau einen 'Prompt' zur Erstellung eines passenden Bildes:\n\n";
+    imageImagePrompt += "Schreibe mit diesem Wissen für jeden der folgendenden Absätze jeweils genau einen 'Prompt' zur Erstellung eines passenden Bildes. Beziehe dich dabei nicht auf die Rahmenhandlung sondern beschreibe ganz genau, was auf dem Bild zu sehen ist:\n\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity) => {
       return cpt.paragraph;
@@ -93,7 +95,7 @@ export class ImagePromptDesignerSubservice {
       "- Füllwörter weglassen\n" +
       "- verwende \"weights\" um wichtige Eigenschaften hervorzuheben. Lege die Wichtung für ein Wort fest, indem du es mit zwei doppelpunkten und folgend dem gewünschten Wert makierst. Beispiel: \"..er fährt mit einem roten::30 Auto::25 nach hause\"\n" +
       "- Beschreibende infos zur verschönerung, wie zb \"cinematic\", \"4k\", \"high detail\" an den prompt anfügen\n" +
-      "- ans Ende jeden Prompt folgend suffix anhängen: '"+imageAiSuffix+"'\n" +
+      // "- ans Ende jeden Prompt folgend suffix anhängen: '"+imageAiSuffix+"'\n" +
       "- schreibe ausschließlich auf Englisch \n\n";
 
     return characterImagePrompt

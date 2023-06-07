@@ -11,7 +11,7 @@ export class TextPromptDesignerSubservice {
 
   public generateStoryPrompt(parameter: ParameterEntity): string {
     // generate Text-Prompt from Child Parameters
-    const paragraphCount = 10;
+    const paragraphCount = parameter.topicChapterCount;
     const avgSentencesPerParagraph = 2;
 
     const storyPrompt = "Du bist ein weltberühmter Kinderbuchautor. Deine Bücher wurden schon oft für ihre besonders einfallsreichen, " +
