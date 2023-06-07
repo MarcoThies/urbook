@@ -22,7 +22,7 @@ import { clear } from "console";
 export class BookGeneratorSubservice {
   constructor(
     private readonly dataManager: DataManagerService,
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
 
     private readonly imagePromptDesigner: ImagePromptDesignerSubservice,
     private readonly textPromptDesigner: TextPromptDesignerSubservice,
@@ -42,7 +42,7 @@ export class BookGeneratorSubservice {
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
-    await this.logsManager.log(`Generate new Book started. Book: ${newBookId} - User: ${user.apiId}`)
+    await this.logManager.log(`Generate new Book started. Book: ${newBookId} - User: ${user.apiId}`)
 
     const newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;
 
@@ -197,7 +197,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 5);
 
     // make async call in bg to regenerate text
-    await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
     await this.newChapterText(chapterId, book);
   }
 
@@ -218,7 +218,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    await this.logsManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }
@@ -234,7 +234,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 6);
 
     // make async call in bg to regenerate image
-    await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} image - User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} image - User: ${book.apiKeyLink.apiId}`);
     this.newChapterImage(chapterId, book);
   }
 
@@ -247,7 +247,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    this.logsManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
+    this.logManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }
@@ -261,7 +261,7 @@ export class BookGeneratorSubservice {
     }
     // check if chapter exists
     if(typeof existingBook.chapters[chapterId] === "undefined") {
-      await this.logsManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename);
+      await this.logManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename);
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.CONFLICT);
     }
 

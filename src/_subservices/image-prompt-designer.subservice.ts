@@ -8,7 +8,7 @@ import { DatabaseLoggerService } from "./_shared/database-logger.service";
 @Injectable()
 export class ImagePromptDesignerSubservice {
   constructor(
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
     private readonly requestManager: RequestManagerSubservice
   ) {}
 

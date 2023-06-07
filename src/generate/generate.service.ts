@@ -19,7 +19,7 @@ export class GenerateService {
   constructor(
     private readonly dataManager: DataManagerService,
     private readonly bookGenSubservice : BookGeneratorSubservice,
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
     private readonly requestManager : RequestManagerSubservice
   ) {}
 

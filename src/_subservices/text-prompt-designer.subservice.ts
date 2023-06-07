@@ -5,7 +5,7 @@ import { DatabaseLoggerService } from "./_shared/database-logger.service";
 @Injectable()
 export class TextPromptDesignerSubservice {
   constructor(
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
   ) {}
 
   public generateStoryPrompt(parameter: ParameterEntity) : string {

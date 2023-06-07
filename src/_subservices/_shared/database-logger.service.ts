@@ -43,7 +43,6 @@ export class DatabaseLoggerService implements LoggerService {
     }
     if(typeof user !== "undefined"){
       logEntry.apiKeyLink = user;
-      console.log("hallo");
     }
     this.logRepo.save(logEntry);
   }

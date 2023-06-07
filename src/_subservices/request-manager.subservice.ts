@@ -9,7 +9,7 @@ import { BooksEntity } from "./_shared/entities/books.entity";
 export class RequestManagerSubservice {
 
   constructor(
-    private readonly logsManager : DatabaseLoggerService
+    private readonly logManager : DatabaseLoggerService
   ) {}
 
   private avatarImageQueue = new RequestQueue();
@@ -28,7 +28,7 @@ export class RequestManagerSubservice {
 
     // Todo: Create Request and wait for response
 
-    this.logsManager.log(`Request new Story from Text-KI.`);
+    this.logManager.log(`Request new Story from Text-KI.`);
     const fullTextReturn = this.demoStoryResponse;
 
     return fullTextReturn.split("\n");
@@ -36,7 +36,7 @@ export class RequestManagerSubservice {
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
 
-    this.logsManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`);
+    this.logManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`);
     // temp text generation
     const fullTextReturn = this.demoStoryResponse;
     const splittedTextReturn = fullTextReturn.split("\n");
@@ -60,7 +60,7 @@ export class RequestManagerSubservice {
     "Die Charaktere in diesem Absatz sind Tim und Mia. Tim wird als abenteuerlustig, mutig und frech beschrieben, während Mia als fröhlich, abenteuerlustig und geschickt dargestellt wird. Ihre physischen Merkmale wie Haarfarbe, Augenfarbe und Hautfarbe werden hervorgehoben, um den Lesern ein lebhaftes Bild von den Charakteren zu vermitteln. Ihre Kleidung und ihre Körperhaltung geben einen weiteren Einblick in ihre Persönlichkeiten und ihren Piratenlebensstil.";
 
   public async requestCharacterDescription(charactersPrompt: string) : Promise<IImageAvatar[]> {
-    this.logsManager.log("Request Character Description from Text-KI");
+    this.logManager.log("Request Character Description from Text-KI");
 
     const requestReturn = this.demoCharacterisationResponse;
     // clean outpout

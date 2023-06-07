@@ -24,7 +24,7 @@ export class DataManagerService {
     @InjectRepository(CharacterEntity)
     private readonly characterRepo : Repository<CharacterEntity>,
 
-    private readonly logsManager : DatabaseLoggerService
+    private readonly logManager : DatabaseLoggerService
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
@@ -56,7 +56,7 @@ export class DataManagerService {
     const myBook = await this.getBookWithAccessCheck(user, bookId);
     // check if status is ready
     if(myBook.state < 9){
-      this.logsManager.warn('Book is still generating. Abort...');
+      this.logManager.warn('Book is still generating. Abort...');
       throw new HttpException('Book is still generating. Abort...', HttpStatus.CONFLICT);
     }
 
@@ -66,7 +66,7 @@ export class DataManagerService {
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
     if(!fileExists){
-      this.logsManager.warn(`No book PDF-found at ${pdfPath}`,"test", user);
+      this.logManager.warn(`No book PDF-found at ${pdfPath}`,"test", user);
       throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
     }
 

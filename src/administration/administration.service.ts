@@ -19,7 +19,7 @@ export class AdministrationService {
     @InjectRepository(ApiKeyEntity)
     private readonly apiKeyRepo : Repository<ApiKeyEntity>,
     private readonly dataManager : DataManagerService,
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
     private readonly statisticService : StatisticSubservice
   ) {}
 
@@ -64,7 +64,7 @@ export class AdministrationService {
   }
 
   public async clearLogs() : Promise<boolean> {
-    return await this.logsManager.clearLogs();
+    return await this.logManager.clearLogs();
   }
 
   public async listBooks(): Promise<IUserData[]> {

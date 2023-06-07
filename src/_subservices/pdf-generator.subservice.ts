@@ -8,7 +8,7 @@ import { DatabaseLoggerService } from "./_shared/database-logger.service";
 export class PdfGeneratorSubservice {
   constructor(
     private readonly dataManager : DataManagerService,
-    private readonly databaseLogger : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
   ) {}
 
   // declare PDF attributes
@@ -35,17 +35,17 @@ export class PdfGeneratorSubservice {
 
     // add cover page
     await this.addCoverPage();
-    this.databaseLogger.log(`PDF: Cover generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`PDF: Cover generated for "${book.title}-${book.apiKeyLink.apiId}"`);
 
     // add all pages with content
     for (let i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
     }
-    this.databaseLogger.log(`PDF: ${this.numberOfPages} pages where generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`PDF: ${this.numberOfPages} pages where generated for "${book.title}-${book.apiKeyLink.apiId}"`);
 
     // add backside of book
     await this.addLastPage();
-    this.databaseLogger.log(`PDF: Last page generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`PDF: Last page generated for "${book.title}-${book.apiKeyLink.apiId}"`);
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
@@ -56,7 +56,7 @@ export class PdfGeneratorSubservice {
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved){
-      this.databaseLogger.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`,"test", book.apiKeyLink);
+      this.logManager.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`,"test", book.apiKeyLink);
       console.log("PDF saved");
     }
 
