@@ -80,8 +80,8 @@ export class DataManagerService {
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
     for (let ind in chapters) {
-      const currImagePath = chapters[ind].imageUrl;
-      if (currImagePath.includes('https:')){
+      const currImagePath: string | undefined = chapters[ind].imageUrl;
+      if (currImagePath && currImagePath.includes('https:')){
         chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
       }
     }

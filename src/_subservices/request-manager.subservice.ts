@@ -83,9 +83,9 @@ export class RequestManagerSubservice {
   private demoCharacterImagePromptResponse: string = ""+
     "Sicher, ich werde nun für Tim und Mia jeweils einen Prompt erstellen, basierend auf den bereitgestellten Charakterbeschreibungen und den gegebenen Anweisungen:\n\n" +
     "Für Tim:\n" +
-    "[Tim] \"pirate boy:30, wild brown curls:25, windswept, eyes:20, glowing with adventure, sun-kissed skin, ragged striped shirt:15, worn-out pirate pants, brave gaze, mischievous grin, ready to face sea dangers, comic style, high detail --ar 2:1 --niji 5 --style expressive --q 0.25\"\n\n" +
+    "[Tim] \"pirate boy:30, wild brown curls:25, windswept, eyes:20, glowing with adventure, sun-kissed skin, ragged striped shirt:15, worn-out pirate pants, brave gaze, mischievous grin, ready to face sea dangers, comic style, high detail --ar 1:1 --niji 5 --style expressive --q 0.25\"\n\n" +
     "Für Mia:\n" +
-    "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 2:1 --niji 5 --style expressive --q 0.25\"";
+    "[Mia] \"pirate girl:30, long chestnut hair:25, ocean-colored eyes:20, sun-tanned face, ornate pirate blouse:15, knee-length pants with pockets, gentle smile, joyful adventurous nature, small hands ready for challenges, comic style, high detail --ar 1:1 --niji 5 --style expressive --q 0.25\"";
   public async requestCharacterPromptsForImage(characterAvatarPrompt: string) : Promise<string[][]> {
     // Todo: Create Request and wait for response
     const requestReturn = this.demoCharacterImagePromptResponse;
@@ -98,15 +98,18 @@ export class RequestManagerSubservice {
     "https://cdn.discordapp.com/attachments/1099720790330585188/1108430341053632672/Storgi_pirate_girl30_long_chestnut_hair25_ocean-colored_eyes20__443ae9ba-ed9f-4b0d-88f7-d8439a66a72d.png"
   ];
   public async requestCharacterImages(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
-    return AvatarList;
-    /*
+
     for(let x in AvatarList) {
-      AvatarList[x].avatarUrl = await this.avatarImageQueue.addJob(
-        async () => await this.requestCharacterImage(AvatarList[x])
-      ) as string;
+      this.avatarImageQueue.addJob(
+        async () => await this.requestCharacterImage(AvatarList[x]),
+         (imageURL: string) => {
+          // safe character Image to DB
+           AvatarList[x].avatarUrl = imageURL;
+        }
+      );
     }
+    await this.avatarImageQueue.onEmpty();
     return AvatarList;
-   */
   }
 
   public async requestCharacterImage(avatar: IImageAvatar) : Promise<string> {

@@ -238,8 +238,7 @@ export class BookGeneratorSubservice {
 
   private async newChapterImage(chapterId: number, book: BooksEntity): Promise<void> {
     // request new chapter image from image AI and save to DB
-    const newChapterArray = book.chapters;
-    // const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
+    const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
     book.chapters[chapterId] = newChapterArray[0];
     await this.dataManager.updateBookContent(book);
 
