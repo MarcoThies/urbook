@@ -10,6 +10,7 @@ import { PdfGeneratorSubservice } from '../_subservices/pdf-generator.subservice
 import { DataManagerModule } from "../_subservices/_shared/data-manager.module";
 import { DatabaseLoggerModule } from "../_subservices/_shared/database-logger.module";
 import { MidjourneyApiSubservice } from "../_subservices/rest-interfaces/midjourney-api.subservice";
+import { OpenAi } from '../_subservices/rest-interfaces/openai.subservice';
 
 
 // Generate-Service Module
@@ -22,7 +23,7 @@ import { MidjourneyApiSubservice } from "../_subservices/rest-interfaces/midjour
     RequestManagerSubservice,
     ImagePromptDesignerSubservice, TextPromptDesignerSubservice,
     PdfGeneratorSubservice,
-    MidjourneyApiSubservice
+    OpenAi, MidjourneyApiSubservice
   ],
   exports: [GenerateService],
 })

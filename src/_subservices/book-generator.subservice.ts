@@ -23,7 +23,6 @@ export class BookGeneratorSubservice {
   constructor(
     private readonly dataManager: DataManagerService,
     private readonly logsManager : DatabaseLoggerService,
-
     private readonly imagePromptDesigner: ImagePromptDesignerSubservice,
     private readonly textPromptDesigner: TextPromptDesignerSubservice,
     private readonly requestManager: RequestManagerSubservice,
@@ -204,7 +203,7 @@ export class BookGeneratorSubservice {
     let bookText : string = book.chapters.map(( item, index ) => "[" + (index + 1) + "]" + item.paragraph ).join("\n\n");
 
     // get prompt for regenerating chapter
-    const regenerationPrompt = this.textPromptDesigner.generateChapterTextPrompt(chapterId, bookText)
+    const regenerationPrompt = this.textPromptDesigner.generateChapterTextPrompt(chapterId + 1, bookText)
 
     // generate new chapter text utilising prompt
     const newPara = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);

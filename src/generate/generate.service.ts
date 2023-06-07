@@ -12,7 +12,7 @@ import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { IBookState } from "./interfaces/book-state.interface";
-import { RequestManagerSubservice } from 'src/_subservices/request-manager.subservice';
+import { RequestManagerSubservice } from '../_subservices/request-manager.subservice';
 
 @Injectable()
 export class GenerateService {
