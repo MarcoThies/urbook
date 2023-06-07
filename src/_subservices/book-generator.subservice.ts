@@ -29,9 +29,7 @@ export class BookGeneratorSubservice {
     private readonly requestManager: RequestManagerSubservice,
     private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
-  
-  avatarImage = new RequestQueue();
-  chapterImage = new RequestQueue();
+
   abortFlag = false;
   
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
@@ -240,7 +238,8 @@ export class BookGeneratorSubservice {
 
   private async newChapterImage(chapterId: number, book: BooksEntity): Promise<void> {
     // request new chapter image from image AI and save to DB
-    const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
+    const newChapterArray = book.chapters;
+    // const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
     book.chapters[chapterId] = newChapterArray[0];
     await this.dataManager.updateBookContent(book);
 

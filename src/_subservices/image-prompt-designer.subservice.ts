@@ -57,7 +57,6 @@ export class ImagePromptDesignerSubservice {
 
     // 2. Request Prompt from Request Manager to get single image prompts
     const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-
     // 3. Map the result to the chapters
     for(let i in chapters) {
       chapters[i].prompt = promptResultText[i][1];

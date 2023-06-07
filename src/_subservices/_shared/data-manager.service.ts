@@ -81,7 +81,7 @@ export class DataManagerService {
     const chapters = book.chapters;
     for (let ind in chapters) {
       const currImagePath = chapters[ind].imageUrl;
-      if (typeof currImagePath === 'string' && currImagePath.includes('https:')){
+      if (currImagePath.includes('https:')){
         chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
       }
     }
@@ -92,6 +92,7 @@ export class DataManagerService {
   public async updateChapter(newChapter: ChapterEntity): Promise<ChapterEntity> {
     return await this.chapterRepo.save(newChapter);
   }
+
 
   public async updateBookState(book: BooksEntity, state: number) {
     // TODO: Check if book generation was aborted, if yes, cancle pipeline

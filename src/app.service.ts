@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { ApiKeyEntity } from "./_subservices/_shared/entities/api-keys.entity";
+import { Injectable } from "@nestjs/common";
 
 export interface statusObj {
   status: boolean,
@@ -8,10 +7,14 @@ export interface statusObj {
 
 @Injectable()
 export class AppService {
+
+  constructor() {}
   requestStatus(): statusObj {
     return {
       timestamp: (new Date()).toUTCString(),
       status: true
     };
   }
+
+
 }

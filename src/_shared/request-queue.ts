@@ -1,3 +1,7 @@
+interface IQueueEntry {
+    job : Function;
+    resolve : Function;
+}
 
 export class RequestQueue {
 
@@ -6,36 +10,62 @@ export class RequestQueue {
         this.isRunning = false;
     }
   
-    private queue : Function[];
+    private queue : IQueueEntry[];
     private isRunning : boolean;
-  
-    addJob(job : Function) {
-        this.queue.push(job as Function);
+    private resolveEmptyPromise: null | Function = null;
+
+    private awaitEmpty = () => {
+        if (this.resolveEmptyPromise) {
+            this.resolveEmptyPromise();
+            this.resolveEmptyPromise = null;
+        }
+    }
+
+    public onEmpty(): Promise<void> {
+        return new Promise(resolve => {
+            this.resolveEmptyPromise = resolve;
+        });
     }
   
+    addJob(jobFnc:Function, resolveFnc:Function) {
+        this.queue.push({
+            job:    jobFnc,
+            resolve: (result:any) => {
+                resolveFnc(result);
+                this.runNextJob();
+            }
+        } as IQueueEntry);
+
+        if(!this.isRunning){
+            this.runNextJob();
+        }
+    }
+
     async runNextJob() {
         if (this.queue.length === 0) {
             this.isRunning = false;
+            this.awaitEmpty();
             return;
         }
-  
+
         this.isRunning = true;
-        const job = this.queue.shift() as Function;
+        const currQueue = this.queue.shift() as IQueueEntry;
+
         try {
-            await job();
+            const jobData = await currQueue.job();
+            currQueue.resolve(jobData);
         } catch (error) {
             console.error("Job in request queue failed with error: ", error);
+            this.runNextJob();
         }
-        // only for testing: if (this.queue.length == 1) { await new Promise(f => setTimeout(f, 25000)); }
-        await this.runNextJob();
     }
 
-    public getCurrentQueueLength() : number {
+    public get length(): number {
         return this.queue.length;
     }
 
     public clearQueue() {
-        this.queue = [] as Function[];
+        this.queue = [] as IQueueEntry[];
     }
     
   }
