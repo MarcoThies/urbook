@@ -30,7 +30,7 @@ export class OpenAi {
         });
         const text = completion.data.choices[0].message?.content as string;
         // console.log("\nPrompt:\n",prompt);
-        console.log("\nResult:\n",text+"\n\n");
+        console.log("\nResult:",text+"\n\n");
 
         return text;
 

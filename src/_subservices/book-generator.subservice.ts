@@ -11,12 +11,10 @@ import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
 import { ParameterEntity } from "./_shared/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
 import { ChapterEntity } from "./_shared/entities/chapter.entity";
-import { CharacterEntity } from "./_shared/entities/character.entity";
-import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
-import { RequestQueue } from "../_shared/request-queue";
-import { clear } from "console";
+import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { CharacterEntity } from "./_shared/entities/character.entity";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -88,7 +86,9 @@ export class BookGeneratorSubservice {
     for(let x in story) {
       // 2.1 Save Chapters to DB
       let chapter = story[x].trim();
-      if (chapter.length < 1) continue;
+      if (chapter.length < 1) {
+        continue;
+      }
       chapterArr.push({
         paragraph: chapter
       } as ChapterEntity);
@@ -115,6 +115,7 @@ export class BookGeneratorSubservice {
     }
     await this.dataManager.updateBookState(book, 3);
 
+
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
@@ -123,6 +124,7 @@ export class BookGeneratorSubservice {
     if(this.abortFlag) {
       return;
     }
+
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
@@ -130,8 +132,9 @@ export class BookGeneratorSubservice {
       const currChapter = chapters[ind];
 
       // Search for each character Name in Chapter Text
-      for(let n in fullAvatarGroup) {
-        const currAvatar = fullAvatarGroup[n];
+      // TODO: change imageAvatars back to fullAvatarGroup
+      for(let n in imageAvatars) {
+        const currAvatar = imageAvatars[n];
         if(currChapter.paragraph.includes(currAvatar.name)) {
           // Character found in current Paragraph
           // Check if Character-Entity already exists
@@ -159,6 +162,7 @@ export class BookGeneratorSubservice {
     }
 
     */
+
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     if(this.abortFlag) {
       return;

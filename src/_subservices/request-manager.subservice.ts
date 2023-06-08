@@ -181,6 +181,7 @@ export class RequestManagerSubservice {
 
       offset = paragrapghEnd;
     }
+    console.log(result);
     return result;
   }
 

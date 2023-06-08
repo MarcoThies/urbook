@@ -58,12 +58,11 @@ export class ImagePromptDesignerSubservice {
     // 2. Request Prompt from Request Manager to get single image prompts
     const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
     // 3. Map the result to the chapters
-    console.log(promptResultText);
 
     for(let i in chapters) {
       // TODO: Check if the prompt has the right format before accessing
-      if(promptResultText[i].length < 2) {
-        console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n")
+      if(!promptResultText[i] || promptResultText[i].length < 2) {
+        console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n");
         continue;
       }
       chapters[i].prompt = promptResultText[i][1];
