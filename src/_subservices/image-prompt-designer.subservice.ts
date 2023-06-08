@@ -62,6 +62,10 @@ export class ImagePromptDesignerSubservice {
 
     for(let i in chapters) {
       // TODO: Check if the prompt has the right format before accessing
+      if(promptResultText[i].length < 2) {
+        console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n")
+        continue;
+      }
       chapters[i].prompt = promptResultText[i][1];
       chapters[i].changed = new Date();
     }
