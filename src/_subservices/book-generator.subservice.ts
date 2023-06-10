@@ -182,6 +182,8 @@ export class BookGeneratorSubservice {
     if(this.abortFlag) {
       return;
     }
+
+    await this.dataManager.updateBookState(book, 9);
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
 
@@ -200,9 +202,9 @@ export class BookGeneratorSubservice {
     // set Book state to regenerating Text
     await this.dataManager.updateBookState(book, 5);
 
-    // make async call in bg to regenerate text
     await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
-    await this.newChapterText(chapterId, book);
+    // make async call in bg to regenerate text -> not async
+    this.newChapterText(chapterId, book);
   }
 
   private async newChapterText(chapterId: number, book: BooksEntity): Promise<void> {
@@ -217,6 +219,7 @@ export class BookGeneratorSubservice {
     book.chapters[chapterId].paragraph = newPara;
 
     // alter chapter text in book and update database entry
+    book.state = 9; // set State to generate pdf
     await this.dataManager.updateBookContent(book);
 
     // write new PDF-File
@@ -239,6 +242,7 @@ export class BookGeneratorSubservice {
 
     // make async call in bg to regenerate image
     await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} image - User: ${book.apiKeyLink.apiId}`);
+    // make async call in bg to regenerate text -> not async
     this.newChapterImage(chapterId, book);
   }
 
@@ -246,6 +250,8 @@ export class BookGeneratorSubservice {
     // request new chapter image from image AI and save to DB
     const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
     book.chapters[chapterId] = newChapterArray[0];
+
+    book.state = 9; // set state to generate pdf
     await this.dataManager.updateBookContent(book);
 
     // write new PDF-File

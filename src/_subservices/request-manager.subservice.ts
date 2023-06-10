@@ -47,19 +47,11 @@ export class RequestManagerSubservice {
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
-    const splittedTextReturn = (textResult as string).split("\n");
+    let splitData = this.dataFromAnswer(textResult as string);
 
-
-    // temp cleanup for demo method
-    let chapterArr: string[] = []
-    for(let x in splittedTextReturn) {
-      let chapter = splittedTextReturn[x].trim();
-      if (chapter.length < 1) continue;
-      chapterArr.push(chapter);
-    }
-    
+    if(splitData.length === 1) return splitData[0][1];
     // return same chapter text as before but add " - regereated -" tag in the end, to identify it as regenerated
-    return chapterArr[tempChapterId] + ' - regenerated -';
+    return textResult as string;
   }
 
 

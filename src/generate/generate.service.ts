@@ -48,6 +48,7 @@ export class GenerateService {
       4: { code: 4,  status: "story images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
       5: { code: 5,  status: "regenerating chapter text", kiHelper: "txt" },
       6: { code: 6,  status: "regenerating chapter image", kiHelper: "img" },
+      9: { code: 9,  status: "generating pdf file", kiHelper: "pdf" },
       10: { code: 10, status: "done", kiHelper: "none" },
     };
 

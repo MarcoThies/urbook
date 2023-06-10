@@ -18,7 +18,13 @@ export class PdfGeneratorSubservice {
   private pageDimensions;
   private numberOfPages;
   private book;
+  private coverImage;
 
+  private gradients: any = {
+    left: "./src/_assets/gradient-left.png",
+    right: "./src/_assets/gradient-right.png",
+
+  }
   // -------------------------------------------------------------------------------------------------------
   // --- 1. Generation of book attributes, orchestration of book generation and PDF export -----------------
   // -------------------------------------------------------------------------------------------------------
@@ -27,11 +33,13 @@ export class PdfGeneratorSubservice {
   public async createA5Book(book: BooksEntity) : Promise<boolean> {
     // define PDF attributes
     this.pdfDoc = await PDFDocument.create();
-    this.textFont = await this.pdfDoc.embedFont(StandardFonts.TimesRoman);
-    this.titleFont = await this.pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+    this.textFont = await this.pdfDoc.embedFont(StandardFonts.Helvetica);
+    this.titleFont = await this.pdfDoc.embedFont(StandardFonts.HelveticaBold);
     this.pageDimensions = [PageSizes.A5[1], PageSizes.A5[0] ] as [number, number];
     this.numberOfPages = book.chapters.length * 2;
     this.book = book;
+
+    this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
 
     // add cover page
     await this.addCoverPage();
@@ -72,7 +80,7 @@ export class PdfGeneratorSubservice {
 
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, "https://i.postimg.cc/FRYwck05/book2.png", 0.87);
+    await this.addImage(page, this.coverImage, 0.87);
     this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 500);
   }
 
@@ -81,16 +89,16 @@ export class PdfGeneratorSubservice {
     switch(this.getCurrentPageType_alternating(pageNumber)) {
       case 'text_left': {
         const pageText = this.book.chapters[(pageNumber - 1) / 2].paragraph
-        const bgImageUrl = "https://i.postimg.cc/nzGFWnVy/bg-text-l.png"
+        // const bgImageUrl = "https://i.postimg.cc/nzGFWnVy/bg-text-l.png"
         const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
-        await this.addTextPage(pageNumber, pageText, this.pageDimensions[0]-180, 80, 100, bgImageUrl, chapterImageUrl);
+        await this.addTextPage(pageNumber, pageText, this.pageDimensions[0]-180, 80, 100, this.gradients.left, chapterImageUrl);
         break;
       }
       case 'text_right': {
         const pageText = this.book.chapters[(pageNumber - 2) / 2].paragraph
-        const bgImageUrl = "https://i.postimg.cc/MHZ62gvv/bg-text-r.png"
+        // const bgImageUrl = "https://i.postimg.cc/MHZ62gvv/bg-text-r.png"
         const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
-        await this.addTextPage(pageNumber, pageText, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, bgImageUrl, chapterImageUrl);
+        await this.addTextPage(pageNumber, pageText, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, this.gradients.right, chapterImageUrl);
         break;
       }
       case 'image_left': {
@@ -108,8 +116,8 @@ export class PdfGeneratorSubservice {
 
   private async addLastPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, "https://i.postimg.cc/FRYwck05/book2.png", 0.87, this.pageDimensions[0]-180);
-    await this.addImage(page, "https://i.postimg.cc/nzGFWnVy/bg-text-l.png", 1);
+    await this.addImage(page, this.coverImage, 0.87, this.pageDimensions[0]-180);
+    await this.addImage(page, this.gradients.left, 1);
     const pageText = "urContent GmbH \nUnter den Linden 1 \n10117 Berlin \ninfo@urBook.de \nwww.urbook.de";
     this.addText(page, pageText, 100, 160, 10, 100, 12);
   }
@@ -133,14 +141,22 @@ export class PdfGeneratorSubservice {
   // -------------------------------------------------------------------------------------------------------
 
   private addTitle(page : PDFPage, text : string, xpos : number, ypos : number, fontSize : number, maxTextWidth : number = 300) {
+    page.drawRectangle({
+      x: xpos - 10,
+      y: ypos - 15,
+      width: maxTextWidth+20,
+      height: 50,
+      borderWidth: 0,
+      color: rgb(1,1,1)
+    });
     page.drawText(text, {
       x: xpos,
       y: ypos,
       size: fontSize,
       font: this.titleFont,
-      color: rgb(1, 0.53, 0.21),
+      color: rgb(0, 0, 0),
       maxWidth: maxTextWidth
-    })
+    });
   }
 
   private addText(page : PDFPage, text : string, xpos : number, ypos : number, fontSize : number, maxTextWidth = 300, lineHeight = fontSize*1.5) {
@@ -149,19 +165,28 @@ export class PdfGeneratorSubservice {
       y: ypos,
       size: fontSize,
       font: this.textFont,
-      color: rgb(1, 0.53, 0.21),
+      color: rgb(0, 0, 0),
       maxWidth: maxTextWidth,
       lineHeight: lineHeight
-    })
+    });
   }
 
   private addPageNumber(page : PDFPage, text : string, xpos : number) {
+    page.drawRectangle({
+      x: xpos - 11,
+      y: 0,
+      width: 30,
+      height: 30,
+      borderWidth: 0,
+      color: rgb(0,0,0)
+    });
+
     page.drawText(text, {
       x: xpos,
-      y: 20,
+      y: 10,
       size: 15,
       font: this.textFont,
-      color: rgb(1, 0.53, 0.21)
+      color: rgb(1, 1, 1)
     })
   }
 
