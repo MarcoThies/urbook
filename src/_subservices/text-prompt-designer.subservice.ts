@@ -50,11 +50,14 @@ export class TextPromptDesignerSubservice {
   }
 
   public generateCharacterDescriptionsPrompt(fullStory: string): string {
-    let characterPrompt = "Schreibe jeweils eine sehr bildlich beschreibende Characterbeschreibung für jeden Character in diesem Text:\n\n";
-    characterPrompt += fullStory + "\n\n";
+    // let characterPrompt = "Schreibe jeweils eine sehr bildlich beschreibende Characterbeschreibung für jeden Character in diesem Text:\n\n";
+    let characterPrompt = "Search for each named character in the following text and look for parts, where the look of an character is described. \n"+
+      "Then write a very descriptive character bio, which describes the character in a very visual way. Don't include any behavioral description or reference to the story plot in any way. But try to include everything that is mentioned in the story. \n\n";
 
-    characterPrompt += "Benutze kurze und nur beschreibende Sätze. Lasse unnötige Füllwörter weg.\n" +
-      "Beziehe dich ausschließlich auf das Aussehen und die Aussenwirkung der Person. Schreibe vor die Charakterisierung immer den Namen der Person / Characters mit [Name]\n"
+    characterPrompt += fullStory + "\n\n\n";
+
+
+    characterPrompt += "Use short sentences in english for your answer. Output the name of the character in square brackets, followed by the description. (e.g.: [Max] Tall boy with green eyes and blue hair)";
     return characterPrompt;
   }
 }

@@ -29,9 +29,8 @@ export class OpenAi {
             frequency_penalty: 1
         });
         const text = completion.data.choices[0].message?.content as string;
-        // console.log("\nPrompt:\n",prompt);
+        console.log("\nPrompt:",prompt);
         console.log("\nResult:",text+"\n\n");
-
         return text;
 
     } catch (error) {

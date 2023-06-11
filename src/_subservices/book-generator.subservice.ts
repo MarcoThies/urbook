@@ -102,7 +102,6 @@ export class BookGeneratorSubservice {
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
-    /*
     // 3.Generate Characters-Descriptions from Story
     const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
 
@@ -119,12 +118,13 @@ export class BookGeneratorSubservice {
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
+    /*
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
     if(this.abortFlag) {
       return;
     }
-
+    */
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
@@ -161,8 +161,6 @@ export class BookGeneratorSubservice {
       await this.dataManager.updateChapter(currChapter);
     }
 
-    */
-
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     if(this.abortFlag) {
       return;
@@ -171,7 +169,7 @@ export class BookGeneratorSubservice {
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
-    const chapters = book.chapters;
+    // const chapters = book.chapters;
     book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);
     await this.dataManager.updateBookContent(book);
 
@@ -205,6 +203,8 @@ export class BookGeneratorSubservice {
     await this.logsManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
     // make async call in bg to regenerate text -> not async
     this.newChapterText(chapterId, book);
+
+    // TODO: reload chapter-prompt for possible different image creation
   }
 
   private async newChapterText(chapterId: number, book: BooksEntity): Promise<void> {

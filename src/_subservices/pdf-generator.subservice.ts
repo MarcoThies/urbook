@@ -181,8 +181,11 @@ export class PdfGeneratorSubservice {
       color: rgb(0,0,0)
     });
 
+    const textPos = (parseInt(text) > 9) ? xpos - 7 : xpos;
+    console.log(textPos);
+
     page.drawText(text, {
-      x: xpos,
+      x: textPos,
       y: 10,
       size: 15,
       font: this.textFont,

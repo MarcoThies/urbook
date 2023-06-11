@@ -146,7 +146,6 @@ export class RequestManagerSubservice {
   private dataFromAnswer(str: string) : string[][] {
     let result: string[][] = [];
     let offset = 0;
-    let timeout = 100;
 
     while(true){
       const nextCharacterPrompt = str.indexOf("[", offset);
@@ -173,8 +172,9 @@ export class RequestManagerSubservice {
 
       offset = paragrapghEnd;
     }
+
     console.log(result);
-    return result;
+    return (result.length > 0) ? result : str.split("\n").map((val,ind) => [ind.toString(), val]);
   }
 
 
