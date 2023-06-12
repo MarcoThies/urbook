@@ -109,16 +109,15 @@ export class BookGeneratorSubservice {
     const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(characterPrompt);
 
     // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
+
     if(this.abortFlag) {
       return;
     }
     await this.dataManager.updateBookState(book, 3);
-
-
+    /*
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
-    /*
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
     if(this.abortFlag) {
