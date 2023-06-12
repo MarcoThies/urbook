@@ -1,6 +1,7 @@
 import { ParameterEntity } from "./_shared/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
+import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class TextPromptDesignerSubservice {
@@ -9,35 +10,43 @@ export class TextPromptDesignerSubservice {
   ) {
   }
 
-  public generateStoryPrompt(parameter: ParameterEntity): string {
+  public generateStoryPrompt(parameter: ParameterEntity): IOpenAiPromptMessage[] {
     // generate Text-Prompt from Child Parameters
     const paragraphCount = parameter.topicChapterCount;
-    const avgSentencesPerParagraph = 2;
+    const avgWordsPerParagraph = 45
 
-    const storyPrompt = "Du bist ein weltberühmter Kinderbuchautor. Deine Bücher wurden schon oft für ihre besonders einfallsreichen, " +
-      "inspirienden, und fantasievollen Geschichten ausgezeichnet, welche darüber hinaus auch immer gekonnt eine Moral vermitteln." +
-      "Schreibe eine personalisierte Geschichte für das folgende Kind mit den aufgeführten Anweisungen: \n" +
+      const systemContent = 
+      "Antworte, als wärst du Kinderbuchautor/in Astrid Lindgren.\n" +
+
+      "Bitte stelle sicher, dass die Geschichte altersgerecht und ansprechend ist, mit einer klaren Erzählung, die die gewählte Moral und das Thema beinhaltet. \n" +
+      "Die Geschichte sollte auch Elemente enthalten, die die Interessen und Persönlichkeitsmerkmale meines Kindes widerspiegeln. \n" +
+      "Erwähne sie aber nicht explizit, sondern richte die Geschichte geschickt an ihnen aus. Erwähne die Moral nicht öfter als ein mal. \n" +
+      "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen.\n" +
+
+      "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.\n" +
+      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl im Format [Zahl] und endet mit zwei Zeilenumbrüchen.\n" +
+      "Vielen Dank für Ihre Hilfe bei der Erstellung dieses besonderen Buches für mein Kind.\n" +
+      "Schreibe nur die Geschichte, kein Anschreiben oder Zusammenfassung, etc.\n";
+      
+      const userContent = 
+      "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
+
       "Name: " + parameter.childName + "\n" +
       "Alter: " + parameter.childAge + "\n" +
       "Geschlecht: " + parameter.childGender + "\n" +
       "Ethnie: " + parameter.childCountry + "\n" +
-      "Du kannst die Ethnie des Kindes für die Geschichte nutzen aber erwähne sie nicht explizit." +
-
       "Lieblingsfarbe: " + parameter.childFavColor + "\n" +
-      "Lieblingstier: " + parameter.childFavAnimal + "\n" +
-
+      "Lieblingstier oder Charakter: " + parameter.childFavAnimal + "\n" +
       "Die in der Geschichte zu vermittelnde Moral lautet: " + parameter.topicMoralType + "\n" +
-      "Die Moral muss stimmig in den Geschichtsverlauf eingebettet werden." +
-
       "Die Geschichte spielt in/im " + parameter.topicSpecialTopic + ".\n" +
 
-      "Die Geschichte soll " + paragraphCount + " Absätze mit jeweils " + (avgSentencesPerParagraph - 1) + " bis " + (avgSentencesPerParagraph + 1) + " Sätzen beinhalten. " +
-      "Die Geschichte muss kindergerecht, fantasievoll und zusammenhängend geschrieben sein." +
-      "Wenn du die Angaben über das Kind im Text benutzt, bette sie unauffällig und stimmig in den Lauf der Geschichte ein." +
-      "Idealerweise enthält die Geschichte einen Spannungsbogen und eine Herausforderung, die das Kind meistert und daraus etwas lernt." +
-      "Beende jeden Abatz mit mindestens einem Zeilenumbruch.";
+      "Achte auf eine ausreichende Länge der Absätze. \n";
 
-    return storyPrompt;
+      const result : IOpenAiPromptMessage[] = 
+        [{ role : messageRole.system , content : systemContent },
+        { role : messageRole.user , content : userContent }] as IOpenAiPromptMessage[]
+
+    return result;
   }
 
   public generateChapterTextPrompt(chapterId: number, currentStory: string): string {

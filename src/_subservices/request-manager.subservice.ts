@@ -6,6 +6,7 @@ import { RequestQueue } from "../_shared/request-queue";
 import { MidjourneyApiSubservice } from "./rest-interfaces/midjourney-api.subservice";
 import { DataManagerService } from "./_shared/data-manager.service";
 import { OpenAi } from "./rest-interfaces/openai.subservice";
+import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -29,12 +30,15 @@ export class RequestManagerSubservice {
     "\n" + "Der Drache war überrascht von der mutigen und ehrlichen Bitte der Piratenkinder. Er erkannte ihre Tapferkeit und ihren guten Charakter an und war bereit, den Schatz gerecht zu teilen. Tim und Mia waren überglücklich und bedankten sich beim Drachen. Sie verließen die Insel mit einem Teil des Schatzes und einem wertvollen Gegenstand, der ihnen an ihre aufregende Reise erinnerte.";
 
 
-  public async requestStory(textPrompt: string) : Promise<string[]> {
+  public async requestStory(textPrompt: IOpenAiPromptMessage[]) : Promise<string[]> {
     this.logsManager.log(`Request new Story from Text-KI.`);
-    const textResult = await this.openAi.promptGPT35(textPrompt);
+    const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
+
+
+    
     return (textResult as string).split("\n");
   }
 

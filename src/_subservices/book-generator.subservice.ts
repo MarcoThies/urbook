@@ -15,6 +15,7 @@ import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { CharacterEntity } from "./_shared/entities/character.entity";
+import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -72,7 +73,7 @@ export class BookGeneratorSubservice {
 
   private async startGenerationPipeline(book: BooksEntity) {
     // 1. Generate Story from Book-Parameters
-    const storyPrompt: string = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
+    const storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
     const story: string[] = await this.requestManager.requestStory(storyPrompt);
