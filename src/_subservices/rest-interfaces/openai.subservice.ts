@@ -1,6 +1,7 @@
 import { Configuration, OpenAIApi } from "openai";
 import { Injectable } from "@nestjs/common";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
+import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
 
 @Injectable()
 export class OpenAi {
@@ -39,6 +40,33 @@ export class OpenAi {
     return false;
 
   }
+
+
+  public async promptGPT35withContext(messages: IOpenAiPromptMessage[]) : Promise<string | boolean> {
+
+    // send text prompt to chatGpt and get response
+    try {
+        let completion = await this.openai.createChatCompletion( {
+            model: "gpt-3.5-turbo",
+            messages: messages,
+            max_tokens: 2000,
+            temperature: 0.5,
+            presence_penalty: 0.5,
+            frequency_penalty: 1
+        });
+        const text = completion.data.choices[0].message?.content as string;
+        // console.log("\nPrompt:\n",prompt);
+        console.log("\nResult:",text+"\n\n");
+
+        return text;
+
+    } catch (error) {
+        console.log(error);
+    }
+    return false;
+
+  }
+
 
   public async promptDavinci(prompt: string) : Promise<string | boolean> {
     // send text prompt to chatGpt and get response
