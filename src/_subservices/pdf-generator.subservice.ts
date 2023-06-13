@@ -23,7 +23,6 @@ export class PdfGeneratorSubservice {
   private gradients: any = {
     left: "./src/_assets/gradient-left.png",
     right: "./src/_assets/gradient-right.png",
-
   }
   // -------------------------------------------------------------------------------------------------------
   // --- 1. Generation of book attributes, orchestration of book generation and PDF export -----------------
