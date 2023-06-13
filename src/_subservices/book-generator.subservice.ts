@@ -75,7 +75,7 @@ export class BookGeneratorSubservice {
     let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
-    const story: string[][] = await this.requestManager.requestStory(storyPrompt);
+    const story: string[][] = await this.requestManager.requestStory(storyPrompt, book.parameterLink.topicChapterCount);
     if(this.abortFlag) {
       return;
     }

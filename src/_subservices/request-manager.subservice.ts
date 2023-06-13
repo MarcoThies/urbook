@@ -22,14 +22,20 @@ export class RequestManagerSubservice {
   private chapterImageQueue = new RequestQueue();
 
 
-  public async requestStory(textPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
+  public async requestStory(textPrompt: IOpenAiPromptMessage[], chapterCount : number) : Promise<string[][]> {
     this.logsManager.log(`Request new Story from Text-KI.`);
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
-      throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
+      throw new HttpException("No result from text ai", HttpStatus.CONFLICT);
     }
 
-    return this.dataFromAnswer(textResult as string);
+    const result = this.dataFromAnswer(textResult as string);
+    if (result.length != chapterCount) {
+      console.log("DEBUG requestManager.requestStory: Generated story didn't have the requested number of chapters.")
+      return this.requestStory(textPrompt, chapterCount);
+    }
+
+    return result;
   }
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
