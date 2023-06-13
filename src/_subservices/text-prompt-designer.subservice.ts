@@ -7,8 +7,7 @@ import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.in
 export class TextPromptDesignerSubservice {
   constructor(
     private readonly logsManager: DatabaseLoggerService,
-  ) {
-  }
+  ) {}
 
   public generateStoryPrompt(parameter: ParameterEntity): IOpenAiPromptMessage[] {
     // generate Text-Prompt from Child Parameters
@@ -58,12 +57,15 @@ export class TextPromptDesignerSubservice {
     return chapterPrompt;
   }
 
-  public generateCharacterDescriptionsPrompt(): string {
+  public generateCharacterDescriptionsPrompt(): IOpenAiPromptMessage {
     let characterPrompt = "Search for each named character in your story and look for parts, where the look of a character is detailed. \n"+
       "Then write a very descriptive character bio, which describes the character in a very visual way. Don't include any behavioral description or reference to the story plot in any way. But try to include everything that is mentioned in the story. \n\n";
 
     characterPrompt += "Use short sentences in english for your answer. Output the name of the character in square brackets, followed by the description. (e.g.: [Max] Tall boy with green eyes and blue hair)";
 
-    return characterPrompt;
+    return {
+      role: messageRole.user,
+      content: characterPrompt
+    }
   }
 }

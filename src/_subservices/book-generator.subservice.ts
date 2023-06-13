@@ -110,31 +110,29 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookContent(book);
 
     // 3.Generate Characters-Descriptions from Story
-    const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt();
-    storyPrompt.push({
-      role: messageRole.user,
-      content: characterPrompt
-    });
+    const characterPrompt: IOpenAiPromptMessage = this.textPromptDesigner.generateCharacterDescriptionsPrompt();
+    storyPrompt.push(characterPrompt);
 
     // 4. Generate Character-Description from Character-Prompt
     const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(storyPrompt);
 
-    // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
-
     if(this.abortFlag) {
       return;
     }
+    // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
     await this.dataManager.updateBookState(book, 3);
-    /*
+
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
 
+    /*
     // 6. Request Avatar Images from Image AI
     const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
     if(this.abortFlag) {
       return;
     }
     */
+
     // 7. Match Character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
@@ -143,8 +141,8 @@ export class BookGeneratorSubservice {
 
       // Search for each character Name in Chapter Text
       // TODO: change imageAvatars back to fullAvatarGroup
-      for(let n in imageAvatars) {
-        const currAvatar = imageAvatars[n];
+      for(let n in characterImagePrompts) {
+        const currAvatar = characterImagePrompts[n];
         if(currChapter.paragraph.includes(currAvatar.name)) {
           // Character found in current Paragraph
           // Check if Character-Entity already exists

@@ -16,10 +16,10 @@ export class ImagePromptDesignerSubservice {
   public async generateCharacterPrompts(characters:IImageAvatar[]) : Promise<IImageAvatar[]> {
 
     // 1. Generate one Text Prompt for creating image Prompts
-    const characterPromptText: string = this.generateCharacterImagePrompt(characters);
+    const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    const promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptText);
+    const promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
 
     // 3. Map the result to the characters
     for(let i in characters) {
@@ -37,25 +37,24 @@ export class ImagePromptDesignerSubservice {
     return characters;
   }
 
-  private generateCharacterImagePrompt(characters: IImageAvatar[]): string {
-    let characterImagePrompt = this.addImageAiInstruction();
+  private generateCharacterImagePrompt(characters: IImageAvatar[]): IOpenAiPromptMessage[] {
+    let promptConversation = this.addImageAiInstruction();
 
-    // characterImagePrompt += "Schreibe mit diesem Wissen für jeden der folgend genannten Charaktere jeweils genau einen 'Prompt' zur Erstellung eines Charakter-Portraits im Comic Stil mit der genannten Image-Ki:\n\n";
-    characterImagePrompt += "With this knowledge, write exactly one 'prompt' for each of the following characters. Make sure the amount of prompts in your answer match the character descriptions given below.\n\n";
+    let characterImagePrompt = "With this knowledge, write exactly one prompt for each of the following characters. Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return "["+char.name+"] "+char.description;
     });
     characterImagePrompt += charaTextJoin.join("\n\n");
 
-    //characterImagePrompt += "\n\nSchreibe vor dem genierten Prompt immer den Namen der Person / Characters in eckigen Klammern, aber lasse den Namen auf jeden Fall aus den Prompts selbst aus!"
     characterImagePrompt += "\n\nWrite the name of the character in square brackets before the generated prompt. (e.g.: [Max] This is a prompt). Do not output any further text except the required answer.";
+    promptConversation.push({role: messageRole.user, content: characterImagePrompt} as IOpenAiPromptMessage);
 
-    return characterImagePrompt;
+    return promptConversation;
   }
 
   public async generateStoryImages(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
     // 1. Generate one Text Prompt for creating image Prompts
-    const textForImagePrompt: string = this.generateStoryImagePrompts(chapters);
+    const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
     const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
@@ -104,7 +103,7 @@ export class ImagePromptDesignerSubservice {
     instructionPrompt += "\n\n"+
       "- write descriptive sentences, use a lot of adjectives to describe details. But keep it to important details only\n" +
       "- don't use any character names or story plot references in the prompt itself\n" +
-      "- don't use commands like 'Generate ....' or 'Create....' in the prompt but rather just start describing the image\n" +
+      "- don't use commands like 'Generate ....' or 'Create....' in the prompt but rather just start describing the scene\n" +
       "- Use commas for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+

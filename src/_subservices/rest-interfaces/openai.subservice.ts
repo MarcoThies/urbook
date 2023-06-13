@@ -7,8 +7,7 @@ import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
 export class OpenAi {
   constructor(
     dataLogger: DatabaseLoggerService
-  ) {
-  }
+  ) {}
 
   private configuration = new Configuration({
     organization: process.env.OPENAI_API_ORG,
@@ -18,7 +17,7 @@ export class OpenAi {
   private openai = new OpenAIApi(this.configuration);
 
   public async promptGPT35(prompt: string) : Promise<string | boolean> {
-
+    console.log({prompt: prompt} as any);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
@@ -29,21 +28,18 @@ export class OpenAi {
             presence_penalty: 0.5,
             frequency_penalty: 1
         });
-        const text = completion.data.choices[0].message?.content as string;
-        console.log("\nPrompt:",prompt);
-        console.log("\nResult:",text+"\n\n");
-        return text;
+        return completion.data.choices[0].message?.content as string;
 
     } catch (error) {
         console.log(error);
+        return false;
     }
-    return false;
 
   }
 
 
   public async promptGPT35withContext(messages: IOpenAiPromptMessage[]) : Promise<string | boolean> {
-
+    console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
@@ -54,17 +50,12 @@ export class OpenAi {
             presence_penalty: 0.5,
             frequency_penalty: 1
         });
-        const text = completion.data.choices[0].message?.content as string;
-        // console.log("\nPrompt:\n",prompt);
-        console.log("\nResult:",text+"\n\n");
-
-        return text;
+        return completion.data.choices[0].message?.content as string;
 
     } catch (error) {
         console.log(error);
+        return false;
     }
-    return false;
-
   }
 
 
@@ -79,17 +70,12 @@ export class OpenAi {
         presence_penalty: 0.5,
         frequency_penalty: 1
       });
-      const text = completion.data.choices[0].text as string;
-
-      console.log("\nPrompt:\n",prompt);
-      console.log("\nResult:\n",text+"\n\n");
-
-      return text;
+      return completion.data.choices[0].text as string;
 
     } catch (error) {
       console.log(error);
+      return false;
     }
-    return false;
 
   }
 
