@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { BooksEntity } from "./_shared/entities/books.entity";
 import { DataManagerService } from "./_shared/data-manager.service";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
@@ -9,13 +9,12 @@ import { CreateBookDto } from "../generate/dto/create-book.dto";
 import { RegenerateChapterDto } from "../generate/dto/regenerate-chapter.dto";
 import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
 import { ParameterEntity } from "./_shared/entities/parameter.entity";
-import { Injectable } from "@nestjs/common";
 import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { PdfGeneratorSubservice } from "./pdf-generator.subservice";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { CharacterEntity } from "./_shared/entities/character.entity";
-import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
+import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -73,20 +72,19 @@ export class BookGeneratorSubservice {
 
   private async startGenerationPipeline(book: BooksEntity) {
     // 1. Generate Story from Book-Parameters
-    const storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
+    let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
-    const story: string[] = await this.requestManager.requestStory(storyPrompt);
+    const story: string[][] = await this.requestManager.requestStory(storyPrompt);
     if(this.abortFlag) {
       return;
     }
-
 
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
     for(let x in story) {
       // 2.1 Save Chapters to DB
-      let chapter = story[x].trim();
+      let chapter = story[x][1].trim();
       if (chapter.length < 1) {
         continue;
       }
@@ -94,20 +92,32 @@ export class BookGeneratorSubservice {
         paragraph: chapter
       } as ChapterEntity);
     }
-    // set new Chapter content to book entity
-    book.chapters = chapterArr;
-    // update Book status 2 => Story generated | Now generating Characters-Descriptions
+
+    // set new story answer to prompt conversation
+    storyPrompt.push({
+      role: messageRole.assistant,
+      content: chapterArr.map((x) => x.paragraph).join("\n")
+    });
+
     if(this.abortFlag) {
       return;
     }
+
+    // set new Chapter content to book entity
+    book.chapters = chapterArr;
+    // update Book status 2 => Story generated | Now generating Characters-Descriptions
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
     // 3.Generate Characters-Descriptions from Story
-    const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt(story.join("\n"));
+    const characterPrompt: string = this.textPromptDesigner.generateCharacterDescriptionsPrompt();
+    storyPrompt.push({
+      role: messageRole.user,
+      content: characterPrompt
+    });
 
     // 4. Generate Character-Description from Character-Prompt
-    const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(characterPrompt);
+    const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(storyPrompt);
 
     // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
 

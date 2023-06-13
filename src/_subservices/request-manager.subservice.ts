@@ -30,16 +30,14 @@ export class RequestManagerSubservice {
     "\n" + "Der Drache war überrascht von der mutigen und ehrlichen Bitte der Piratenkinder. Er erkannte ihre Tapferkeit und ihren guten Charakter an und war bereit, den Schatz gerecht zu teilen. Tim und Mia waren überglücklich und bedankten sich beim Drachen. Sie verließen die Insel mit einem Teil des Schatzes und einem wertvollen Gegenstand, der ihnen an ihre aufregende Reise erinnerte.";
 
 
-  public async requestStory(textPrompt: IOpenAiPromptMessage[]) : Promise<string[]> {
+  public async requestStory(textPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
     this.logsManager.log(`Request new Story from Text-KI.`);
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
-
-    
-    return (textResult as string).split("\n");
+    return this.dataFromAnswer(textResult as string);
   }
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
@@ -64,26 +62,24 @@ export class RequestManagerSubservice {
     "[Mia]: Mia war ein kleines Piratenmädchen mit langen, kastanienbraunen Haaren, die in sanften Wellen über ihre Schultern fielen. Ihre Augen hatten die Farbe des Ozeans, und ihre Gesichtsfarbe zeugte von vielen Tagen unter der Sonne. Mia trug eine verzierte Piratenbluse und eine knielange Hose mit unzähligen Taschen, in denen sie ihre Schätze aufbewahrte. Ihr zartes Lächeln verriet ihre fröhliche und abenteuerliche Natur, und ihre kleinen Hände waren immer bereit, sich in jede Herausforderung zu stürzen.\n\n" +
     "Die Charaktere in diesem Absatz sind Tim und Mia. Tim wird als abenteuerlustig, mutig und frech beschrieben, während Mia als fröhlich, abenteuerlustig und geschickt dargestellt wird. Ihre physischen Merkmale wie Haarfarbe, Augenfarbe und Hautfarbe werden hervorgehoben, um den Lesern ein lebhaftes Bild von den Charakteren zu vermitteln. Ihre Kleidung und ihre Körperhaltung geben einen weiteren Einblick in ihre Persönlichkeiten und ihren Piratenlebensstil.";
 
-  public async requestCharacterDescription(charactersPrompt: string) : Promise<IImageAvatar[]> {
+  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[]) : Promise<IImageAvatar[]> {
     this.logsManager.log("Request Character Description from Text-KI");
 
     // const requestReturn = this.demoCharacterisationResponse;
-    // clean outpout
-    const textResult = await this.openAi.promptGPT35(charactersPrompt);
+    const textResult = await this.openAi.promptGPT35withContext(charactersPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
     let splitData = this.dataFromAnswer(textResult as string);
 
-    const characterArray: IImageAvatar[] = splitData.map((char)=>{
+    return splitData.map((char)=>{
       return {
         name: char[0].trim(),
         description: char[1].trim()
       } as IImageAvatar
     });
 
-    return characterArray;
   }
 
   private demoCharacterImagePromptResponse: string = ""+

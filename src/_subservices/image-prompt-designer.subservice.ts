@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
+import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {
@@ -73,33 +74,50 @@ export class ImagePromptDesignerSubservice {
     return chapters;
   }
 
-  private generateStoryImagePrompts(chapter: ChapterEntity[]): string {
-    let imageImagePrompt = this.addImageAiInstruction();
-    imageImagePrompt += "Use that knowledge to write exactly one 'prompt' for each of the following paragraphs. This prompt should later be used to generate the image with another ai service. Do not refer to the story plot, but describe exactly what can be seen in each picture:\n\n";
+  private generateStoryImagePrompts(chapter: ChapterEntity[]): IOpenAiPromptMessage[] {
+    let promptConversation = this.addImageAiInstruction();
+
+    // let imageImagePrompt = this.addImageAiInstruction();
+    let imageImagePrompt = ""+
+      "Please write exactly one prompt for each of the following paragraphs."+
+      "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       return "["+(indx+1)+"] "+cpt.paragraph;
     });
     imageImagePrompt += storyTextJoin.join("\n\n");
 
     // place paragraphs
-    imageImagePrompt += "\n\nWrite the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is a prompt). Do not output any further text except the required answer."
-    return imageImagePrompt;
+    imageImagePrompt += "\n\nWrite the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt). Do not output any further text except the required answer.";
+    promptConversation.push(
+      {role: messageRole.user, content: imageImagePrompt} as IOpenAiPromptMessage
+    );
+    return promptConversation;
   }
 
 
-  private addImageAiInstruction(): string{
-    let instructionPrompt = "Here are some instructions on how to write a good prompts for an ai image generating service:\n\n";
-
-    // characterImagePrompt += "<<Load some File content here>>";
+  private addImageAiInstruction(): IOpenAiPromptMessage[]{
+    let instructionPrompt = ""+
+      "You are an language model specialized in writing prompts for another image ai.\n"+
+      "Prompts are short descriptive sentences that can be used to generate images from text.\n"+
+      "Here are the guidelines by which you create these image-prompts:";
 
     instructionPrompt += "\n\n"+
       "- write descriptive sentences, use a lot of adjectives to describe details. But keep it to important details only\n" +
       "- don't use any character names or story plot references in the prompt itself\n" +
       "- don't use commands like 'Generate ....' or 'Create....' in the prompt but rather just start describing the image\n" +
-      "- you can give single words more meaning by adding two colons, followed by a number weight between 1 and 100 (e.g.: blue caterpillar::25 and its big tree::40)\n";
+      "- Use commas for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
+      "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
+      "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
+      "- Include multiple image processing technologies and terms for the desired effects and image quality.\n" +
+      "- Use your creativity to incorporate various lighting scenarios into the images.\n" +
+      "- Use specific shades of primary colors and experiment with different styles.\n" +
+      "- Specify specific camera angles, such as selfies, panoramic views, GoPro images, fish-eye, or satellite view.\n" +
+      "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n";
 
-
-    return instructionPrompt+"\n\n";
+    instructionPrompt += "\n\n"+
+      "Every time I tell you to write prompt you will imagine you are writing a prompt for a specific high budget film director to create an image that will he or she will use to pitch a scene to executives that will convince them, based on its creativity, concept, depth of intrigue and imagery to invest billions of dollars into the production of this movie.\n"+
+      "Describe the image in the prompt. Write a prompt.";
+    return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 
 }
