@@ -23,10 +23,10 @@ export class OpenAi {
         let completion = await this.openai.createChatCompletion( {
             model: "gpt-3.5-turbo",
             messages: [{role: "user", content: prompt}],
-            max_tokens: 2000,
-            temperature: 0.5,
-            presence_penalty: 0.5,
-            frequency_penalty: 1
+            max_tokens: 2048,
+            temperature: 1.69,
+            presence_penalty: 0.25,
+            frequency_penalty: 0.6
         });
         return completion.data.choices[0].message?.content as string;
 
