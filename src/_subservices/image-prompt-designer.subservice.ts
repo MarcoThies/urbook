@@ -40,7 +40,7 @@ export class ImagePromptDesignerSubservice {
   private generateCharacterImagePrompt(characters: IImageAvatar[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    let characterImagePrompt = "With this knowledge, write exactly one prompt for each of the following characters. Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
+    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters. Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return "["+char.name+"] "+char.description;
     });
@@ -96,25 +96,24 @@ export class ImagePromptDesignerSubservice {
 
   private addImageAiInstruction(): IOpenAiPromptMessage[]{
     let instructionPrompt = ""+
-      "You are an language model specialized in writing prompts for another image ai.\n"+
+      "You are an language model specialized in writing prompts for an image generating ai.\n"+
       "Prompts are short descriptive sentences that can be used to generate images from text.\n"+
-      "Here are the guidelines by which you create these image-prompts:";
+      "Here are the rules you have to follow when writing prompts:\n\n";
 
     instructionPrompt += "\n\n"+
-      "- write descriptive sentences, use a lot of adjectives to describe details. But keep it to important details only\n" +
-      "- don't use any character names or story plot references in the prompt itself\n" +
-      "- don't use commands like 'Generate ....' or 'Create....' in the prompt but rather just start describing the scene\n" +
-      "- Use commas for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
+      "- Use describing adjectives but keep it to important details when describing an image\n" +
+      "- do not use character names, or any names at all" +
+      "- do not reference the story plot in any way\n" +
+      "- do not describe any actions or events, rather describe the scene\n" +
+      "- don not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a scene\n" +
+      "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
-      "- Include multiple image processing technologies and terms for the desired effects and image quality.\n" +
       "- Use your creativity to incorporate various lighting scenarios into the images.\n" +
-      "- Use specific shades of primary colors and experiment with different styles.\n" +
-      "- Specify specific camera angles, such as selfies, panoramic views, GoPro images, fish-eye, or satellite view.\n" +
       "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n";
 
     instructionPrompt += "\n\n"+
-      "Every time I tell you to write prompt you will imagine you are writing a prompt for a specific high budget film director to create an image that will he or she will use to pitch a scene to executives that will convince them, based on its creativity, concept, depth of intrigue and imagery to invest billions of dollars into the production of this movie.\n"+
+      "Every time I tell you to write prompts, you will imagine you are writing a prompt for a specific high budget film director to create an image that will he or she will use to pitch a scene to executives that will convince them, based on its creativity, concept, depth of intrigue and imagery to invest billions of dollars into the production of this movie.\n"+
       "Describe the image in the prompt. Write a prompt.";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
