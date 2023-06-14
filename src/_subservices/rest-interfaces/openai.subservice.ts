@@ -28,7 +28,9 @@ export class OpenAi {
             presence_penalty: 0.25,
             frequency_penalty: 0.6
         });
-        return completion.data.choices[0].message?.content as string;
+        const result = completion.data.choices[0].message?.content as string;
+        console.log("\n\nDEBUG: plain answer: ", result);
+        return result;
 
     } catch (error) {
         console.log(error);
@@ -50,7 +52,9 @@ export class OpenAi {
             presence_penalty: 0.5,
             frequency_penalty: 1
         });
-        return completion.data.choices[0].message?.content as string;
+      const result = completion.data.choices[0].message?.content as string;
+      console.log("\n\nDEBUG: plain answer: ", result);
+      return result;
 
     } catch (error) {
         console.log(error);

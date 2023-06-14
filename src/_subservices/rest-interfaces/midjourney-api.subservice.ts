@@ -16,7 +16,7 @@ export class MidjourneyApiSubservice {
     });
   }
 
-  private imgQuality = .5; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
+  private imgQuality = .25; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
   private suffix = "--ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
   // private suffix = "--ar 2:1 --v 5.1 --q "+this.imgQuality;
 

@@ -29,12 +29,12 @@ export class LogEntity {
   time: Date;
 
   @Exclude()
-  @ManyToOne(() => ApiKeyEntity, { cascade : true, onDelete: "NO ACTION"})
+  @ManyToOne(() => ApiKeyEntity, { cascade : true, onDelete: "SET NULL"})
   @JoinColumn({ name: "apiId"})
   apiKeyLink: ApiKeyEntity;
 
   @Exclude()
-  @ManyToOne(() => BooksEntity, { cascade : true, onDelete: "NO ACTION"})
+  @ManyToOne(() => BooksEntity, { cascade : true, onDelete: "SET NULL"})
   @JoinColumn({ name: "bookId"})
   bookLink: BooksEntity;
 }

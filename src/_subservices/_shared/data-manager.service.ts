@@ -51,8 +51,9 @@ export class DataManagerService {
       ...book
     });
     // save new Book
-    this.logManager.log(`New Book saved!`, __filename, "NEW BOOK", book.apiKeyLink, book);
-    return await this.booksRepo.save(book);
+    const savedBook = await this.booksRepo.save(bookIdEntry);
+    this.logManager.log(`New Book saved!`, __filename, "NEW BOOK", savedBook.apiKeyLink, savedBook);
+    return savedBook;
   }
 
   public async getBookPdf(user: ApiKeyEntity, bookId: string): Promise<any> {
