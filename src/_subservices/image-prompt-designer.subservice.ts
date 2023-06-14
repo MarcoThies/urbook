@@ -9,7 +9,7 @@ import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.in
 @Injectable()
 export class ImagePromptDesignerSubservice {
   constructor(
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
     private readonly requestManager: RequestManagerSubservice
   ) {}
 

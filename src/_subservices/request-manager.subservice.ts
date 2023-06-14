@@ -12,7 +12,7 @@ import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 export class RequestManagerSubservice {
 
   constructor(
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
     private readonly openAi : OpenAi,
     private readonly imageAPI : MidjourneyApiSubservice,
     private readonly dataManager : DataManagerService
@@ -23,7 +23,8 @@ export class RequestManagerSubservice {
 
 
   public async requestStory(textPrompt: IOpenAiPromptMessage[], chapterCount : number) : Promise<string[][]> {
-    this.logsManager.log(`Request new Story from Text-KI.`);
+    this.logManager.log(`Request new Story from Text-KI.`, __filename, "KI-TEXT");
+
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT);
@@ -40,7 +41,7 @@ export class RequestManagerSubservice {
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
 
-    this.logsManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`);
+    this.logManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`, __filename, "KI-TEXT");
 
     const textResult = await this.openAi.promptGPT35(textPrompt);
     if(!textResult){
@@ -54,7 +55,7 @@ export class RequestManagerSubservice {
   }
 
   public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[]) : Promise<IImageAvatar[]> {
-    this.logsManager.log("Request Character Description from Text-KI");
+    this.logManager.log("Request Character Description from Text-KI", __filename, "KI-CHARACTER");
 
     // const requestReturn = this.demoCharacterisationResponse;
     const textResult = await this.openAi.promptGPT35withContext(charactersPrompt);
@@ -74,7 +75,6 @@ export class RequestManagerSubservice {
   }
 
   public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
-    // const requestReturn = this.demoCharacterImagePromptResponse;
     const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)

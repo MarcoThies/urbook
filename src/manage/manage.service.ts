@@ -13,7 +13,7 @@ import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.s
 export class ManageService {
   constructor(
     private readonly dataManager: DataManagerService,
-    private readonly logsManager : DatabaseLoggerService,
+    private readonly logManager : DatabaseLoggerService,
   ) {}
 
   public async listBooks(user: ApiKeyEntity): Promise<BooksEntity[]> {

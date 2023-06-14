@@ -1,13 +1,10 @@
 import { ParameterEntity } from "./_shared/entities/parameter.entity";
 import { Injectable } from "@nestjs/common";
-import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 
 @Injectable()
 export class TextPromptDesignerSubservice {
-  constructor(
-    private readonly logsManager: DatabaseLoggerService,
-  ) {}
+  constructor() {}
 
   public generateStoryPrompt(parameter: ParameterEntity): IOpenAiPromptMessage[] {
     // generate Text-Prompt from Child Parameters
@@ -26,8 +23,8 @@ export class TextPromptDesignerSubservice {
       "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl im Format [Zahl] und endet mit zwei Zeilenumbrüchen.\n" +
       "Vielen Dank für Ihre Hilfe bei der Erstellung dieses besonderen Buches für mein Kind.\n" +
       "Schreibe nur die Geschichte, kein Anschreiben oder Zusammenfassung, etc.\n";
-      
-      const userContent = 
+
+      const userContent =
       "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
 
       "Name: " + parameter.childName + "\n" +
