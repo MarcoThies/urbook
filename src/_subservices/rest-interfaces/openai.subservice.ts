@@ -45,12 +45,13 @@ export class OpenAi {
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
-            model: "gpt-3.5-turbo",
+            model: "gpt-3.5-turbo-16k",
             messages: messages,
-            max_tokens: 2000,
-            temperature: 0.5,
-            presence_penalty: 0.5,
-            frequency_penalty: 1
+            top_p: 0.5,
+            max_tokens: 2048,
+            temperature: 1.69,
+            presence_penalty: 0.25,
+            frequency_penalty: 0.6
         });
       const result = completion.data.choices[0].message?.content as string;
       console.log("\n\nDEBUG: plain answer: ", result);

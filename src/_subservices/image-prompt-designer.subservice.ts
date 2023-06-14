@@ -19,7 +19,12 @@ export class ImagePromptDesignerSubservice {
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    const promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    let promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    //    Assure that there are as many prompts characters
+    while (characters.length != promptResultText.length) {
+      console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
+      promptResultText = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    }
 
     // 3. Map the result to the characters
     for(let i in characters) {
@@ -57,9 +62,13 @@ export class ImagePromptDesignerSubservice {
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    const promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+    let promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+    //    Assure that there are as many prompts characters
+    while (promptResultText.length != promptResultText.length) {
+      console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
+      promptResultText = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+    }
     // 3. Map the result to the chapters
-
     for(let i in chapters) {
       // TODO: Check if the prompt has the right format before accessing
       if(!promptResultText[i] || promptResultText[i].length < 2) {
@@ -86,7 +95,7 @@ export class ImagePromptDesignerSubservice {
     imageImagePrompt += storyTextJoin.join("\n\n");
 
     // place paragraphs
-    imageImagePrompt += "\n\nWrite the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt). Do not output any further text except the required answer.";
+    imageImagePrompt += "\n\nDo not output any further text except the required answer. Write the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt).";
     promptConversation.push(
       {role: messageRole.user, content: imageImagePrompt} as IOpenAiPromptMessage
     );
