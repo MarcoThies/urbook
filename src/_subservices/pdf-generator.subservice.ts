@@ -35,17 +35,17 @@ export class PdfGeneratorSubservice {
 
     // add cover page
     await this.addCoverPage();
-    this.logManager.log(`PDF: Cover generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`Cover generated`, __filename, "PDF", book.apiKeyLink, book);
 
     // add all pages with content
     for (let i = 1; i <= this.numberOfPages; i++) {
       await this.addPage(i);
     }
-    this.logManager.log(`PDF: ${this.numberOfPages} pages where generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`${this.numberOfPages} pages where generated`, __filename, "PDF", book.apiKeyLink, book);
 
     // add backside of book
     await this.addLastPage();
-    this.logManager.log(`PDF: Last page generated for "${book.title}-${book.apiKeyLink.apiId}"`);
+    this.logManager.log(`Last page generated`, __filename, "PDF", book.apiKeyLink, book);
     
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
@@ -56,7 +56,7 @@ export class PdfGeneratorSubservice {
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
 
     if (pdfSuccessfullySaved){
-      this.logManager.log(`PDF: File saved for "${book.title}-${book.apiKeyLink.apiId}"`,"test", book.apiKeyLink);
+      this.logManager.log(`File saved!`,__filename, "PDF", book.apiKeyLink, book);
       console.log("PDF saved");
     }
 

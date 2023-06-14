@@ -42,7 +42,7 @@ export class BookGeneratorSubservice {
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
-    await this.logManager.log(`Generate new Book started. Book: ${newBookId} - User: ${user.apiId}`)
+    this.logManager.log(`Generate new Book started. Book: ${newBookId}`, __filename, "NEW BOOK", user);
 
     const newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;
 
@@ -197,7 +197,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 5);
 
     // make async call in bg to regenerate text
-    await this.logManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} text - User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`Regenerating chapter ${chapterId+1}`, __filename, "REGENERATE", user, book);
     await this.newChapterText(chapterId, book);
   }
 
@@ -218,7 +218,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    await this.logManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1}`, __filename, "NEW BOOK", book.apiKeyLink, book);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }
@@ -234,7 +234,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 6);
 
     // make async call in bg to regenerate image
-    await this.logManager.log(`Book ${book.title} regenerating chapter ${chapterId+1} image - User: ${book.apiKeyLink.apiId}`);
+    await this.logManager.log(`Regenerating chapter ${chapterId+1} image`, __filename, "REGENERATE", user, book);
     this.newChapterImage(chapterId, book);
   }
 
@@ -247,7 +247,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    this.logManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1} Book: ${book.title} User: ${book.apiKeyLink.apiId}`);
+    this.logManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1}`, __filename, "NEW BOOK", book.apiKeyLink, book);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }

@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { LogEntity } from "./entities/log.entity";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
+import { BooksEntity } from "./entities/books.entity";
 
 @Injectable()
 export class DatabaseLoggerService implements LoggerService {
@@ -11,38 +12,39 @@ export class DatabaseLoggerService implements LoggerService {
     private readonly logRepo : Repository<LogEntity>,
   ) {}
 
-  log(message: string, context?: string, user?: ApiKeyEntity) {
-    this.writeLog('info', message, undefined, context, user);
+  log(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    this.writeLog('info', message, trace, context, user, book);
   }
 
-  error(message: string, trace: string, context?: string) {
-    this.writeLog('error', message, trace, context, undefined);
+  error(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    this.writeLog('error', message, trace, context, user, book);
   }
 
-  warn(message: string, context?: string, user?: ApiKeyEntity) {
-    this.writeLog('warning', message, undefined, context, user);
+  warn(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    this.writeLog('warning', message, trace, context, user, book);
   }
 
-  debug(message: string, context?: string) {
-    this.writeLog('debug', message, undefined, context, undefined);
+  debug(message: string, trace: string, context?: string, user?: ApiKeyEntity) {
+    this.writeLog('debug', message, trace, context, user, undefined);
   }
 
-  verbose(message: string, context?: string) {
-    this.writeLog('verbose', message, undefined, context, undefined);
+  verbose(message: string, trace: string, context?: string) {
+    this.writeLog('verbose', message, trace, context, undefined, undefined);
   }
 
-  private writeLog(level: string, message: string, trace?: string, origin?: string, user?: ApiKeyEntity) {
+  private writeLog(level: string, message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
     const logEntry = new LogEntity();
     logEntry.level = level;
     logEntry.message = message;
-    if(typeof trace !== "undefined"){
-      logEntry.trace = trace;
-    }
-    if(typeof origin !== "undefined"){
-      logEntry.context = origin;
+    logEntry.trace = trace;
+    if(typeof context !== "undefined"){
+      logEntry.context = context;
     }
     if(typeof user !== "undefined"){
       logEntry.apiKeyLink = user;
+    }
+    if(typeof book !== "undefined"){
+      logEntry.bookLink = book;
     }
     this.logRepo.save(logEntry);
   }

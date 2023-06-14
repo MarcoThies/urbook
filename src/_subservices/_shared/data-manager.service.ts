@@ -34,10 +34,12 @@ export class DataManagerService {
 
   public async getBookList(user: ApiKeyEntity | boolean): Promise<BooksEntity[]> {
     if(user === false) {
+      this.logManager.log("Admin receives list of all books", __filename, "GET BOOK LIST");
       return await this.booksRepo.find({
         relations: ['apiKeyLink']
       });
     } else {
+      this.logManager.log("User receives list of his books", __filename, "GET BOOK LIST", user as ApiKeyEntity);
       return await this.booksRepo.find({
         where: { apiKeyLink: user }
       });
@@ -49,6 +51,7 @@ export class DataManagerService {
       ...book
     });
     // save new Book
+    this.logManager.log(`New Book saved!`, __filename, "NEW BOOK", book.apiKeyLink, book);
     return await this.booksRepo.save(book);
   }
 
@@ -56,7 +59,7 @@ export class DataManagerService {
     const myBook = await this.getBookWithAccessCheck(user, bookId);
     // check if status is ready
     if(myBook.state < 9){
-      this.logManager.warn('Book is still generating. Abort...');
+      this.logManager.warn('Book is still generating. Abort...', __filename, "GET PDF", user, myBook);
       throw new HttpException('Book is still generating. Abort...', HttpStatus.CONFLICT);
     }
 
@@ -66,10 +69,11 @@ export class DataManagerService {
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
     if(!fileExists){
-      this.logManager.warn(`No book PDF-found at ${pdfPath}`,"test", user);
+      this.logManager.warn(`No book PDF-found at ${pdfPath}`, __filename, "GET PDF", user, myBook);
       throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
     }
 
+    this.logManager.log(`User gets PDF`, __filename, "GET PDF", user, myBook);
     return {
       pdfUrl: 'http://localhost:3000' + encodeURI(pdfPath)
     };
@@ -186,6 +190,7 @@ export class DataManagerService {
       // Admin can access any book
       const anyBook = await this.getBookById(bookIsbn);
       if(!anyBook){
+        await this.logManager.error(`Can't find book with id ${bookIsbn}`, __filename, " ADMIN GET BOOK", user);
         throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
       }
       return anyBook;
@@ -194,6 +199,7 @@ export class DataManagerService {
       // check if user is allowed to access this book
       const myBook = await this.getBookIfOwned(user, bookIsbn);
       if(myBook === false){
+        await this.logManager.error(`Can't find book with id ${bookIsbn} or not from this user`, __filename, "GET BOOK", user);
         throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
       }
       return myBook as BooksEntity;
@@ -202,6 +208,7 @@ export class DataManagerService {
 
   public async deleteBook(book: BooksEntity): Promise<boolean> {
 
+    this.logManager.log("Book deleted", __filename, "DELETE BOOK", book.apiKeyLink, book);
     const bookId = book.id;
     // remove all Characters of book
     const characters = await this.characterRepo
