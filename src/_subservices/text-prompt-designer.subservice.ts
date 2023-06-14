@@ -9,10 +9,31 @@ export class TextPromptDesignerSubservice {
   public generateStoryPrompt(parameter: ParameterEntity): IOpenAiPromptMessage[] {
     // generate Text-Prompt from Child Parameters
     const paragraphCount = parameter.topicChapterCount;
-    const avgWordsPerParagraph = 45
+    const avgWordsPerParagraph = 40
+    let author : string = 'Lewis Carroll';
+
+    const randomNumber = Math.floor(Math.random() * 5);
+    switch(randomNumber) {
+      case 0:
+        author = 'Astrid Lindgren';
+        break;
+      case 1:
+        author = 'Eric Carle';
+        break;
+      case 2:
+        author = 'Dr. Seuss';
+        break;
+      case 3:
+        author = 'Roald Dahl';
+        break;
+      case 4:
+        author = 'Lewis Carroll';
+        break;
+    }
+
 
     const systemContent =
-      "Antworte, als wärst du Kinderbuchautor/in Astrid Lindgren.\n" +
+      "Antworte, als wärst du Kinderbuchautor/in " + author + ".\n" +
 
       "Bitte stelle sicher, dass die Geschichte altersgerecht und ansprechend ist, mit einer klaren Erzählung, die die gewählte Moral und das Thema beinhaltet. \n" +
       "Die Geschichte sollte auch Elemente enthalten, die die Interessen und Persönlichkeitsmerkmale meines Kindes widerspiegeln. \n" +
@@ -20,9 +41,7 @@ export class TextPromptDesignerSubservice {
       "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen.\n" +
 
       "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.\n" +
-      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl im Format [Zahl] und endet mit zwei Zeilenumbrüchen.\n" +
-      "Vielen Dank für Ihre Hilfe bei der Erstellung dieses besonderen Buches für mein Kind.\n" +
-      "Schreibe nur die Geschichte, kein Anschreiben oder Zusammenfassung, etc.\n";
+      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl in eckigen Klammern (zum Beispiel [Zahl]) und endet mit zwei Zeilenumbrüchen.\n";
 
       const userContent =
       "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
@@ -32,10 +51,11 @@ export class TextPromptDesignerSubservice {
       "Geschlecht: " + parameter.childGender + "\n" +
       "Ethnie: " + parameter.childCountry + "\n" +
       "Lieblingsfarbe: " + parameter.childFavColor + "\n" +
-      "Lieblingstier oder Charakter: " + parameter.childFavAnimal + "\n" +
+      "Lieblingstier/-charakter:: " + parameter.childFavAnimal + "\n" +
       "Die in der Geschichte zu vermittelnde Moral lautet: " + parameter.topicMoralType + "\n" +
-      "Die Geschichte spielt in/im " + parameter.topicSpecialTopic + ".\n" +
+      "Das Thema der Geschichte lautet: " + parameter.topicSpecialTopic + ".\n" +
 
+      "Erwähne die Lieblingsfarbe und das Lieblingstier/-charakter im ersten Absatz nicht! \n" +
       "Achte auf eine ausreichende Länge der Absätze. \n";
 
     return [

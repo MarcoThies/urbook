@@ -79,7 +79,7 @@ export class PdfGeneratorSubservice {
 
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.coverImage, 0.87);
+    await this.addImage(page, this.coverImage, 0.55);
     this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 500);
   }
 
@@ -115,7 +115,7 @@ export class PdfGeneratorSubservice {
 
   private async addLastPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.coverImage, 0.87, this.pageDimensions[0]-180);
+    await this.addImage(page, this.coverImage, 0.55, this.pageDimensions[0]-180);
     await this.addImage(page, this.gradients.left, 1);
     const pageText = "urContent GmbH \nUnter den Linden 1 \n10117 Berlin \ninfo@urBook.de \nwww.urbook.de";
     this.addText(page, pageText, 100, 160, 10, 100, 12);
