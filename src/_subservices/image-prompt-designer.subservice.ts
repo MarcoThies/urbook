@@ -96,7 +96,9 @@ export class ImagePromptDesignerSubservice {
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       return "["+(indx+1)+"] "+cpt.paragraph;
     });
-    imagePrompt += storyTextJoin.join("\n\n");
+    imagePrompt += storyTextJoin.join("\n");
+
+    // TODO: Map character-description text to appearance of names in the chapter
 
     // place paragraphs
     imagePrompt += "\n\nDo not output any further text except the required answer. Write the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt).";
