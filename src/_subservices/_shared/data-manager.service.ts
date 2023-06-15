@@ -11,6 +11,7 @@ import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
 import { urlencoded } from "express";
 import { DatabaseLoggerService } from "./database-logger.service";
+import { LogsDto } from "../../administration/dto/logs.dto";
 
 @Injectable()
 export class DataManagerService {
@@ -93,6 +94,8 @@ export class DataManagerService {
       }
     }
 
+    await this.logManager.log("Book content updated", __filename, "DATABASE", book.apiKeyLink, book);
+
     return await this.booksRepo.save(book);
   }
 
@@ -102,10 +105,9 @@ export class DataManagerService {
 
 
   public async updateBookState(book: BooksEntity, state: number) {
-    // TODO: Check if book generation was aborted, if yes, cancle pipeline
     book.state = state;
+    await this.logManager.log(`New Book state: ${state}`, __filename, "DATABASE", book.apiKeyLink, book);
     await this.booksRepo.save(book);
-    await this.logManager.log(`New Book state: ${state}`, __filename, "NEW BOOK", book.apiKeyLink, book);
   }
 
   private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
@@ -232,18 +234,33 @@ export class DataManagerService {
     return true;
   }
 
-  public async getLogsOfUser(user: ApiKeyEntity, timeInfo: number | boolean): Promise<LogEntity[]>{
-    let ormOptions: FindManyOptions<LogEntity> = {where: { apiKeyLink: user }, relations: ["bookLink"]};
-    if(timeInfo === false){
-      ormOptions.take = 100;
-    }else if(typeof(timeInfo) === "number"){
-      const timeNow = Math.floor(Date.now() / 1000);
-      const timePast = timeNow - timeInfo;
-      ormOptions.where = {
-        apiKeyLink: user,
-        time: MoreThan(new Date(timePast * 1000))
-      };
+  public async getLogs(user: ApiKeyEntity|boolean, time: number|boolean, book: BooksEntity|boolean ): Promise<LogEntity[]>{
+
+    let ormOptions: FindManyOptions<LogEntity> = {
+      relations: ["apiKeyLink", "bookLink"],
+      order: {time: "DESC"},
+    };
+
+    if(user !== false){
+      ormOptions.where = {};
+      (ormOptions.where as any).apiKeyLink = user;
     }
+
+    if(book !== false){
+      if(!ormOptions.where) ormOptions.where = {};
+      (ormOptions.where as any).bookLink = book;
+    }
+
+    if(time === false){
+      ormOptions.take = 100;
+    }else if(typeof(time) === "number"){
+      const timeNow = Math.floor(Date.now() / 1000);
+      const timePast = timeNow - time;
+
+      if(!ormOptions.where) ormOptions.where = {};
+      (ormOptions.where as any).time = MoreThan(new Date(timePast * 1000));
+    }
+
     return await this.logRepo.find(ormOptions);
   }
 }

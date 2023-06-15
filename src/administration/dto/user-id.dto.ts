@@ -1,5 +1,7 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class UserIdDto {
-  @IsNotEmpty() userId: number;
+  @IsNotEmpty()
+  @IsNumber()
+  userId: number;
 }

@@ -1,5 +1,7 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class ApiKeyDto {
-  @IsNotEmpty() apiKey: string;
+  @IsNotEmpty()
+  @IsString()
+  apiKey: string;
 }

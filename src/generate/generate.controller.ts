@@ -6,6 +6,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { RegenerateChapterDto } from "./dto/regenerate-chapter.dto";
 import { IBookState } from "./interfaces/book-state.interface";
+import { BookIdDto } from "../_subservices/_shared/dto/book-id.dto";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -30,12 +31,12 @@ export class GenerateController {
     }
 
     @Post("check-status")
-    public async checkStatus(@Body() bookIdDto: IBookId, @Request() req): Promise<IBookState> {
-      return await this.generateService.checkStatus(bookIdDto.bookId, req.user);
+    public async checkStatus(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookState> {
+      return await this.generateService.checkStatus(bookIdDto.isbn, req.user);
     }
 
     @Post("abort")
-    public async abortGeneration(@Body() bookIdDto: IBookId, @Request() req): Promise<Boolean> {
-      return await this.generateService.abort(bookIdDto.bookId, req.user);
+    public async abortGeneration(@Body() bookIdDto: BookIdDto, @Request() req): Promise<Boolean> {
+      return await this.generateService.abort(bookIdDto.isbn, req.user);
     }
 }

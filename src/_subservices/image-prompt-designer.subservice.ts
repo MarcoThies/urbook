@@ -70,7 +70,6 @@ export class ImagePromptDesignerSubservice {
     }
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      // TODO: Check if the prompt has the right format before accessing
       if(!promptResultText[i] || promptResultText[i].length < 2) {
         console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n");
         continue;
@@ -85,7 +84,6 @@ export class ImagePromptDesignerSubservice {
   private generateStoryImagePrompts(chapter: ChapterEntity[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    // let imageImagePrompt = this.addImageAiInstruction();
     let imageImagePrompt = ""+
       "Please write exactly one prompt for each of the following paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";

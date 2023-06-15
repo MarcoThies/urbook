@@ -24,7 +24,6 @@ export class GenerateService {
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<IBookId> {
-
     // start the generation process
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
 
@@ -41,20 +40,22 @@ export class GenerateService {
     const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state); 
 
     let statusDict = {
-      0: { code: 0,  status: "waiting to start...", kiHelper: "none" },
-      1: { code: 1,  status: "story text", kiHelper: "txt" },
-      2: { code: 2,  status: "character descriptions", kiHelper: "txt" },
-      3: { code: 3,  status: "avatar images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
-      4: { code: 4,  status: "story images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
-      5: { code: 5,  status: "regenerating chapter text", kiHelper: "txt" },
-      6: { code: 6,  status: "regenerating chapter image", kiHelper: "img" },
-      9: { code: 9,  status: "generating pdf file", kiHelper: "pdf" },
-      10: { code: 10, status: "done", kiHelper: "none" },
+      "-2": { code: -1,  status: "unknown error", kiHelper: "none" },
+      "-1": { code: -1,  status: "user aborted process", kiHelper: "none" },
+      "0": { code: 0,  status: "waiting to start...", kiHelper: "none" },
+      "1": { code: 1,  status: "story text", kiHelper: "txt" },
+      "2": { code: 2,  status: "character descriptions", kiHelper: "txt" },
+      "3": { code: 3,  status: "avatar images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
+      "4": { code: 4,  status: "story images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
+      "5": { code: 5,  status: "regenerating chapter text", kiHelper: "txt" },
+      "6": { code: 6,  status: "regenerating chapter image", kiHelper: "img" },
+      "9": { code: 9,  status: "generating pdf file", kiHelper: "pdf" },
+      "10": { code: 10, status: "done", kiHelper: "none" },
     };
 
     let statusInfo;
-    if(typeof statusDict[myBook.state] === "undefined") statusInfo = statusDict[10];
-    else statusInfo = statusDict[myBook.state];
+    if(typeof statusDict[(myBook.state).toString()] === "undefined") statusInfo = statusDict["-2"];
+    else statusInfo = statusDict[(myBook.state).toString()];
 
     return {
       bookId: myBook.isbn,
@@ -64,7 +65,6 @@ export class GenerateService {
 
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     await this.bookGenSubservice.abort(bookId, user);
-    
     return true;
   }
 

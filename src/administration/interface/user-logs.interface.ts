@@ -5,6 +5,6 @@ export interface IUserLogs{
     trace: string;
     context: string;
     time: string;
-    userId: number;
+    userId?: number;
     bookKey: string;
   }

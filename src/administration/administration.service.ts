@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindManyOptions, Repository } from "typeorm";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
 import { generateId, hash } from "../_shared/utils";
@@ -14,7 +14,7 @@ import { IBookInfo, IUserData } from "./interface/user-data.interface";
 import { UserIdDto } from "./dto/user-id.dto";
 import { IUserLogs } from "./interface/user-logs.interface";
 import { LogEntity } from "src/_subservices/_shared/entities/log.entity";
-import { UserLogsDto } from "./dto/user-logs.dto";
+import { LogsDto } from "./dto/logs.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -132,17 +132,28 @@ export class AdministrationService {
     return await this.statisticService.getStatisticsOfUser(user);
   }
 
-  async userLastLogs(userLogsDto: UserLogsDto): Promise<IUserLogs[]>{
+  async getLogs(logsDto: LogsDto): Promise<IUserLogs[]>{
     // check if hash exists
-    const user = await this.apiKeyRepo.findOne({ where: { apiId : userLogsDto.userId } });
-    if(!user) {
-      throw new HttpException('API user not found', HttpStatus.CONFLICT);
+    let user:  null|boolean|ApiKeyEntity = false;
+    if(logsDto.userId) {
+      user = await this.apiKeyRepo.findOne({ where: { apiId: logsDto.userId } });
+      if(!user) {
+        throw new HttpException('API user not found', HttpStatus.CONFLICT);
+      }
     }
-    const timeInfo = (!userLogsDto.timeFrame)? false: userLogsDto.timeFrame;
-    console.log(timeInfo);
-    console.log(userLogsDto.timeFrame);
+
+    const timeInfo = (!logsDto.timeFrame)? false: logsDto.timeFrame;
+
+    let book:  null|boolean|BooksEntity = false;
+    if(logsDto.isbn){
+      book = await this.dataManager.getBookById(logsDto.isbn);
+      if(!book) {
+        throw new HttpException(`Book with id ${logsDto.isbn} not found`, HttpStatus.CONFLICT);
+      }
+    }
+
     // get the last Logs of this user
-    const allLogs = await this.dataManager.getLogsOfUser(user, timeInfo) as LogEntity[];
+    const allLogs = await this.dataManager.getLogs(user, timeInfo, book) as LogEntity[];
     let logsList: IUserLogs[] = [];
     for(let log of allLogs)
     {
@@ -153,7 +164,7 @@ export class AdministrationService {
         trace: log.trace,
         context: log.context,
         time: log.time.toUTCString(),
-        userId: userLogsDto.userId,
+        userId: (!log.apiKeyLink)? "no User in this log": log.apiKeyLink.apiId,
         bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn
       } as IUserLogs);
     }
