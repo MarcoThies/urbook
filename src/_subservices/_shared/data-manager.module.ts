@@ -7,12 +7,13 @@ import { ParameterEntity } from "./entities/parameter.entity";
 import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
 import { DatabaseLoggerModule } from "./database-logger.module";
+import { LogEntity } from './entities/log.entity';
 
 @Module({
     imports: [
       TypeOrmModule.forFeature([
           BooksEntity,
-          ParameterEntity, ChapterEntity, CharacterEntity
+          ParameterEntity, ChapterEntity, CharacterEntity, LogEntity
       ]),
       DatabaseLoggerModule
     ],

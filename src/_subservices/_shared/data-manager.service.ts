@@ -1,6 +1,6 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "./entities/books.entity";
-import { getConnection, getConnectionManager, Repository } from "typeorm";
+import { FindManyOptions, getConnection, getConnectionManager, MoreThan, Repository } from "typeorm";
 import { ParameterEntity } from "./entities/parameter.entity";
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
@@ -11,6 +11,7 @@ import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
 import { urlencoded } from "express";
 import { DatabaseLoggerService } from "./database-logger.service";
+import { LogsDto } from "../../administration/dto/logs.dto";
 
 @Injectable()
 export class DataManagerService {
@@ -23,6 +24,8 @@ export class DataManagerService {
     private readonly chapterRepo : Repository<ChapterEntity>,
     @InjectRepository(CharacterEntity)
     private readonly characterRepo : Repository<CharacterEntity>,
+    @InjectRepository(LogEntity)
+    private readonly logRepo : Repository<LogEntity>,
 
     private readonly logManager : DatabaseLoggerService
   ) {}
@@ -52,7 +55,7 @@ export class DataManagerService {
     });
     // save new Book
     const savedBook = await this.booksRepo.save(bookIdEntry);
-    this.logManager.log(`New Book saved!`, __filename, "NEW BOOK", savedBook.apiKeyLink, savedBook);
+    this.logManager.log(`New Book created`, __filename, "NEW BOOK", savedBook.apiKeyLink, savedBook);
     return savedBook;
   }
 
@@ -91,6 +94,8 @@ export class DataManagerService {
       }
     }
 
+    await this.logManager.log("Book content updated", __filename, "DATABASE", book.apiKeyLink, book);
+
     return await this.booksRepo.save(book);
   }
 
@@ -100,9 +105,8 @@ export class DataManagerService {
 
 
   public async updateBookState(book: BooksEntity, state: number) {
-    // TODO: Check if book generation was aborted, if yes, cancle pipeline
-    await this.logManager.log(`New Book state: ${state}`, __filename, "NEW BOOK");
     book.state = state;
+    await this.logManager.log(`New Book state: ${state}`, __filename, "DATABASE", book.apiKeyLink, book);
     await this.booksRepo.save(book);
   }
 
@@ -211,7 +215,6 @@ export class DataManagerService {
 
   public async deleteBook(book: BooksEntity): Promise<boolean> {
 
-    this.logManager.log("Book deleted", __filename, "DELETE BOOK");
     const bookId = book.id;
     // remove all Characters of book
     const characters = await this.characterRepo
@@ -229,5 +232,35 @@ export class DataManagerService {
     await this.resetFileStructure("."+this.getBookPath(book), false);
 
     return true;
+  }
+
+  public async getLogs(user: ApiKeyEntity|boolean, time: number|boolean, book: BooksEntity|boolean ): Promise<LogEntity[]>{
+
+    let ormOptions: FindManyOptions<LogEntity> = {
+      relations: ["apiKeyLink", "bookLink"],
+      order: {time: "DESC"},
+    };
+
+    if(user !== false){
+      ormOptions.where = {};
+      (ormOptions.where as any).apiKeyLink = user;
+    }
+
+    if(book !== false){
+      if(!ormOptions.where) ormOptions.where = {};
+      (ormOptions.where as any).bookLink = book;
+    }
+
+    if(time === false){
+      ormOptions.take = 100;
+    }else if(typeof(time) === "number"){
+      const timeNow = Math.floor(Date.now() / 1000);
+      const timePast = timeNow - time;
+
+      if(!ormOptions.where) ormOptions.where = {};
+      (ormOptions.where as any).time = MoreThan(new Date(timePast * 1000));
+    }
+
+    return await this.logRepo.find(ormOptions);
   }
 }

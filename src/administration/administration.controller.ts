@@ -16,6 +16,8 @@ import { IStatistic } from "./interface/statistic.interface";
 import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IUserData } from "./interface/user-data.interface";
 import { UserIdDto } from "./dto/user-id.dto";
+import { IUserLogs } from "./interface/user-logs.interface";
+import { LogsDto } from "./dto/logs.dto";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -60,5 +62,8 @@ export class AdministrationController {
     return await this.adminService.userStatistic(userIdDto);
   }
 
-
+  @Post('get-logs')
+  async getLogs(@Body() userLogsDto: LogsDto): Promise<IUserLogs[]> {
+    return await this.adminService.getLogs(userLogsDto);
+  }
 }

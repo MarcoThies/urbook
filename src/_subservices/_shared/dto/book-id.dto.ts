@@ -1,5 +1,7 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class BookIdDto {
-  @IsNotEmpty() isbn: string;
+  @IsNotEmpty()
+  @IsString()
+  isbn: string;
 }

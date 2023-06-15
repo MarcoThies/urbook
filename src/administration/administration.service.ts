@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { FindManyOptions, Repository } from "typeorm";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
 import { generateId, hash } from "../_shared/utils";
@@ -12,6 +12,9 @@ import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IStatistic } from "./interface/statistic.interface";
 import { IBookInfo, IUserData } from "./interface/user-data.interface";
 import { UserIdDto } from "./dto/user-id.dto";
+import { IUserLogs } from "./interface/user-logs.interface";
+import { LogEntity } from "src/_subservices/_shared/entities/log.entity";
+import { LogsDto } from "./dto/logs.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -127,5 +130,44 @@ export class AdministrationService {
     }
     // get Statistic of this user
     return await this.statisticService.getStatisticsOfUser(user);
+  }
+
+  async getLogs(logsDto: LogsDto): Promise<IUserLogs[]>{
+    // check if hash exists
+    let user:  null|boolean|ApiKeyEntity = false;
+    if(logsDto.userId) {
+      user = await this.apiKeyRepo.findOne({ where: { apiId: logsDto.userId } });
+      if(!user) {
+        throw new HttpException('API user not found', HttpStatus.CONFLICT);
+      }
+    }
+
+    const timeInfo = (!logsDto.timeFrame)? false: logsDto.timeFrame;
+
+    let book:  null|boolean|BooksEntity = false;
+    if(logsDto.isbn){
+      book = await this.dataManager.getBookById(logsDto.isbn);
+      if(!book) {
+        throw new HttpException(`Book with id ${logsDto.isbn} not found`, HttpStatus.CONFLICT);
+      }
+    }
+
+    // get the last Logs of this user
+    const allLogs = await this.dataManager.getLogs(user, timeInfo, book) as LogEntity[];
+    let logsList: IUserLogs[] = [];
+    for(let log of allLogs)
+    {
+      logsList.push({
+        id: log.id,
+        level: log.level,
+        message: log.message,
+        trace: log.trace,
+        context: log.context,
+        time: log.time.toUTCString(),
+        userId: (!log.apiKeyLink)? -1: log.apiKeyLink.apiId,
+        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn
+      } as IUserLogs);
+    }
+    return logsList;
   }
 }
