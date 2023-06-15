@@ -101,6 +101,7 @@ export class DataManagerService {
 
   public async updateBookState(book: BooksEntity, state: number) {
     // TODO: Check if book generation was aborted, if yes, cancle pipeline
+    await this.logManager.log(`New Book state: ${state}`, __filename, "NEW BOOK");
     book.state = state;
     await this.booksRepo.save(book);
   }
@@ -210,7 +211,7 @@ export class DataManagerService {
 
   public async deleteBook(book: BooksEntity): Promise<boolean> {
 
-    this.logManager.log("Book deleted", __filename, "DELETE BOOK", book.apiKeyLink, book);
+    this.logManager.log("Book deleted", __filename, "DELETE BOOK");
     const bookId = book.id;
     // remove all Characters of book
     const characters = await this.characterRepo
