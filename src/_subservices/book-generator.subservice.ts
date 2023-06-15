@@ -179,7 +179,7 @@ export class BookGeneratorSubservice {
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
     // const chapters = book.chapters;
-    book.chapters =  await this.imagePromptDesigner.generateStoryImages(chapters);
+    book.chapters =  await this.imagePromptDesigner.addImagePromptsToChapter(chapters);
     await this.dataManager.updateBookContent(book);
 
     // 9. Request Story-Images from Image AI

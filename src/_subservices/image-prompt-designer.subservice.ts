@@ -19,10 +19,12 @@ export class ImagePromptDesignerSubservice {
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    let promptResultText: string[][] = []; 
     //    Assure that there are as many prompts characters
-    while (characters.length != promptResultText.length) {
-      console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
+    while (characters.length !== promptResultText.length) {
+      if(promptResultText.length !== 0) {
+        console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
+      }
       promptResultText = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
     }
 
@@ -57,15 +59,17 @@ export class ImagePromptDesignerSubservice {
     return promptConversation;
   }
 
-  public async generateStoryImages(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
+  public async addImagePromptsToChapter(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
     // 1. Generate one Text Prompt for creating image Prompts
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+    let promptResultText: string[][] = [];
     //    Assure that there are as many prompts characters
-    while (promptResultText.length != promptResultText.length) {
-      console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
+    while (promptResultText.length !== chapters.length) {
+      if (promptResultText.length !== 0) {
+        console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
+      }
       promptResultText = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
     }
     // 3. Map the result to the chapters
@@ -86,18 +90,18 @@ export class ImagePromptDesignerSubservice {
     let promptConversation = this.addImageAiInstruction();
 
     // let imageImagePrompt = this.addImageAiInstruction();
-    let imageImagePrompt = ""+
+    let imagePrompt = ""+
       "Please write exactly one prompt for each of the following paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       return "["+(indx+1)+"] "+cpt.paragraph;
     });
-    imageImagePrompt += storyTextJoin.join("\n\n");
+    imagePrompt += storyTextJoin.join("\n\n");
 
     // place paragraphs
-    imageImagePrompt += "\n\nDo not output any further text except the required answer. Write the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt).";
+    imagePrompt += "\n\nDo not output any further text except the required answer. Write the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt).";
     promptConversation.push(
-      {role: messageRole.user, content: imageImagePrompt} as IOpenAiPromptMessage
+      {role: messageRole.user, content: imagePrompt} as IOpenAiPromptMessage
     );
     return promptConversation;
   }

@@ -31,9 +31,9 @@ export class RequestManagerSubservice {
     }
 
     const result = this.dataFromAnswer(textResult as string);
-    if (result.length != chapterCount) {
+    if (result.length !== chapterCount) {
       console.log("DEBUG requestManager.requestStory: Generated story didn't have the requested number of chapters.")
-      return this.requestStory(textPrompt, chapterCount);
+      return await this.requestStory(textPrompt, chapterCount);
     }
 
     return result;
