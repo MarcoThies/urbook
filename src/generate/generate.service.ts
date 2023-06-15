@@ -64,6 +64,7 @@ export class GenerateService {
 
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     await this.bookGenSubservice.abort(bookId, user);
+    
     return true;
   }
 

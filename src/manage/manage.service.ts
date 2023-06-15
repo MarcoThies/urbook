@@ -24,10 +24,12 @@ export class ManageService {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
 
+    this.logManager.log(`Deleted Book: ${myBook.isbn}`, __filename, "DELETE BOOK", myBook.apiKeyLink);
+    /*
     if(myBook.state < 9) {
       // TODO: Stop all processes that are still generating this book
     }
-
+    */
     const isBookDeleted = await this.dataManager.deleteBook(myBook);
 
     return {

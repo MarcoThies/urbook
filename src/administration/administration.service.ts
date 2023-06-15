@@ -12,6 +12,9 @@ import { IUserStatistic } from "./interface/user-statistic.interface";
 import { IStatistic } from "./interface/statistic.interface";
 import { IBookInfo, IUserData } from "./interface/user-data.interface";
 import { UserIdDto } from "./dto/user-id.dto";
+import { IUserLogs } from "./interface/user-logs.interface";
+import { LogEntity } from "src/_subservices/_shared/entities/log.entity";
+import { UserLogsDto } from "./dto/user-logs.dto";
 
 @Injectable()
 export class AdministrationService {
@@ -127,5 +130,33 @@ export class AdministrationService {
     }
     // get Statistic of this user
     return await this.statisticService.getStatisticsOfUser(user);
+  }
+
+  async userLastLogs(userLogsDto: UserLogsDto): Promise<IUserLogs[]>{
+    // check if hash exists
+    const user = await this.apiKeyRepo.findOne({ where: { apiId : userLogsDto.userId } });
+    if(!user) {
+      throw new HttpException('API user not found', HttpStatus.CONFLICT);
+    }
+    const timeInfo = (!userLogsDto.timeFrame)? false: userLogsDto.timeFrame;
+    console.log(timeInfo);
+    console.log(userLogsDto.timeFrame);
+    // get the last Logs of this user
+    const allLogs = await this.dataManager.getLogsOfUser(user, timeInfo) as LogEntity[];
+    let logsList: IUserLogs[] = [];
+    for(let log of allLogs)
+    {
+      logsList.push({
+        id: log.id,
+        level: log.level,
+        message: log.message,
+        trace: log.trace,
+        context: log.context,
+        time: log.time.toUTCString(),
+        userId: userLogsDto.userId,
+        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn
+      } as IUserLogs);
+    }
+    return logsList;
   }
 }

@@ -1,6 +1,6 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "./entities/books.entity";
-import { getConnection, getConnectionManager, Repository } from "typeorm";
+import { FindManyOptions, getConnection, getConnectionManager, MoreThan, Repository } from "typeorm";
 import { ParameterEntity } from "./entities/parameter.entity";
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
@@ -23,6 +23,8 @@ export class DataManagerService {
     private readonly chapterRepo : Repository<ChapterEntity>,
     @InjectRepository(CharacterEntity)
     private readonly characterRepo : Repository<CharacterEntity>,
+    @InjectRepository(LogEntity)
+    private readonly logRepo : Repository<LogEntity>,
 
     private readonly logManager : DatabaseLoggerService
   ) {}
@@ -52,7 +54,7 @@ export class DataManagerService {
     });
     // save new Book
     const savedBook = await this.booksRepo.save(bookIdEntry);
-    this.logManager.log(`New Book saved!`, __filename, "NEW BOOK", savedBook.apiKeyLink, savedBook);
+    this.logManager.log(`New Book created`, __filename, "NEW BOOK", savedBook.apiKeyLink, savedBook);
     return savedBook;
   }
 
@@ -101,9 +103,9 @@ export class DataManagerService {
 
   public async updateBookState(book: BooksEntity, state: number) {
     // TODO: Check if book generation was aborted, if yes, cancle pipeline
-    await this.logManager.log(`New Book state: ${state}`, __filename, "NEW BOOK");
     book.state = state;
     await this.booksRepo.save(book);
+    await this.logManager.log(`New Book state: ${state}`, __filename, "NEW BOOK", book.apiKeyLink, book);
   }
 
   private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
@@ -211,7 +213,6 @@ export class DataManagerService {
 
   public async deleteBook(book: BooksEntity): Promise<boolean> {
 
-    this.logManager.log("Book deleted", __filename, "DELETE BOOK");
     const bookId = book.id;
     // remove all Characters of book
     const characters = await this.characterRepo
@@ -229,5 +230,20 @@ export class DataManagerService {
     await this.resetFileStructure("."+this.getBookPath(book), false);
 
     return true;
+  }
+
+  public async getLogsOfUser(user: ApiKeyEntity, timeInfo: number | boolean): Promise<LogEntity[]>{
+    let ormOptions: FindManyOptions<LogEntity> = {where: { apiKeyLink: user }, relations: ["bookLink"]};
+    if(timeInfo === false){
+      ormOptions.take = 100;
+    }else if(typeof(timeInfo) === "number"){
+      const timeNow = Math.floor(Date.now() / 1000);
+      const timePast = timeNow - timeInfo;
+      ormOptions.where = {
+        apiKeyLink: user,
+        time: MoreThan(new Date(timePast * 1000))
+      };
+    }
+    return await this.logRepo.find(ormOptions);
   }
 }

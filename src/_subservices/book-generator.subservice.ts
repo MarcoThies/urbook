@@ -299,6 +299,7 @@ export class BookGeneratorSubservice {
     this.abortFlag = true;
     this.requestManager.clearQueues();
     
+    this.logManager.log(`Cancle Job Book: ${myBook.isbn}`, __filename, "CANCLE BOOK", myBook.apiKeyLink);
     this.dataManager.deleteBook(myBook);
     return true;
   }
