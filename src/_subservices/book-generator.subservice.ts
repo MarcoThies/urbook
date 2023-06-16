@@ -29,18 +29,18 @@ export class BookGeneratorSubservice {
   ) {}
 
   abortFlag = false;
-  
+
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
     // begin Book generation Process
     this.abortFlag = false;
-    const newBookId = generateId(3,4);
 
+    const newBookId = generateId(3,4);
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
-    this.logManager.log(`Generate new Book started. Book: ${newBookId}`, __filename, "NEW BOOK", user);
+    this.logManager.log(`Request new book: ${newBookId}`, __filename, "GENERATE", user);
 
-    const newTitle: string = `${createBookDto.child_name} and the ${createBookDto.topic_specialTopic}`;
+    const newTitle: string = `${createBookDto.child_name} and ${createBookDto.topic_specialTopic}`;
 
     // Generate new Book & Parameter entity-data-object
     const newBook = {
@@ -73,10 +73,14 @@ export class BookGeneratorSubservice {
 
   private async startGenerationPipeline(book: BooksEntity) {
     // 1. Generate Story from Book-Parameters
+    await this.logManager.log(`Start book generation...`, __filename, "GENERATE", book.apiKeyLink, book);
     let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
+
+    this.requestManager.bookRef = book;
 
     // 2. Generate Story from Story-Prompt
     const story: string[][] = await this.requestManager.requestStory(storyPrompt, book.parameterLink.topicChapterCount);
+
     if(this.abortFlag) {
       return;
     }
@@ -125,6 +129,7 @@ export class BookGeneratorSubservice {
 
     // 5. Generate Character-Prompts from Character-Description
     const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
+    await this.logManager.log('Character prompts generated', __filename, "GENERATE", book.apiKeyLink, book);
 
     /*
     // 6. Request Avatar Images from Image AI
@@ -170,6 +175,8 @@ export class BookGeneratorSubservice {
       await this.dataManager.updateChapter(currChapter);
     }
 
+    await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book.apiKeyLink, book);
+
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     if(this.abortFlag) {
       return;
@@ -182,9 +189,13 @@ export class BookGeneratorSubservice {
     book.chapters =  await this.imagePromptDesigner.addImagePromptsToChapter(chapters);
     await this.dataManager.updateBookContent(book);
 
+    await this.logManager.log('Generated chapter prompts', __filename, "GENERATE", book.apiKeyLink, book);
+
     // 9. Request Story-Images from Image AI
     book.chapters = await this.requestManager.requestStoryImages(book.chapters);
     await this.dataManager.updateBookContent(book);
+
+    await this.logManager.log('Chapter images generated', __filename, "GENERATE", book.apiKeyLink, book);
 
     if(this.abortFlag) {
       return;
@@ -193,10 +204,10 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 9);
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
+    await this.logManager.log('Generated PDF-File from book', __filename, "GENERATE", book.apiKeyLink, book);
 
     // update Book status 5 => Building Done
     await this.dataManager.updateBookState(book,  10);
-
   }
 
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<void> {
@@ -286,7 +297,7 @@ export class BookGeneratorSubservice {
     }
     // check if chapter exists
     if(typeof existingBook.chapters[chapterId] === "undefined") {
-      await this.logManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename);
+      await this.logManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename, "STATUS", user, existingBook);
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.CONFLICT);
     }
 
@@ -296,15 +307,19 @@ export class BookGeneratorSubservice {
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     // get book if found and owned by user
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+    this.logManager.log(`Trying to cancel job for book: ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook.apiKeyLink);
 
     // check if book is in state 10 (finished)
-    if(myBook.state == 10){
-      throw new HttpException(`Generation of book with ID ${bookId} is already completed. Nothing to abort!`, HttpStatus.CONFLICT);
+    if(myBook.state > 9 || myBook.state < 0){
+      throw new HttpException(`Generation of book with ID ${bookId} not running. Nothing to abort!`, HttpStatus.CONFLICT);
     }
+
     this.abortFlag = true;
     this.requestManager.clearQueues();
-    
-    this.dataManager.deleteBook(myBook);
+
+    await this.dataManager.updateBookState(myBook, -1);
+    this.logManager.log(`Cancel Job Book: ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook.apiKeyLink);
+
     return true;
   }
 

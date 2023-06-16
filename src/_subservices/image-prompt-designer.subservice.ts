@@ -19,7 +19,7 @@ export class ImagePromptDesignerSubservice {
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = []; 
+    let promptResultText: string[][] = [];
     //    Assure that there are as many prompts characters
     while (characters.length !== promptResultText.length) {
       if(promptResultText.length !== 0) {
@@ -74,7 +74,6 @@ export class ImagePromptDesignerSubservice {
     }
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      // TODO: Check if the prompt has the right format before accessing
       if(!promptResultText[i] || promptResultText[i].length < 2) {
         console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n");
         continue;

@@ -12,41 +12,50 @@ export class DatabaseLoggerService implements LoggerService {
     private readonly logRepo : Repository<LogEntity>,
   ) {}
 
-  log(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
-    this.writeLog('info', message, trace, context, user, book);
+  private cachedUser: null | ApiKeyEntity = null;
+
+  async log(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    await this.writeLog('info', message, trace, context, user, book);
   }
 
-  error(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
-    this.writeLog('error', message, trace, context, user, book);
+  async error(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    await this.writeLog('error', message, trace, context, user, book);
   }
 
-  warn(message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
-    this.writeLog('warning', message, trace, context, user, book);
+  async warn(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+    await this.writeLog('warning', message, trace, context, user, book);
   }
 
-  debug(message: string, trace: string, context?: string, user?: ApiKeyEntity) {
-    this.writeLog('debug', message, trace, context, user, undefined);
+  async debug(message: string, trace: string, context: string, user?: ApiKeyEntity) {
+    await this.writeLog('debug', message, trace, context, user, undefined);
   }
 
-  verbose(message: string, trace: string, context?: string) {
-    this.writeLog('verbose', message, trace, context, undefined, undefined);
+  async verbose(message: string, trace: string, context: string) {
+    await this.writeLog('verbose', message, trace, context, undefined, undefined);
   }
 
-  private writeLog(level: string, message: string, trace: string, context?: string, user?: ApiKeyEntity, book?: BooksEntity) {
+  private async writeLog(level: string, message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
     const logEntry = new LogEntity();
     logEntry.level = level;
     logEntry.message = message;
     logEntry.trace = trace;
-    if(typeof context !== "undefined"){
-      logEntry.context = context;
-    }
+    logEntry.context = context;
+
     if(typeof user !== "undefined"){
+      if(!this.cachedUser) {
+        this.cachedUser = user;
+      }
       logEntry.apiKeyLink = user;
+    }else if(this.cachedUser){
+      // user not given in log function
+      logEntry.apiKeyLink = this.cachedUser;
     }
+
     if(typeof book !== "undefined"){
       logEntry.bookLink = book;
     }
-    this.logRepo.save(logEntry);
+
+    await this.logRepo.save(logEntry);
   }
 
   public async clearLogs() : Promise<boolean> {
