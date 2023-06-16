@@ -62,8 +62,8 @@ export class ImagePromptDesignerSubservice {
     return promptConversation;
   }
 
-  public async addImagePromptsToChapter(book: BooksEntity): Promise<ChapterEntity[]>{
-    const chapters = book.chapters;
+  public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<ChapterEntity[]>{
+    const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
     // 1. Generate one Text Prompt for creating image Prompts
     console.log("DBG: started");
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);

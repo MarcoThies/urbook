@@ -240,10 +240,8 @@ export class BookGeneratorSubservice {
     await this.logManager.log(`New chapter text generated: ${newPara} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
 
     // generate new image prompt according to new chapter text
-    book.chapters[chapterId] = await this.imagePromptDesigner.addImagePromptsToChapter({
-      chapters:[book.chapters[chapterId]],
-      apiKeyLink:book.apiKeyLink
-    } as BooksEntity)[0];
+    const newChapter = await this.imagePromptDesigner.addImagePromptsToChapter(book, chapterId);
+    book.chapters[chapterId] = newChapter[0];
 
     console.log("DBG3: " + book.chapters[0]);
     await this.dataManager.updateBookContent(book);
@@ -278,10 +276,7 @@ export class BookGeneratorSubservice {
     // request new chapter image from image AI and save to DB
 
     await this.logManager.log(`Request new image for chapter: ${chapterId+1}`, __filename, "REGENERATE", book);
-    const newChapterArray = await this.requestManager.requestStoryImages({
-      chapters:[book.chapters[chapterId]],
-      apiKeyLink:book.apiKeyLink
-    } as BooksEntity);
+    const newChapterArray = await this.requestManager.requestStoryImages(book, chapterId);
     book.chapters[chapterId] = newChapterArray[0];
 
     await this.logManager.log(`Regenerating PDF-file`, __filename, "REGENERATE", book);
