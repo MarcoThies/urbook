@@ -228,6 +228,10 @@ export class BookGeneratorSubservice {
     const newPara = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
     book.chapters[chapterId].paragraph = newPara;
 
+    // generate new image prompt according to new chapter text
+    book.chapters[chapterId] =  await this.imagePromptDesigner.addImagePromptsToChapter([book.chapters[chapterId]])[0];
+
+    await this.dataManager.updateBookContent(book);
     // alter chapter text in book and update database entry
     book.state = 9; // set State to generate pdf
     await this.dataManager.updateBookContent(book);
@@ -258,6 +262,7 @@ export class BookGeneratorSubservice {
 
   private async newChapterImage(chapterId: number, book: BooksEntity): Promise<void> {
     // request new chapter image from image AI and save to DB
+
     const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
     book.chapters[chapterId] = newChapterArray[0];
 

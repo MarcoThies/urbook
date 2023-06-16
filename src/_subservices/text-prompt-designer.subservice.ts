@@ -41,7 +41,8 @@ export class TextPromptDesignerSubservice {
       "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen.\n" +
 
       "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.\n" +
-      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl in eckigen Klammern (zum Beispiel [Zahl]) und endet mit zwei Zeilenumbrüchen.\n";
+      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl in eckigen Klammern (zum Beispiel [Zahl]) und endet mit zwei Zeilenumbrüchen.\n" +
+      "Antworte nur mit den Absätzen der Geschichte.";
 
       const userContent =
       "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
@@ -65,13 +66,15 @@ export class TextPromptDesignerSubservice {
 
   }
 
-  public generateChapterTextPrompt(chapterId: number, currentStory: string): string {
+  public generateChapterTextPrompt(chapterId: number, currentStory: string): IOpenAiPromptMessage[] {
     // generate text prompt for regeneration of particular chapter
-    const chapterPrompt = "Gegeben ist die folgende Geschichte mit per [index] nummerierten Absätzen: \n" +
-      currentStory +
-      "\nGeneriere einen neuen Text für Absatz " + chapterId + " und gebe nur diesen als Antwort zurück. " +
+    const systemContent = "Gegeben ist die folgende Geschichte mit per [index] nummerierten Absätzen: \n" + currentStory;
+    const userContent = "\nGeneriere einen neuen Text für Absatz " + chapterId + " und gebe nur diesen als Antwort zurück. " +
       "Im neu generierten Text müssen die gleichen Charaktere vorkommen wie im alten."
-    return chapterPrompt;
+    return [
+      { role : messageRole.system , content : systemContent },
+      { role : messageRole.user , content : userContent } 
+    ] as IOpenAiPromptMessage[] ;
   }
 
   public generateCharacterDescriptionsPrompt(): IOpenAiPromptMessage {

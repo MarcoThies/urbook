@@ -39,11 +39,11 @@ export class RequestManagerSubservice {
     return result;
   }
 
-  public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
+  public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<string> {
 
     this.logManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`, __filename, "KI-TEXT");
 
-    const textResult = await this.openAi.promptGPT35(textPrompt);
+    const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }

@@ -47,7 +47,7 @@ export class OpenAi {
         let completion = await this.openai.createChatCompletion( {
             model: "gpt-3.5-turbo-16k",
             messages: messages,
-            top_p: 0.5,
+            top_p: 0.3,
             max_tokens: 2048,
             temperature: 1.69,
             presence_penalty: 0.25,
