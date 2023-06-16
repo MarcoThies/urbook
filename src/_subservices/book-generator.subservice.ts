@@ -232,7 +232,6 @@ export class BookGeneratorSubservice {
 
     // get prompt for regenerating chapter
     const regenerationPrompt = this.textPromptDesigner.generateChapterTextPrompt(chapterId + 1, bookText)
-    console.log("DBG1: " + chapterId + "   " + book.chapters[chapterId].paragraph);
     // generate new chapter text utilising prompt
     const newPara = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
     book.chapters[chapterId].paragraph = newPara;
@@ -240,13 +239,9 @@ export class BookGeneratorSubservice {
     await this.logManager.log(`New chapter text generated: ${newPara} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
 
     // generate new image prompt according to new chapter text
-    const newChapters = await this.imagePromptDesigner.addImagePromptsToChapter({
-      chapters:[book.chapters[chapterId]],
-      apiKeyLink:book.apiKeyLink
-    } as BooksEntity);
-    book.chapters[chapterId] = newChapters[0];
+    const newChapter = await this.imagePromptDesigner.addImagePromptsToChapter(book, chapterId);
+    book.chapters[chapterId] = newChapter[0];
 
-    console.log("DBG3: " + book.chapters[0]);
     await this.dataManager.updateBookContent(book);
     // alter chapter text in book and update database entry
     book.state = 9; // set State to generate pdf
@@ -279,10 +274,7 @@ export class BookGeneratorSubservice {
     // request new chapter image from image AI and save to DB
 
     await this.logManager.log(`Request new image for chapter: ${chapterId+1}`, __filename, "REGENERATE", book);
-    const newChapterArray = await this.requestManager.requestStoryImages({
-      chapters:[book.chapters[chapterId]],
-      apiKeyLink:book.apiKeyLink
-    } as BooksEntity);
+    const newChapterArray = await this.requestManager.requestStoryImages(book, chapterId);
     book.chapters[chapterId] = newChapterArray[0];
 
     await this.logManager.log(`Regenerating PDF-file`, __filename, "REGENERATE", book);
@@ -302,7 +294,6 @@ export class BookGeneratorSubservice {
     // get book if found and owned by user
     const existingBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
     // check if book is in state 10 (finished)
-    existingBook.state = 10; //DBG
     if(existingBook.state < 10){
       throw new HttpException(`Book with ID ${bookId} is still processing. Abort...!`, HttpStatus.CONFLICT);
     }
