@@ -240,10 +240,11 @@ export class BookGeneratorSubservice {
     await this.logManager.log(`New chapter text generated: ${newPara} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
 
     // generate new image prompt according to new chapter text
-    book.chapters[chapterId] = await this.imagePromptDesigner.addImagePromptsToChapter({
+    const newChapters = await this.imagePromptDesigner.addImagePromptsToChapter({
       chapters:[book.chapters[chapterId]],
       apiKeyLink:book.apiKeyLink
-    } as BooksEntity)[0];
+    } as BooksEntity);
+    book.chapters[chapterId] = newChapters[0];
 
     console.log("DBG3: " + book.chapters[0]);
     await this.dataManager.updateBookContent(book);
