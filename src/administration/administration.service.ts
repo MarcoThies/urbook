@@ -70,9 +70,9 @@ export class AdministrationService {
     return await this.logManager.clearLogs();
   }
 
-  public async listBooks(): Promise<IUserData[]> {
+  public async listBooks(user: ApiKeyEntity): Promise<IUserData[]> {
     // get all Books
-    const allBooks = await this.dataManager.getBookList(false);
+    const allBooks = await this.dataManager.getBookList(user);
     // get all Users
     const apiUsers = await this.apiKeyRepo.find();
 
@@ -107,13 +107,13 @@ export class AdministrationService {
     return userList;
   }
 
-  async getStatistic(): Promise<IStatistic> {
+  async getStatistic(user: ApiKeyEntity): Promise<IStatistic> {
     // get general statistic
 
     //get number of users / admins
     const userCount = await this.apiKeyRepo.count( { where: { admin: false }});
     const adminCount = await this.apiKeyRepo.count({ where: { admin: true }});
-    const bookCount = await this.statisticService.getBookCount(false)
+    const bookCount = await this.statisticService.getBookCount(user);
 
     return {
       totalUsers: userCount,
@@ -158,14 +158,13 @@ export class AdministrationService {
     for(let log of allLogs)
     {
       logsList.push({
-        id: log.id,
         level: log.level,
         message: log.message,
-        trace: log.trace,
         context: log.context,
         time: log.time.toUTCString(),
         userId: (!log.apiKeyLink)? -1: log.apiKeyLink.apiId,
-        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn
+        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn,
+        trace: log.trace
       } as IUserLogs);
     }
     return logsList;

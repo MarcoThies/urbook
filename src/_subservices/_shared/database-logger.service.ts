@@ -12,17 +12,16 @@ export class DatabaseLoggerService implements LoggerService {
     private readonly logRepo : Repository<LogEntity>,
   ) {}
 
-  private cachedUser: null | ApiKeyEntity = null;
 
-  async log(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+  async log(message: string, trace: string, context: string, book?: BooksEntity, user?: ApiKeyEntity) {
     await this.writeLog('info', message, trace, context, user, book);
   }
 
-  async error(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+  async error(message: string, trace: string, context: string, book?: BooksEntity, user?: ApiKeyEntity) {
     await this.writeLog('error', message, trace, context, user, book);
   }
 
-  async warn(message: string, trace: string, context: string, user?: ApiKeyEntity, book?: BooksEntity) {
+  async warn(message: string, trace: string, context: string, book?: BooksEntity, user?: ApiKeyEntity) {
     await this.writeLog('warning', message, trace, context, user, book);
   }
 
@@ -41,18 +40,13 @@ export class DatabaseLoggerService implements LoggerService {
     logEntry.trace = trace;
     logEntry.context = context;
 
-    if(typeof user !== "undefined"){
-      if(!this.cachedUser) {
-        this.cachedUser = user;
-      }
-      logEntry.apiKeyLink = user;
-    }else if(this.cachedUser){
-      // user not given in log function
-      logEntry.apiKeyLink = this.cachedUser;
-    }
-
     if(typeof book !== "undefined"){
       logEntry.bookLink = book;
+      logEntry.apiKeyLink = book.apiKeyLink;
+    }
+
+    if(typeof user !== "undefined"){
+      logEntry.apiKeyLink = user;
     }
 
     await this.logRepo.save(logEntry);

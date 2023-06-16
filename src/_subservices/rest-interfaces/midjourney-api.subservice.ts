@@ -22,7 +22,9 @@ export class MidjourneyApiSubservice {
 
   async requestImage(prompt: string): Promise<string> {
     console.log("\n\n... requesting new image");
-    const imgGrid =  await this.client.Imagine(prompt+" "+this.suffix);
+    const imgGrid =  await this.client.Imagine(prompt+" "+this.suffix, (uri, progress)=>{
+      console.log(uri, progress);
+    });
     if(!imgGrid) {
       throw new HttpException("Could not generate any Images", 500);
     }

@@ -38,9 +38,9 @@ export class BookGeneratorSubservice {
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
 
-    this.logManager.log(`Request new book: ${newBookId}`, __filename, "GENERATE", user);
+    await this.logManager.log(`Request new book: ${newBookId}`, __filename, "GENERATE", undefined, user);
 
-    const newTitle: string = `${createBookDto.child_name} and ${createBookDto.topic_specialTopic}`;
+    const newTitle: string = `${createBookDto.child_name} - ${createBookDto.topic_specialTopic}`;
 
     // Generate new Book & Parameter entity-data-object
     const newBook = {
@@ -73,13 +73,11 @@ export class BookGeneratorSubservice {
 
   private async startGenerationPipeline(book: BooksEntity) {
     // 1. Generate Story from Book-Parameters
-    await this.logManager.log(`Start book generation...`, __filename, "GENERATE", book.apiKeyLink, book);
+    await this.logManager.log(`Start book generation...`, __filename, "GENERATE", book);
     let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
-    this.requestManager.bookRef = book;
-
     // 2. Generate Story from Story-Prompt
-    const story: string[][] = await this.requestManager.requestStory(storyPrompt, book.parameterLink.topicChapterCount);
+    const story: string[][] = await this.requestManager.requestStory(storyPrompt, book);
 
     if(this.abortFlag) {
       return;
@@ -119,7 +117,7 @@ export class BookGeneratorSubservice {
     storyPrompt.push(characterPrompt);
 
     // 4. Generate Character-Description from Character-Prompt
-    const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(storyPrompt);
+    const imageAvatars: IImageAvatar[] = await this.requestManager.requestCharacterDescription(storyPrompt, book);
 
     if(this.abortFlag) {
       return;
@@ -128,8 +126,8 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
-    const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars);
-    await this.logManager.log('Character prompts generated', __filename, "GENERATE", book.apiKeyLink, book);
+    const characterImagePrompts: IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars, book);
+    await this.logManager.log('Character image prompts accepted', __filename, "GENERATE", book);
 
     /*
     // 6. Request Avatar Images from Image AI
@@ -175,7 +173,7 @@ export class BookGeneratorSubservice {
       await this.dataManager.updateChapter(currChapter);
     }
 
-    await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book.apiKeyLink, book);
+    await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book);
 
     // update Book status 4 => Character Avatars Done | Now generating Story Images
     if(this.abortFlag) {
@@ -186,17 +184,15 @@ export class BookGeneratorSubservice {
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
     // const chapters = book.chapters;
-    book.chapters =  await this.imagePromptDesigner.addImagePromptsToChapter(chapters);
-    console.log("DBG: " + book.chapters[1]);
+    book.chapters = chapters;
+    book.chapters =  await this.imagePromptDesigner.addImagePromptsToChapter(book);
     await this.dataManager.updateBookContent(book);
-
-    await this.logManager.log('Generated chapter prompts', __filename, "GENERATE", book.apiKeyLink, book);
 
     // 9. Request Story-Images from Image AI
-    book.chapters = await this.requestManager.requestStoryImages(book.chapters);
+    book.chapters = await this.requestManager.requestStoryImages(book);
     await this.dataManager.updateBookContent(book);
 
-    await this.logManager.log('Chapter images generated', __filename, "GENERATE", book.apiKeyLink, book);
+    await this.logManager.log('Chapter images generated', __filename, "GENERATE", book);
 
     if(this.abortFlag) {
       return;
@@ -205,7 +201,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 9);
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
-    await this.logManager.log('Generated PDF-File from book', __filename, "GENERATE", book.apiKeyLink, book);
+    await this.logManager.log('Generated PDF-File from book', __filename, "GENERATE", book);
 
     // update Book status 5 => Building Done
     await this.dataManager.updateBookState(book,  10);
@@ -222,14 +218,15 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 5);
 
     // make async call in bg to regenerate text
-    await this.logManager.log(`Regenerating chapter ${chapterId+1}`, __filename, "REGENERATE", user, book);
+    await this.logManager.log(`Regenerating chapter ${chapterId+1}`, __filename, "REGENERATE", book, user);
 
-    this.newChapterText(chapterId, book);
+    this.newChapterText(chapterId, book, user);
 
     // TODO: reload chapter-prompt for possible different image creation
   }
 
-  private async newChapterText(chapterId: number, book: BooksEntity): Promise<void> {
+  private async newChapterText(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
+    await this.logManager.log(`Regenerate chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
     // re-assemble whole book text with paragraph numbers to be able to give it as context to AI for regeneration of chapter
     let bookText : string = book.chapters.map(( item, index ) => "[" + (index + 1) + "]" + item.paragraph ).join("\n\n");
 
@@ -239,10 +236,14 @@ export class BookGeneratorSubservice {
     // generate new chapter text utilising prompt
     const newPara = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
     book.chapters[chapterId].paragraph = newPara;
-    console.log("DBG2: " + chapterId + "   " + book.chapters[chapterId].paragraph);
+
+    await this.logManager.log(`New chapter text generated: ${newPara} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
 
     // generate new image prompt according to new chapter text
-    book.chapters[chapterId] = await this.imagePromptDesigner.addImagePromptsToChapter([book.chapters[chapterId]])[0];
+    book.chapters[chapterId] = await this.imagePromptDesigner.addImagePromptsToChapter({
+      chapters:[book.chapters[chapterId]],
+      apiKeyLink:book.apiKeyLink
+    } as BooksEntity)[0];
 
     console.log("DBG3: " + book.chapters[0]);
     await this.dataManager.updateBookContent(book);
@@ -253,7 +254,6 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    await this.logManager.log(`New chapter text generated and saved to database: ${newPara} - Chapter: ${chapterId+1}`, __filename, "NEW BOOK", book.apiKeyLink, book);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }
@@ -269,7 +269,7 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 6);
 
     // make async call in bg to regenerate image
-    await this.logManager.log(`Regenerating chapter ${chapterId+1} image`, __filename, "REGENERATE", user, book);
+    await this.logManager.log(`Regenerating chapter ${chapterId+1} image`, __filename, "REGENERATE", book, user);
     // make async call in bg to regenerate text -> not async
     this.newChapterImage(chapterId, book);
   }
@@ -277,8 +277,14 @@ export class BookGeneratorSubservice {
   private async newChapterImage(chapterId: number, book: BooksEntity): Promise<void> {
     // request new chapter image from image AI and save to DB
 
-    const newChapterArray = await this.requestManager.requestStoryImages([book.chapters[chapterId]]);
+    await this.logManager.log(`Request new image for chapter: ${chapterId+1}`, __filename, "REGENERATE", book);
+    const newChapterArray = await this.requestManager.requestStoryImages({
+      chapters:[book.chapters[chapterId]],
+      apiKeyLink:book.apiKeyLink
+    } as BooksEntity);
     book.chapters[chapterId] = newChapterArray[0];
+
+    await this.logManager.log(`Regenerating PDF-file`, __filename, "REGENERATE", book);
 
     book.state = 9; // set state to generate pdf
     await this.dataManager.updateBookContent(book);
@@ -286,7 +292,7 @@ export class BookGeneratorSubservice {
     // write new PDF-File
     await this.pdfGenerator.createA5Book(book);
 
-    this.logManager.log(`New chapter image generated and saved to database: ${newChapterArray[0].imageUrl} - Chapter: ${chapterId+1}`, __filename, "NEW BOOK", book.apiKeyLink, book);
+    await this.logManager.log(`PDF-file regenerated`, __filename, "REGENERATE",book);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }
@@ -301,7 +307,7 @@ export class BookGeneratorSubservice {
     }
     // check if chapter exists
     if(typeof existingBook.chapters[chapterId] === "undefined") {
-      await this.logManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename, "STATUS", user, existingBook);
+      await this.logManager.error(`Chapter with ID ${chapterId + 1} doesn't exist! - Book: ${existingBook.title} User: ${user.apiId}`, __filename, "STATUS", existingBook, user);
       throw new HttpException(`Chapter with ID ${chapterId + 1} doesn't exist!`, HttpStatus.CONFLICT);
     }
 
@@ -311,10 +317,11 @@ export class BookGeneratorSubservice {
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     // get book if found and owned by user
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    this.logManager.log(`Trying to cancel job for book: ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook.apiKeyLink);
+    await this.logManager.log(`Trying to cancel job for book: ${myBook.isbn}`, __filename, "ABORT", myBook, user);
 
     // check if book is in state 10 (finished)
     if(myBook.state > 9 || myBook.state < 0){
+      await this.logManager.log(`Could not abort job ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook, user);
       throw new HttpException(`Generation of book with ID ${bookId} not running. Nothing to abort!`, HttpStatus.CONFLICT);
     }
 
@@ -322,7 +329,7 @@ export class BookGeneratorSubservice {
     this.requestManager.clearQueues();
 
     await this.dataManager.updateBookState(myBook, -1);
-    this.logManager.log(`Cancel Job Book: ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook.apiKeyLink);
+    await this.logManager.log(`Cancel Job Book: ${myBook.isbn}`, __filename, "ABORT", myBook, user);
 
     return true;
   }

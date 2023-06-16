@@ -4,7 +4,7 @@ import {
   Controller,
   Get,
   Post,
-  Request, UnauthorizedException,
+  Request,
   UseGuards,
   UseInterceptors
 } from "@nestjs/common";
@@ -49,12 +49,12 @@ export class AdministrationController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
   public async listBooks(@Request() req) : Promise<IUserData[]> {
-    return await this.adminService.listBooks();
+    return await this.adminService.listBooks(req.user);
   }
 
   @Get('statistic')
-  async statistics(): Promise<IStatistic> {
-    return await this.adminService.getStatistic();
+  async statistics(@Request() req): Promise<IStatistic> {
+    return await this.adminService.getStatistic(req.user);
   }
 
   @Post('user-statistic')

@@ -5,6 +5,7 @@ import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
+import { BooksEntity } from "./_shared/entities/books.entity";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {
@@ -13,7 +14,7 @@ export class ImagePromptDesignerSubservice {
     private readonly requestManager: RequestManagerSubservice
   ) {}
 
-  public async generateCharacterPrompts(characters:IImageAvatar[]) : Promise<IImageAvatar[]> {
+  public async generateCharacterPrompts(characters:IImageAvatar[], bookRef: BooksEntity) : Promise<IImageAvatar[]> {
 
     // 1. Generate one Text Prompt for creating image Prompts
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
@@ -23,9 +24,11 @@ export class ImagePromptDesignerSubservice {
     //    Assure that there are as many prompts characters
     while (characters.length !== promptResultText.length) {
       if(promptResultText.length !== 0) {
+        await this.logManager.warn('Character prompts dont match required count... retry', __filename, "GENERATE", bookRef);
         console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
       }
       promptResultText = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+      await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
     }
 
     // 3. Map the result to the characters
@@ -59,7 +62,8 @@ export class ImagePromptDesignerSubservice {
     return promptConversation;
   }
 
-  public async addImagePromptsToChapter(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
+  public async addImagePromptsToChapter(book: BooksEntity): Promise<ChapterEntity[]>{
+    const chapters = book.chapters;
     // 1. Generate one Text Prompt for creating image Prompts
     console.log("DBG: started");
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
@@ -69,11 +73,13 @@ export class ImagePromptDesignerSubservice {
     console.log("DBG: started2" + promptResultText.length + chapters.length);
     while (promptResultText.length !== chapters.length) {
       if (promptResultText.length !== 0) {
+        await this.logManager.warn('Story image prompts dont match required count... retry', __filename, "GENERATE", book);
         console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
       }
       console.log("DBG: loop started");
       promptResultText = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-      console.log("DBG:promptTextResult " + promptResultText);
+
+      await this.logManager.log('Generated story image prompts successfully', __filename, "GENERATE", book);
     }
     console.log("DBG: started3");
     // 3. Map the result to the chapters
