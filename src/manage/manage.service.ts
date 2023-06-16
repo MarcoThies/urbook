@@ -17,7 +17,7 @@ export class ManageService {
   ) {}
 
   public async listBooks(user: ApiKeyEntity): Promise<BooksEntity[]> {
-    this.logManager.log("Receives list of his books", __filename, "MANAGE", user);
+    await this.logManager.log("Receives list of his books", __filename, "MANAGE", undefined, user);
     return await this.dataManager.getBookList(user);
   }
 
@@ -26,15 +26,15 @@ export class ManageService {
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
 
     if(myBook.state > 0 && myBook.state < 10) {
-      this.logManager.log(`Deleted aborted: ${myBook.isbn} - still processing`, __filename, "DELETE", user);
+      await this.logManager.log(`Deleted aborted: ${myBook.isbn} - still processing`, __filename, "DELETE", myBook, user);
       throw new HttpException("Book is still being generated", HttpStatus.CONFLICT);
     }
 
     // check if Book has been aborted
     if(myBook.state < 0) {
-      this.logManager.log(`Deleted aborted Book: ${myBook.isbn}`, __filename, "DELETE", user);
+      await this.logManager.log(`Deleted aborted book: ${myBook.isbn}`, __filename, "DELETE", myBook, user);
     }else{
-      this.logManager.log(`Deleted Book: ${myBook.isbn}`, __filename, "DELETE", user);
+      await this.logManager.log(`Deleted book: ${myBook.isbn}`, __filename, "DELETE", myBook, user);
     }
 
     const isBookDeleted = await this.dataManager.deleteBook(myBook);
@@ -47,12 +47,12 @@ export class ManageService {
   }
 
   public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
-    this.logManager.log(`Request single book ${bookIdDto.isbn}`, __filename, "MANAGE", user);
-    return await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
+    const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
+    await this.logManager.log(`Request single book ${bookIdDto.isbn}`, __filename, "MANAGE", userBook, user);
+    return userBook;
   }
 
   public async getPdf(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<any> {
-    this.logManager.log(`Request PDF-File for ${bookIdDto.isbn}`, __filename, "MANAGE", user);
     return await this.dataManager.getBookPdf(user, bookIdDto.isbn);
   }
 }

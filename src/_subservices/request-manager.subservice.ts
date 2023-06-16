@@ -24,35 +24,36 @@ export class RequestManagerSubservice {
 
   public bookRef: BooksEntity;
 
-  public async requestStory(textPrompt: IOpenAiPromptMessage[], chapterCount : number) : Promise<string[][]> {
-    this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", undefined, this.bookRef);
+  public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<string[][]> {
+    const chapterCount = book.parameterLink.topicChapterCount;
+    await this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", book);
 
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
       const error = "No result from text ai";
-      await this.logManager.error(error, __filename, "GENERATE", undefined, this.bookRef);
+      await this.logManager.error(error, __filename, "GENERATE", book);
       throw new HttpException(error, HttpStatus.CONFLICT);
     }
 
     const result = this.dataFromAnswer(textResult as string);
 
     if (result.length !== chapterCount) {
-      await this.logManager.warn("Chapter count didn't match requirements", __filename, "GENERATE", undefined, this.bookRef);
-      console.log("DEBUG requestManager.requestStory: Generated story didn't have the requested number of chapters.")
-      return await this.requestStory(textPrompt, chapterCount);
+      await this.logManager.warn("Chapter count didn't match requirements... Regenerate", __filename, "GENERATE", this.bookRef);
+      console.log("WARNING: requestManager.requestStory: Generated story didn't have the requested number of chapters.")
+      return await this.requestStory(textPrompt, book);
     }
 
-    await this.logManager.log("Story text generated", __filename, "GENERATE", undefined, this.bookRef);
+    await this.logManager.log("Story text generated", __filename, "GENERATE", book);
 
     return result;
   }
 
   public async requestNewChapterText(textPrompt: string, tempChapterId : number) : Promise<string> {
 
-    await this.logManager.log(`Request new chapter text from Text-KI - tempChapterId: ${tempChapterId}`, __filename, "KI-TEXT");
 
     const textResult = await this.openAi.promptGPT35(textPrompt);
     if(!textResult){
+      await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
@@ -62,18 +63,18 @@ export class RequestManagerSubservice {
     return textResult as string;
   }
 
-  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[]) : Promise<IImageAvatar[]> {
-    await this.logManager.log("Request character description from text-ai", __filename, "GENERATE", undefined, this.bookRef);
+  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[], bookRef: BooksEntity) : Promise<IImageAvatar[]> {
+    await this.logManager.log("Request character description from text-ai", __filename, "GENERATE", bookRef);
 
     const textResult = await this.openAi.promptGPT35withContext(charactersPrompt);
     if(!textResult){
-      await this.logManager.error("No answer from text ai", __filename, "GENERATE", undefined, this.bookRef);
+      await this.logManager.error("No answer from text ai", __filename, "GENERATE", bookRef);
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
     let splitData = this.dataFromAnswer(textResult as string);
 
-    await this.logManager.log("Character descriptions generated", __filename, "GENERATE", undefined, this.bookRef);
+    await this.logManager.log("Character descriptions generated successfully", __filename, "GENERATE", bookRef);
 
     return splitData.map((char)=>{
       return {
@@ -87,13 +88,13 @@ export class RequestManagerSubservice {
   public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
     const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt);
     if(!textResult){
-      this.logManager.error("No answer from text ai", __filename, "GENERATE", undefined, this.bookRef);
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
 
     return this.dataFromAnswer(textResult as string);
   }
 
+  /*
   public async requestCharacterImages(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
 
     for(let x in AvatarList) {
@@ -114,21 +115,18 @@ export class RequestManagerSubservice {
   public async requestCharacterImage(avatar: IImageAvatar) : Promise<string> {
     const prompt = avatar.prompt;
     if(!prompt){
-      this.logManager.error("No prompt for character image request", __filename, "GENERATE", undefined, this.bookRef);
+      await this.logManager.error("No prompt for character image request", __filename, "GENERATE", this.bookRef.apiKeyLink, this.bookRef);
       throw new HttpException("No Prompt for Image Request", HttpStatus.CONFLICT);
     }
     return await this.imageAPI.requestImage(prompt)
   }
-
+  */
   public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
-    await this.logManager.log("Requesting prompts for story images", __filename, "GENERATE", undefined, this.bookRef);
 
     const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt);
     if(!textResult){
-      await this.logManager.error("No prompt for story image request", __filename, "GENERATE", undefined, this.bookRef);
       throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
     }
-    await this.logManager.log("Got prompts for story images", __filename, "GENERATE", undefined, this.bookRef);
     return this.dataFromAnswer(textResult as string);
   }
 
@@ -168,21 +166,24 @@ export class RequestManagerSubservice {
     return output;
   }
 
-  public async requestStoryImages(chapters: ChapterEntity[]) : Promise<ChapterEntity[]> {
+  public async requestStoryImages(book: BooksEntity) : Promise<ChapterEntity[]> {
+    const chapters = book.chapters;
+    await this.logManager.log(`Adding ${chapters.length} requests to MidJourney queue`, __filename, "GENERATE", book);
+
     for(let x in chapters) {
-      
       this.chapterImageQueue.addJob(
         async() => await this.requestStoryImage(chapters[x]),
         (imgUrl: string) => {
           // safe image
           chapters[x].imageUrl = imgUrl;
           this.dataManager.updateChapter(chapters[x]);
-          this.logManager.log("Successfully received image from midjourney", __filename, "GENERATE", undefined, this.bookRef);
+          this.logManager.log(`Received MidJourney image`, __filename, "GENERATE", book);
         }
       );
 
     }
     await this.chapterImageQueue.onEmpty();
+    await this.logManager.log(`Completed ${chapters.length} image requests successfully`, __filename, "GENERATE", book);
     return chapters;
   }
 

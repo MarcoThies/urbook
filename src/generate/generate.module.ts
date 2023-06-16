@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Scope } from "@nestjs/common";
 import { GenerateService } from './generate.service';
 import { GenerateController } from './generate.controller';
 
@@ -19,8 +19,16 @@ import { OpenAi } from '../_subservices/rest-interfaces/openai.subservice';
   controllers: [GenerateController],
   providers: [
     GenerateService,
-    BookGeneratorSubservice,
-    RequestManagerSubservice,
+    {
+      provide: BookGeneratorSubservice,
+      useClass: BookGeneratorSubservice,
+      scope: Scope.REQUEST,
+    },
+    {
+      provide: RequestManagerSubservice,
+      useClass: RequestManagerSubservice,
+      scope: Scope.REQUEST,
+    },
     ImagePromptDesignerSubservice, TextPromptDesignerSubservice,
     PdfGeneratorSubservice,
     OpenAi, MidjourneyApiSubservice

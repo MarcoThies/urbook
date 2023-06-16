@@ -10,7 +10,7 @@ export class StatisticSubservice {
   ) {}
 
 
-  public async getBookCount(user: boolean | ApiKeyEntity): Promise<number> {
+  public async getBookCount(user: ApiKeyEntity): Promise<number> {
     const bookList = await this.dataManager.getBookList(user);
     return bookList.length;
   }
