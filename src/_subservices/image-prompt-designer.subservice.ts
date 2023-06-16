@@ -61,17 +61,21 @@ export class ImagePromptDesignerSubservice {
 
   public async addImagePromptsToChapter(chapters: ChapterEntity[]): Promise<ChapterEntity[]>{
     // 1. Generate one Text Prompt for creating image Prompts
+    console.log("DBG: started");
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
-
     // 2. Request Prompt from Request Manager to get single image prompts
     let promptResultText: string[][] = [];
     //    Assure that there are as many prompts characters
+    console.log("DBG: started2" + promptResultText.length + chapters.length);
     while (promptResultText.length !== chapters.length) {
       if (promptResultText.length !== 0) {
         console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
       }
+      console.log("DBG: loop started");
       promptResultText = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+      console.log("DBG:promptTextResult " + promptResultText);
     }
+    console.log("DBG: started3");
     // 3. Map the result to the chapters
     for(let i in chapters) {
       if(!promptResultText[i] || promptResultText[i].length < 2) {
@@ -81,6 +85,7 @@ export class ImagePromptDesignerSubservice {
       chapters[i].prompt = promptResultText[i][1];
       chapters[i].changed = new Date();
     }
+    console.log("DBG: Length " + chapters.length + "\nContent" + chapters[0].prompt + " \nimgUrl" + chapters[0].imageUrl);
 
     return chapters;
   }

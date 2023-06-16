@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, IsNumber} from "class-validator";
 
 export class RegenerateChapterDto {
   @IsNotEmpty()
@@ -6,6 +6,6 @@ export class RegenerateChapterDto {
   bookId: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   chapterId: number;
 }

@@ -121,8 +121,9 @@ export class RequestManagerSubservice {
   }
 
   public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
+    console.log("DBGre: started");
     await this.logManager.log("Requesting prompts for story images", __filename, "GENERATE", undefined, this.bookRef);
-
+    
     const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt);
     if(!textResult){
       await this.logManager.error("No prompt for story image request", __filename, "GENERATE", undefined, this.bookRef);

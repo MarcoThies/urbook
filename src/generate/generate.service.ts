@@ -69,7 +69,7 @@ export class GenerateService {
   }
 
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
- 
+    
     await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {

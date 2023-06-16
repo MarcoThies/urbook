@@ -187,6 +187,7 @@ export class BookGeneratorSubservice {
     // Create empty Image-Prompt-Group
     // const chapters = book.chapters;
     book.chapters =  await this.imagePromptDesigner.addImagePromptsToChapter(chapters);
+    console.log("DBG: " + book.chapters[1]);
     await this.dataManager.updateBookContent(book);
 
     await this.logManager.log('Generated chapter prompts', __filename, "GENERATE", book.apiKeyLink, book);
@@ -234,14 +235,16 @@ export class BookGeneratorSubservice {
 
     // get prompt for regenerating chapter
     const regenerationPrompt = this.textPromptDesigner.generateChapterTextPrompt(chapterId + 1, bookText)
-
+    console.log("DBG1: " + chapterId + "   " + book.chapters[chapterId].paragraph);
     // generate new chapter text utilising prompt
     const newPara = await this.requestManager.requestNewChapterText(regenerationPrompt, chapterId);
     book.chapters[chapterId].paragraph = newPara;
+    console.log("DBG2: " + chapterId + "   " + book.chapters[chapterId].paragraph);
 
     // generate new image prompt according to new chapter text
-    book.chapters[chapterId] =  await this.imagePromptDesigner.addImagePromptsToChapter([book.chapters[chapterId]])[0];
+    book.chapters[chapterId] = await this.imagePromptDesigner.addImagePromptsToChapter([book.chapters[chapterId]])[0];
 
+    console.log("DBG3: " + book.chapters[0]);
     await this.dataManager.updateBookContent(book);
     // alter chapter text in book and update database entry
     book.state = 9; // set State to generate pdf
@@ -292,6 +295,7 @@ export class BookGeneratorSubservice {
     // get book if found and owned by user
     const existingBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
     // check if book is in state 10 (finished)
+    existingBook.state = 10; //DBG
     if(existingBook.state < 10){
       throw new HttpException(`Book with ID ${bookId} is still processing. Abort...!`, HttpStatus.CONFLICT);
     }
