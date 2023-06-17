@@ -27,7 +27,7 @@ export class GenerateService {
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<IBookId> {
 
     if(await this.dataManager.userIsGenerating(user)) {
-      throw new HttpException("User is already generating a currently book", HttpStatus.CONFLICT);
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
     }
     // start the generation process
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
@@ -58,7 +58,10 @@ export class GenerateService {
   }
 
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
-    
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
+
     await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {
@@ -69,6 +72,9 @@ export class GenerateService {
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
 
     await this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
 
