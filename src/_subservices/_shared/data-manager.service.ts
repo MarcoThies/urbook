@@ -1,6 +1,6 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "./entities/books.entity";
-import { FindManyOptions, getConnection, getConnectionManager, MoreThan, Repository } from "typeorm";
+import { Between, FindManyOptions, getConnection, getConnectionManager, LessThan, MoreThan, Repository } from "typeorm";
 import { ParameterEntity } from "./entities/parameter.entity";
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
@@ -47,6 +47,14 @@ export class DataManagerService {
       });
     }
   }
+
+  public async userIsGenerating(user: ApiKeyEntity): Promise<boolean> {
+    const generatingBooks = await this.booksRepo.find({
+      where: { apiKeyLink: user, state: Between(1,9) }
+    });
+    return generatingBooks.length > 0;
+  }
+
   public async saveNewBook(book:BooksEntity): Promise<BooksEntity> {
     // save new Parameter List
     const bookIdEntry = await this.booksRepo.create({
@@ -87,8 +95,6 @@ export class DataManagerService {
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
     for (let ind in chapters) {
-      if (chapters[ind].imageUrl === undefined)
-        console.log("undefined chapter " + ind)
       const currImagePath: string | undefined = chapters[ind].imageUrl;
       if (currImagePath && currImagePath.includes('https:')){
         chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);

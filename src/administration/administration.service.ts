@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { FindManyOptions, Repository } from "typeorm";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
-import { generateId, hash } from "../_shared/utils";
+import { generateId, hash, statusStrings } from "../_shared/utils";
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
@@ -99,7 +99,7 @@ export class AdministrationService {
             isbn: book.isbn,
             created: book.createdAt.toUTCString(),
             chapterCount: book.chapters.length,
-            state: book.state
+            state: statusStrings(book.state)
           } as IBookInfo;
         })
       } as IUserData);

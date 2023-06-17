@@ -21,18 +21,18 @@ export class RequestManagerSubservice {
 
   private avatarImageQueue = new RequestQueue();
   private chapterImageQueue = new RequestQueue();
+  private abortFlag = false;
 
   public bookRef: BooksEntity;
 
-  public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<string[][]> {
+  public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | string[][]> {
     const chapterCount = book.parameterLink.topicChapterCount;
     await this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", book);
 
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
     if(!textResult){
-      const error = "No result from text ai";
-      await this.logManager.error(error, __filename, "GENERATE", book);
-      throw new HttpException(error, HttpStatus.CONFLICT);
+      await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
+      return false;
     }
 
     const result = this.dataFromAnswer(textResult as string);
@@ -48,13 +48,12 @@ export class RequestManagerSubservice {
     return result;
   }
 
-  public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<string> {
-
+  public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<boolean | string> {
 
     const textResult = await this.openAi.promptGPT35withContext(textPrompt);
-    if(!textResult){
+    if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
-      throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
+      return false;
     }
 
     let splitData = this.dataFromAnswer(textResult as string);
@@ -63,13 +62,13 @@ export class RequestManagerSubservice {
     return textResult as string;
   }
 
-  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[], bookRef: BooksEntity) : Promise<IImageAvatar[]> {
+  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[], bookRef: BooksEntity) : Promise<boolean | IImageAvatar[]> {
     await this.logManager.log("Request character description from text-ai", __filename, "GENERATE", bookRef);
 
     const textResult = await this.openAi.promptGPT35withContext(charactersPrompt);
     if(!textResult){
       await this.logManager.error("No answer from text ai", __filename, "GENERATE", bookRef);
-      throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
+      return false;
     }
 
     let splitData = this.dataFromAnswer(textResult as string);
@@ -82,13 +81,12 @@ export class RequestManagerSubservice {
         description: char[1].trim()
       } as IImageAvatar
     });
-
   }
 
-  public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
+  public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<boolean | string[][]> {
     const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt);
-    if(!textResult){
-      throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
+    if(textResult === false){
+      return false;
     }
 
     return this.dataFromAnswer(textResult as string);
@@ -121,10 +119,10 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt)
   }
   */
-  public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<string[][]> {
+  public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<boolean|string[][]> {
     const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt);
     if(!textResult){
-      throw new HttpException("No result from text ai", HttpStatus.CONFLICT)
+      return false;
     }
     return this.dataFromAnswer(textResult as string);
   }
@@ -165,7 +163,7 @@ export class RequestManagerSubservice {
     return output;
   }
 
-  public async requestStoryImages(book: BooksEntity, chapterId?:number) : Promise<ChapterEntity[]> {
+  public async requestStoryImages(book: BooksEntity, chapterId?:number) : Promise<boolean|ChapterEntity[]> {
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
 
     await this.logManager.log(`Adding ${chapters.length} requests to MidJourney queue`, __filename, "GENERATE", book);
@@ -173,30 +171,44 @@ export class RequestManagerSubservice {
     for(let x in chapters) {
       this.chapterImageQueue.addJob(
         async() => await this.requestStoryImage(chapters[x]),
-        (imgUrl: string) => {
-          // safe image
-          chapters[x].imageUrl = imgUrl;
+        (imgUrl: string|boolean) => {
+          if(imgUrl === false) {
+            this.abortFlag = true;
+            return;
+          }
+          // safe image to entity
+          chapters[x].imageUrl = imgUrl as string;
           this.dataManager.updateChapter(chapters[x]);
-          this.logManager.log(`Received MidJourney image`, __filename, "GENERATE", book);
+          this.logManager.log(`Saved MidJourney image`, __filename, "GENERATE", book);
         }
       );
 
     }
     await this.chapterImageQueue.onEmpty();
+
+    // check if abort flag is set -> communicate to generator-subservice
+    if(this.abortFlag){
+      await this.logManager.log(`Aborting current MidJourney image requests in queue`, __filename, "GENERATE", book);
+      return false;
+    }
+
     await this.logManager.log(`Completed ${chapters.length} image requests successfully`, __filename, "GENERATE", book);
     return chapters;
   }
 
-  public async requestStoryImage(chapter: ChapterEntity) : Promise<string> {
+  public async requestStoryImage(chapter: ChapterEntity) : Promise<boolean|string> {
     const prompt = chapter.prompt;
-    if(!prompt) throw new HttpException("No Prompt for Image Request", HttpStatus.CONFLICT);
+    if(!prompt) return false;
+
+    // check if abort flag is set -> abort next generation in pipeline
+    if(this.abortFlag) return false;
+
     // add Job to queue
     return await this.imageAPI.requestImage(prompt);
   }
 
   public getCurrentRequestQueueLength(state : number) : number {
     switch (state) {
-      case 10 : return 0;
       case 3  : return this.avatarImageQueue.length;
       case 4  : return this.chapterImageQueue.length;
       default : return 0;
