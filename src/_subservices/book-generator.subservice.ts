@@ -44,7 +44,7 @@ export class BookGeneratorSubservice {
 
     // Generate new Book & Parameter entity-data-object
     const newBook = {
-      isbn: newBookId,
+      bookId: newBookId,
       title: newTitle,
       state: 1,
       apiKeyLink: user,
@@ -343,11 +343,11 @@ export class BookGeneratorSubservice {
   public async abort(bookId: string, user: ApiKeyEntity): Promise<Boolean> {
     // get book if found and owned by user
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    await this.logManager.log(`Trying to cancel job for book: ${myBook.isbn}`, __filename, "ABORT", myBook, user);
+    await this.logManager.log(`Trying to cancel job for book: ${myBook.bookId}`, __filename, "ABORT", myBook, user);
 
     // check if book is in state 10 (finished)
     if(myBook.state > 9 || myBook.state < 0){
-      await this.logManager.log(`Could not abort job ${myBook.isbn}`, __filename, "CANCEL BOOK", myBook, user);
+      await this.logManager.log(`Could not abort job ${myBook.bookId}`, __filename, "CANCEL BOOK", myBook, user);
       throw new HttpException(`Generation of book with ID ${bookId} not running. Nothing to abort!`, HttpStatus.CONFLICT);
     }
 
@@ -355,7 +355,7 @@ export class BookGeneratorSubservice {
     this.requestManager.clearQueues();
 
     await this.dataManager.updateBookState(myBook, -1);
-    await this.logManager.log(`Cancel Job Book: ${myBook.isbn}`, __filename, "ABORT", myBook, user);
+    await this.logManager.log(`Cancel Job Book: ${myBook.bookId}`, __filename, "ABORT", myBook, user);
 
     return true;
   }

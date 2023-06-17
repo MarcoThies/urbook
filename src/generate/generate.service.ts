@@ -33,7 +33,7 @@ export class GenerateService {
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
 
     return {
-        bookId: newBook.isbn,
+        bookId: newBook.bookId,
         status: true,
         timeStamp: newBook.createdAt.toUTCString()
     } as IBookId;
@@ -47,7 +47,7 @@ export class GenerateService {
     const statusInfo = statusStrings(myBook.state, currentQueueLength);
 
     return {
-      bookId: myBook.isbn,
+      bookId: myBook.bookId,
       status: statusInfo,
     } as IBookState;
   }

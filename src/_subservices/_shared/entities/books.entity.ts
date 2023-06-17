@@ -26,7 +26,7 @@ export class BooksEntity {
     nullable: false,
     unique: true
   })
-  isbn: string;
+  bookId: string;
 
   @Exclude()
   @Column({

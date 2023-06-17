@@ -10,7 +10,7 @@ export interface IUserData{
 
 export interface IBookInfo {
   title: string,
-  isbn: string,
+  bookId: string,
   created: string,
   chapterCount: number,
   state: IStatusInfo

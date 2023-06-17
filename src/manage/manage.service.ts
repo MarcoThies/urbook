@@ -23,36 +23,36 @@ export class ManageService {
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<IDeletedBook> {
 
-    const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
+    const myBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
 
     if(myBook.state > 0 && myBook.state < 10) {
-      await this.logManager.log(`Deleted aborted: ${myBook.isbn} - still processing`, __filename, "DELETE", myBook, user);
+      await this.logManager.log(`Deleted aborted: ${myBook.bookId} - still processing`, __filename, "DELETE", myBook, user);
       throw new HttpException("Book is still being generated", HttpStatus.CONFLICT);
     }
 
     // check if Book has been aborted
     if(myBook.state < 0) {
-      await this.logManager.log(`Deleted aborted book: ${myBook.isbn}`, __filename, "DELETE", myBook, user);
+      await this.logManager.log(`Deleted aborted book: ${myBook.bookId}`, __filename, "DELETE", myBook, user);
     }else{
-      await this.logManager.log(`Deleted book: ${myBook.isbn}`, __filename, "DELETE", myBook, user);
+      await this.logManager.log(`Deleted book: ${myBook.bookId}`, __filename, "DELETE", myBook, user);
     }
 
     const isBookDeleted = await this.dataManager.deleteBook(myBook);
 
     return {
-      deletedBookId: bookIdDto.isbn,
+      deletedBookId: bookIdDto.bookId,
       status: isBookDeleted,
       timeStamp: new Date().toUTCString()
     } as IDeletedBook;
   }
 
   public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
-    const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.isbn);
-    await this.logManager.log(`Request single book ${bookIdDto.isbn}`, __filename, "MANAGE", userBook, user);
+    const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
+    await this.logManager.log(`Request single book ${bookIdDto.bookId}`, __filename, "MANAGE", userBook, user);
     return userBook;
   }
 
   public async getPdf(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<any> {
-    return await this.dataManager.getBookPdf(user, bookIdDto.isbn);
+    return await this.dataManager.getBookPdf(user, bookIdDto.bookId);
   }
 }
