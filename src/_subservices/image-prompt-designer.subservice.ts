@@ -14,7 +14,7 @@ export class ImagePromptDesignerSubservice {
     private readonly requestManager: RequestManagerSubservice
   ) {}
 
-  public async generateCharacterPrompts(characters:IImageAvatar[], bookRef: BooksEntity) : Promise<IImageAvatar[]> {
+  public async generateCharacterPrompts(characters:IImageAvatar[], bookRef: BooksEntity) : Promise<boolean|IImageAvatar[]> {
 
     // 1. Generate one Text Prompt for creating image Prompts
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
@@ -27,7 +27,11 @@ export class ImagePromptDesignerSubservice {
         await this.logManager.warn('Character prompts dont match required count... retry', __filename, "GENERATE", bookRef);
         console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
       }
-      promptResultText = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+      const resultFromAi = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+      if(resultFromAi === false) {
+        return false;
+      }
+      promptResultText = resultFromAi as string[][];
       await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
     }
 
@@ -62,7 +66,7 @@ export class ImagePromptDesignerSubservice {
     return promptConversation;
   }
 
-  public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<ChapterEntity[]>{
+  public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<boolean|ChapterEntity[]>{
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
     // 1. Generate one Text Prompt for creating image Prompts
     console.log("DBG: started");
@@ -77,8 +81,11 @@ export class ImagePromptDesignerSubservice {
         console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
       }
       console.log("DBG: loop started");
-      promptResultText = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-
+      const promptResults : boolean|string[][]  = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+      if(promptResults === false) {
+        return false;
+      }
+      promptResultText = promptResults as string[][];
       await this.logManager.log('Generated story image prompts successfully', __filename, "GENERATE", book);
     }
     console.log("DBG: started3");

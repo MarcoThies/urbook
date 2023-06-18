@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { FindManyOptions, Repository } from "typeorm";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
-import { generateId, hash } from "../_shared/utils";
+import { generateId, hash, statusStrings } from "../_shared/utils";
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { BooksEntity } from "../_subservices/_shared/entities/books.entity";
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
@@ -96,10 +96,10 @@ export class AdministrationService {
         books: assignedBooks.map((book: BooksEntity)=>{
           return {
             title: book.title,
-            isbn: book.isbn,
+            bookId: book.bookId,
             created: book.createdAt.toUTCString(),
             chapterCount: book.chapters.length,
-            state: book.state
+            state: statusStrings(book.state)
           } as IBookInfo;
         })
       } as IUserData);
@@ -145,10 +145,10 @@ export class AdministrationService {
     const timeInfo = (!logsDto.timeFrame)? false: logsDto.timeFrame;
 
     let book:  null|boolean|BooksEntity = false;
-    if(logsDto.isbn){
-      book = await this.dataManager.getBookById(logsDto.isbn);
+    if(logsDto.bookId){
+      book = await this.dataManager.getBookById(logsDto.bookId);
       if(!book) {
-        throw new HttpException(`Book with id ${logsDto.isbn} not found`, HttpStatus.CONFLICT);
+        throw new HttpException(`Book with id ${logsDto.bookId} not found`, HttpStatus.CONFLICT);
       }
     }
 
@@ -163,7 +163,7 @@ export class AdministrationService {
         context: log.context,
         time: log.time.toUTCString(),
         userId: (!log.apiKeyLink)? -1: log.apiKeyLink.apiId,
-        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.isbn,
+        bookKey: (!log.bookLink)? "no Book in this log": log.bookLink.bookId,
         trace: log.trace
       } as IUserLogs);
     }

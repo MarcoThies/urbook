@@ -1,5 +1,5 @@
 // Common
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 
 // Interface & DTO
 import { CreateBookDto } from "./dto/create-book.dto";
@@ -13,6 +13,7 @@ import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.s
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { IBookState } from "./interfaces/book-state.interface";
 import { RequestManagerSubservice } from '../_subservices/request-manager.subservice';
+import { statusStrings } from "../_shared/utils";
 
 @Injectable()
 export class GenerateService {
@@ -24,11 +25,15 @@ export class GenerateService {
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<IBookId> {
+
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
     // start the generation process
     const newBook = await this.bookGenSubservice.generateNewBook(createBookDto, user);
 
     return {
-        bookId: newBook.isbn,
+        bookId: newBook.bookId,
         status: true,
         timeStamp: newBook.createdAt.toUTCString()
     } as IBookId;
@@ -37,28 +42,12 @@ export class GenerateService {
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
-    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state); 
+    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state);
 
-    let statusDict = {
-      "-2": { code: -1,  status: "unknown error", kiHelper: "none" },
-      "-1": { code: -1,  status: "user aborted process", kiHelper: "none" },
-      "0": { code: 0,  status: "waiting to start...", kiHelper: "none" },
-      "1": { code: 1,  status: "story text", kiHelper: "txt" },
-      "2": { code: 2,  status: "character descriptions", kiHelper: "txt" },
-      "3": { code: 3,  status: "avatar images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
-      "4": { code: 4,  status: "story images - " + currentQueueLength + " more images to be generated.", kiHelper: "img" },
-      "5": { code: 5,  status: "regenerating chapter text", kiHelper: "txt" },
-      "6": { code: 6,  status: "regenerating chapter image", kiHelper: "img" },
-      "9": { code: 9,  status: "generating pdf file", kiHelper: "pdf" },
-      "10": { code: 10, status: "done", kiHelper: "none" },
-    };
-
-    let statusInfo;
-    if(typeof statusDict[(myBook.state).toString()] === "undefined") statusInfo = statusDict["-2"];
-    else statusInfo = statusDict[(myBook.state).toString()];
+    const statusInfo = statusStrings(myBook.state, currentQueueLength);
 
     return {
-      bookId: myBook.isbn,
+      bookId: myBook.bookId,
       status: statusInfo,
     } as IBookState;
   }
@@ -69,7 +58,10 @@ export class GenerateService {
   }
 
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
-    
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
+
     await this.bookGenSubservice.regenerateChapterText(regenerateChapterDto, user);
 
     return {
@@ -80,6 +72,9 @@ export class GenerateService {
   }
 
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
 
     await this.bookGenSubservice.regenerateChapterImage(regenerateChapterDto, user);
 

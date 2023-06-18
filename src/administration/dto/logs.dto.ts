@@ -11,5 +11,5 @@ export class LogsDto {
 
   @IsOptional()
   @IsString()
-  readonly isbn?: string;
+  readonly bookId?: string;
 }

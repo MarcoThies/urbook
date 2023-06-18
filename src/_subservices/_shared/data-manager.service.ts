@@ -1,6 +1,6 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { BooksEntity } from "./entities/books.entity";
-import { FindManyOptions, getConnection, getConnectionManager, MoreThan, Repository } from "typeorm";
+import { Between, FindManyOptions, getConnection, getConnectionManager, LessThan, MoreThan, Repository } from "typeorm";
 import { ParameterEntity } from "./entities/parameter.entity";
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
@@ -31,7 +31,7 @@ export class DataManagerService {
   ) {}
 
   public async getBookById(bookId: string): Promise<BooksEntity | null> {
-    return await this.booksRepo.findOne({ where: { isbn: bookId }, relations : ['apiKeyLink', 'parameterLink'] });
+    return await this.booksRepo.findOne({ where: { bookId: bookId }, relations : ['apiKeyLink', 'parameterLink'] });
   }
 
   public async getBookList(user: ApiKeyEntity): Promise<BooksEntity[]> {
@@ -47,6 +47,14 @@ export class DataManagerService {
       });
     }
   }
+
+  public async userIsGenerating(user: ApiKeyEntity): Promise<boolean> {
+    const generatingBooks = await this.booksRepo.find({
+      where: { apiKeyLink: user, state: Between(1,9) }
+    });
+    return generatingBooks.length > 0;
+  }
+
   public async saveNewBook(book:BooksEntity): Promise<BooksEntity> {
     // save new Parameter List
     const bookIdEntry = await this.booksRepo.create({
@@ -87,8 +95,6 @@ export class DataManagerService {
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
     for (let ind in chapters) {
-      if (chapters[ind].imageUrl === undefined)
-        console.log("undefined chapter " + ind)
       const currImagePath: string | undefined = chapters[ind].imageUrl;
       if (currImagePath && currImagePath.includes('https:')){
         chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
@@ -131,7 +137,7 @@ export class DataManagerService {
   }
 
   public getBookPath(book : BooksEntity) : string {
-    const book_id = book.isbn;
+    const book_id = book.bookId;
     return this.getUserPath(book) + book_id + '/';
   }
 
@@ -191,26 +197,26 @@ export class DataManagerService {
   }
 
   private async getBookIfOwned (user : ApiKeyEntity, bookId : string) : Promise<BooksEntity | boolean> {
-    const result = await this.booksRepo.findOne({ where: { isbn: bookId, apiKeyLink: user }, relations: ['apiKeyLink', 'chapters', 'parameterLink'] });
+    const result = await this.booksRepo.findOne({ where: { bookId: bookId, apiKeyLink: user }, relations: ['apiKeyLink', 'chapters', 'parameterLink'] });
     return (result) ? result : false;
   }
 
-  public async getBookWithAccessCheck(user: ApiKeyEntity, bookIsbn: string): Promise<BooksEntity> {
+  public async getBookWithAccessCheck(user: ApiKeyEntity, bookId: string): Promise<BooksEntity> {
     if(user.admin === true) {
       // Admin can access any book
-      const anyBook = await this.getBookById(bookIsbn);
+      const anyBook = await this.getBookById(bookId);
       if(!anyBook){
-        await this.logManager.error(`Can't find book with id ${bookIsbn}`, __filename, " ADMIN GET BOOK", undefined, user);
-        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
+        await this.logManager.error(`Can't find book with id ${bookId}`, __filename, " ADMIN GET BOOK", undefined, user);
+        throw new HttpException(`Can't find book with id ${bookId}`, HttpStatus.CONFLICT);
       }
       return anyBook;
 
     }else{
       // check if user is allowed to access this book
-      const myBook = await this.getBookIfOwned(user, bookIsbn);
+      const myBook = await this.getBookIfOwned(user, bookId);
       if(myBook === false){
-        await this.logManager.error(`Can't find book with id ${bookIsbn} or not from this user`, __filename, "GET BOOK", undefined, user);
-        throw new HttpException(`Can't find book with id ${bookIsbn}`, HttpStatus.CONFLICT);
+        await this.logManager.error(`Can't find book with id ${bookId} or not from this user`, __filename, "GET BOOK", undefined, user);
+        throw new HttpException(`Can't find book with id ${bookId}`, HttpStatus.CONFLICT);
       }
       return myBook as BooksEntity;
     }
@@ -229,7 +235,7 @@ export class DataManagerService {
     await this.characterRepo.remove(characters);
 
     // find book relational
-    await this.logManager.error(`Removed book ${book.isbn} from system`, __filename, "DATABASE", book);
+    await this.logManager.error(`Removed book ${book.bookId} from system`, __filename, "DATABASE", book);
 
     await this.parameterRepo.remove(book.parameterLink);
 

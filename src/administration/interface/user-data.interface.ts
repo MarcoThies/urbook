@@ -1,3 +1,4 @@
+import { IStatusInfo } from "../../_shared/utils";
 
 export interface IUserData{
   userId: number,
@@ -9,8 +10,8 @@ export interface IUserData{
 
 export interface IBookInfo {
   title: string,
-  isbn: string,
+  bookId: string,
   created: string,
   chapterCount: number,
-  state: number
+  state: IStatusInfo
 }

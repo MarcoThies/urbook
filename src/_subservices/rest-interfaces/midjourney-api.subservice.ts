@@ -20,20 +20,20 @@ export class MidjourneyApiSubservice {
   private suffix = "--ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
   // private suffix = "--ar 2:1 --v 5.1 --q "+this.imgQuality;
 
-  async requestImage(prompt: string): Promise<string> {
+  async requestImage(prompt: string): Promise<string | boolean> {
     console.log("\n\n... requesting new image");
     const imgGrid =  await this.client.Imagine(prompt+" "+this.suffix, (uri, progress)=>{
       console.log(uri, progress);
     });
     if(!imgGrid) {
-      throw new HttpException("Could not generate any Images", 500);
+      return false;
     }
     console.log("image generated", imgGrid);
     return await this.upscaleImage(imgGrid, 1);
   }
 
 
-  async upscaleImage(imgGrid: MJMessage, imgIndx: number): Promise<string> {
+  async upscaleImage(imgGrid: MJMessage, imgIndx: number): Promise<string|boolean> {
     console.log("... upscaling image");
     const upscaleData = await this.client.Upscale(
       imgGrid.content,
@@ -43,7 +43,7 @@ export class MidjourneyApiSubservice {
     )
 
     if(!upscaleData || !upscaleData.uri) {
-      throw new HttpException("Could not upscale the Image", 500);
+      return false;
     }
 
     console.log("image upscaled", upscaleData.uri);
