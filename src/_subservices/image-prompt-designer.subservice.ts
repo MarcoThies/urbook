@@ -6,6 +6,7 @@ import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 import { BooksEntity } from "./_shared/entities/books.entity";
+import { ICharacterList } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {
@@ -20,31 +21,19 @@ export class ImagePromptDesignerSubservice {
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = [];
-    //    Assure that there are as many prompts characters
-    while (characters.length !== promptResultText.length) {
-      if(promptResultText.length !== 0) {
-        await this.logManager.warn('Character prompts dont match required count... retry', __filename, "GENERATE", bookRef);
-        console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
-      }
-      const resultFromAi = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
-      if(resultFromAi === false) {
-        return false;
-      }
-      promptResultText = resultFromAi as string[][];
-      await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
-    }
+    const resultFromAi = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
 
     // 3. Map the result to the characters
     for(let i in characters) {
       const charName = characters[i].name;
 
-      const promptMatch = promptResultText.find((item: string[]) => {
-        return item[0] === charName;
+      const promptMatch = (resultFromAi as ICharacterList[]).find((item: ICharacterList) => {
+        return item.name === charName;
       });
 
       if(promptMatch) {
-        characters[i].prompt = promptMatch[1];
+        characters[i].prompt = promptMatch.prompt;
       }
     }
 
@@ -60,7 +49,6 @@ export class ImagePromptDesignerSubservice {
     });
     characterImagePrompt += charaTextJoin.join("\n\n");
 
-    characterImagePrompt += "\n\nWrite the name of the character in square brackets before the generated prompt. (e.g.: [Max] This is a prompt). Do not output any further text except the required answer.";
     promptConversation.push({role: messageRole.user, content: characterImagePrompt} as IOpenAiPromptMessage);
 
     return promptConversation;

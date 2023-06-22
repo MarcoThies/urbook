@@ -40,9 +40,7 @@ export class TextPromptDesignerSubservice {
       "Erwähne sie aber nicht explizit, sondern richte die Geschichte geschickt an ihnen aus. Erwähne die Moral nicht öfter als ein mal. \n" +
       "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen.\n" +
 
-      "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.\n" +
-      "Nummeriere die Absätze. Jeder Absatz beginnt mit einer Zahl in eckigen Klammern (zum Beispiel [Zahl]) und endet mit zwei Zeilenumbrüchen.\n" +
-      "Antworte nur mit den Absätzen der Geschichte.";
+      "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.";
 
       const userContent =
       "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +

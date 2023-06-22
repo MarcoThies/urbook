@@ -8,6 +8,7 @@ import { DataManagerService } from "./_shared/data-manager.service";
 import { OpenAi } from "./rest-interfaces/openai.subservice";
 import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 import { BooksEntity } from "./_shared/entities/books.entity";
+import { ICharacterList, IOpenAiStoryData, IStoryPrompts } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -25,7 +26,7 @@ export class RequestManagerSubservice {
 
   public bookRef: BooksEntity;
 
-  public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | string[][]> {
+  public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | IOpenAiStoryData> {
     const chapterCount = book.parameterLink.topicChapterCount;
     await this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", book);
 
@@ -42,10 +43,10 @@ export class RequestManagerSubservice {
             },
             "chapters" : {
               "type": "array",
-              "description": "A list of chapters",
+              "description": "A list of paragraphs that make up the story",
               "items": {
                 "type": "string",
-                "description": "One paragraph of the story"
+                "description": "One paragraph of the story with at least 100 characters"
               }
             },
             "characters" : {
@@ -69,14 +70,15 @@ export class RequestManagerSubservice {
         }
       }
     ]
-    const textResult = await this.openAi.promptGPT35withContext(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT35(textPrompt, structure);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
     }
 
-    console.log(textResult)
+    return textResult as IOpenAiStoryData;
 
+    /*
     const result = this.dataFromAnswer(textResult as string);
 
     if (result.length !== chapterCount) {
@@ -88,6 +90,7 @@ export class RequestManagerSubservice {
     await this.logManager.log("Story text generated", __filename, "GENERATE", book);
 
     return result;
+   */
   }
 
   public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<boolean | string> {
@@ -125,7 +128,7 @@ export class RequestManagerSubservice {
     });
   }
 
-  public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<boolean | string[][]> {
+  public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<boolean | ICharacterList[]> {
     const structure = [
       {
         "name" : "character_profile_prompts",
@@ -155,12 +158,12 @@ export class RequestManagerSubservice {
       }
     ]
 
-    const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt, structure);
+    const textResult = await this.openAi.promptGPT35(characterAvatarPrompt, structure);
     if(textResult === false){
       return false;
     }
 
-    return this.dataFromAnswer(textResult as string);
+    return textResult as ICharacterList[];
   }
 
   /*
@@ -190,7 +193,7 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt)
   }
   */
-  public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<boolean|string[][]> {
+  public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<boolean|string[]> {
 
     const structure = [
       {
@@ -211,11 +214,11 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt, structure);
+    const textResult = await this.openAi.promptGPT35(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }
-    return this.dataFromAnswer(textResult as string);
+    return (textResult as IStoryPrompts).chapterPrompts;
   }
 
   // Some helper function to extract important data from the AIs response

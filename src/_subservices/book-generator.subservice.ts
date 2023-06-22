@@ -15,6 +15,7 @@ import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { CharacterEntity } from "./_shared/entities/character.entity";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
+import { IOpenAiStoryData } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -77,7 +78,7 @@ export class BookGeneratorSubservice {
     let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
-    const story: string[][] | boolean = await this.requestManager.requestStory(storyPrompt, book);
+    const story: IOpenAiStoryData | boolean = await this.requestManager.requestStory(storyPrompt, book);
     if(story === false){
       await this.errorInPipeline(book);
       return;
@@ -87,27 +88,16 @@ export class BookGeneratorSubservice {
       return;
     }
 
+    const storyData = story as IOpenAiStoryData;
+    book.title = storyData.title;
+
     // create db entities from paragraphs
     let chapterArr: ChapterEntity[] = []
-    for(let x in story as string[][]) {
+    for(let x in storyData.chapters) {
       // 2.1 Save Chapters to DB
-      let chapter = story[x][1].trim();
-      if (chapter.length < 1) {
-        continue;
-      }
       chapterArr.push({
-        paragraph: chapter
+        paragraph: story[x].trim()
       } as ChapterEntity);
-    }
-
-    // set new story answer to prompt conversation
-    storyPrompt.push({
-      role: messageRole.assistant,
-      content: chapterArr.map((x) => x.paragraph).join("\n")
-    });
-
-    if(this.abortFlag) {
-      return;
     }
 
     // set new Chapter content to book entity
@@ -116,6 +106,7 @@ export class BookGeneratorSubservice {
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
+    /*
     // 3.Generate Characters-Descriptions from Story
     const characterPrompt: IOpenAiPromptMessage = this.textPromptDesigner.generateCharacterDescriptionsPrompt();
     storyPrompt.push(characterPrompt);
@@ -129,10 +120,18 @@ export class BookGeneratorSubservice {
     if(this.abortFlag) {
       return;
     }
+   */
+
     // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
+    const imageAvatars: IImageAvatar[] = storyData.characters.map((char) => {
+      return {
+        name: char.name,
+        description: char.description
+      } as IImageAvatar;
+    });
     const characterImagePrompts: boolean | IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars as IImageAvatar[], book);
     if(characterImagePrompts === false){
       await this.errorInPipeline(book);

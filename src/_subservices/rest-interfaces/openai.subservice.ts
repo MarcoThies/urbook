@@ -2,6 +2,7 @@ import { Configuration, OpenAIApi } from "openai";
 import { Injectable } from "@nestjs/common";
 import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
+import { ICharacterList, IOpenAiStoryData, IStoryPrompts } from "../interfaces/story-data.interface";
 
 @Injectable()
 export class OpenAi {
@@ -16,7 +17,7 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<string | boolean> {
+  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts| boolean> {
       console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
