@@ -29,11 +29,53 @@ export class RequestManagerSubservice {
     const chapterCount = book.parameterLink.topicChapterCount;
     await this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", book);
 
-    const textResult = await this.openAi.promptGPT35withContext(textPrompt);
+    const structure = [
+      {
+        "name" : "create_child_story",
+        "description" : "A full children's story with "+book.parameterLink.topicChapterCount+" chapters",
+        "parameters" : {
+          "type"  : "object",
+          "properties" : {
+            "title" : {
+              "type" : "string",
+              "description" : "A fitting title of the story"
+            },
+            "chapters" : {
+              "type": "array",
+              "description": "A list of chapters",
+              "items": {
+                "type": "string",
+                "description": "One paragraph of the story"
+              }
+            },
+            "characters" : {
+              "type": "array",
+              "description": "A list of characters and their visual depiction",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the character"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A very detailed depiction of the character"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+    const textResult = await this.openAi.promptGPT35withContext(textPrompt, structure);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
     }
+
+    console.log(textResult)
 
     const result = this.dataFromAnswer(textResult as string);
 
@@ -84,7 +126,36 @@ export class RequestManagerSubservice {
   }
 
   public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<boolean | string[][]> {
-    const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt);
+    const structure = [
+      {
+        "name" : "character_profile_prompts",
+        "description" : "A list of image ai prompts for each character-profile",
+        "parameters" : {
+          "type"  : "object",
+          "properties" : {
+            "charPrompts" : {
+              "type": "array",
+              "description": "A list of prompts for each character",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the character"
+                  },
+                  "prompt": {
+                    "type": "string",
+                    "description": "A prompt for the image ai, that depicts the character"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+
+    const textResult = await this.openAi.promptGPT35withContext(characterAvatarPrompt, structure);
     if(textResult === false){
       return false;
     }
@@ -120,7 +191,27 @@ export class RequestManagerSubservice {
   }
   */
   public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<boolean|string[][]> {
-    const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt);
+
+    const structure = [
+      {
+        "name" : "story_image_prompts",
+        "description" : "A list of image ai prompts for each chapter",
+        "parameters" : {
+          "type"  : "object",
+          "properties" : {
+            "chapterPrompts" : {
+              "type": "array",
+              "description": "A list of prompts for each chapter",
+              "items": {
+                "type": "string",
+                "description": "A prompt for the image ai, that depicts the chapter"
+              }
+            }
+          }
+        }
+      }
+    ];
+    const textResult = await this.openAi.promptGPT35withContext(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }
