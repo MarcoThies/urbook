@@ -16,19 +16,21 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT35(prompt: string) : Promise<string | boolean> {
-    console.log({prompt: prompt} as any);
+  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<string | boolean> {
+      console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
-            model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: prompt}],
+            model: "gpt-3.5-turbo-16k",
+            messages: messages,
+            functions: functions,
+            top_p: 0.3,
             max_tokens: 2048,
             temperature: 1.69,
             presence_penalty: 0.25,
             frequency_penalty: 0.6
         });
-        const result = completion.data.choices[0].message?.content as string;
+        const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
         console.log("\n\nDEBUG: plain answer: ", result);
         return result;
 

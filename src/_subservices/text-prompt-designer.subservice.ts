@@ -59,6 +59,7 @@ export class TextPromptDesignerSubservice {
       "Erwähne die Lieblingsfarbe und das Lieblingstier/-charakter im ersten Absatz nicht! \n" +
       "Achte auf eine ausreichende Länge der Absätze. \n";
 
+      console.log(systemContent + "\n" + userContent);
     return [
         { role : messageRole.system , content : systemContent },
         { role : messageRole.user , content : userContent }
