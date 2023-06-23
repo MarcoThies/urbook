@@ -15,7 +15,7 @@ import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { CharacterEntity } from "./_shared/entities/character.entity";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
-import { IOpenAiStoryData } from "./interfaces/story-data.interface";
+import { ICharacterList, IOpenAiStoryData } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class BookGeneratorSubservice {
@@ -41,12 +41,12 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log(`Request new book: ${newBookId}`, __filename, "GENERATE", undefined, user);
 
-    const newTitle: string = `${createBookDto.child_name} - ${createBookDto.topic_specialTopic}`;
+    const demoTitle: string = `${createBookDto.child_name} - ${createBookDto.topic_specialTopic}`;
 
     // Generate new Book & Parameter entity-data-object
     const newBook = {
       bookId: newBookId,
-      title: newTitle,
+      title: demoTitle,
       state: 1,
       apiKeyLink: user,
       parameterLink: {
@@ -96,7 +96,7 @@ export class BookGeneratorSubservice {
     for(let x in storyData.chapters) {
       // 2.1 Save Chapters to DB
       chapterArr.push({
-        paragraph: story[x].trim()
+        paragraph: storyData.chapters[x].trim()
       } as ChapterEntity);
     }
 
@@ -106,30 +106,14 @@ export class BookGeneratorSubservice {
     book.state = 2; 
     await this.dataManager.updateBookContent(book);
 
-    /*
-    // 3.Generate Characters-Descriptions from Story
-    const characterPrompt: IOpenAiPromptMessage = this.textPromptDesigner.generateCharacterDescriptionsPrompt();
-    storyPrompt.push(characterPrompt);
-
-    // 4. Generate Character-Description from Character-Prompt
-    const imageAvatars: boolean|IImageAvatar[] = await this.requestManager.requestCharacterDescription(storyPrompt, book);
-    if(imageAvatars === false){
-      await this.errorInPipeline(book);
-      return;
-    }
-    if(this.abortFlag) {
-      return;
-    }
-   */
-
-    // update Book status 3 => Character Descriptions done | Now generating Character-Demo Images
+    // update Book status 3 => Character Descriptions done | Now generating Character Images
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
-    const imageAvatars: IImageAvatar[] = storyData.characters.map((char) => {
+    const imageAvatars: IImageAvatar[] = storyData.characters.map((char: ICharacterList) => {
       return {
         name: char.name,
-        description: char.description
+        description: char.info
       } as IImageAvatar;
     });
     const characterImagePrompts: boolean | IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars as IImageAvatar[], book);
@@ -154,7 +138,6 @@ export class BookGeneratorSubservice {
       const currChapter = chapters[ind];
 
       // Search for each character Name in Chapter Text
-      // TODO: change imageAvatars back to fullAvatarGroup
       for(let n in characterImagePrompts as IImageAvatar[]) {
         const currAvatar = characterImagePrompts[n] as IImageAvatar;
         if(currChapter.paragraph.includes(currAvatar.name)) {

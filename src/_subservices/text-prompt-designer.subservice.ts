@@ -50,7 +50,7 @@ export class TextPromptDesignerSubservice {
       "Geschlecht: " + parameter.childGender + "\n" +
       "Ethnie: " + parameter.childCountry + "\n" +
       "Lieblingsfarbe: " + parameter.childFavColor + "\n" +
-      "Lieblingstier/-charakter:: " + parameter.childFavAnimal + "\n" +
+      "Lieblingstier/-charakter: " + parameter.childFavAnimal + "\n" +
       "Die in der Geschichte zu vermittelnde Moral lautet: " + parameter.topicMoralType + "\n" +
       "Das Thema der Geschichte lautet: " + parameter.topicSpecialTopic + ".\n" +
 
@@ -80,7 +80,7 @@ export class TextPromptDesignerSubservice {
     let characterPrompt = "Search for each named character in your story and look for parts, where the look of a character is detailed. \n"+
       "Then write a very descriptive character bio, which describes the character in a very visual way. Don't include any behavioral description or reference to the story plot in any way. But try to include everything that is mentioned in the story. \n\n";
 
-    characterPrompt += "Use short sentences in english for your answer. Output the name of the character in square brackets, followed by the description. (e.g.: [Max] Tall boy with green eyes and blue hair)";
+    characterPrompt += "Use short sentences in english for your answer.";
 
     return {
       role: messageRole.user,

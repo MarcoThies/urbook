@@ -6,7 +6,7 @@ export interface IOpenAiStoryData {
 
 export interface ICharacterList {
   name: string;
-  description: string;
+  info: string;
   prompt?: string;
 }
 

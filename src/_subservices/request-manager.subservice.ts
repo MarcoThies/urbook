@@ -43,10 +43,10 @@ export class RequestManagerSubservice {
             },
             "chapters" : {
               "type": "array",
-              "description": "A list of paragraphs that make up the story",
+              "description": "A list of story paragraphs that are at least 45-60 characters in length",
               "items": {
                 "type": "string",
-                "description": "One paragraph of the story with at least 100 characters"
+                "description": "One single paragraph of the story"
               }
             },
             "characters" : {
@@ -59,7 +59,7 @@ export class RequestManagerSubservice {
                     "type": "string",
                     "description": "The name of the character"
                   },
-                  "description": {
+                  "info": {
                     "type": "string",
                     "description": "A very detailed depiction of the character"
                   }
@@ -75,22 +75,9 @@ export class RequestManagerSubservice {
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
     }
-
-    return textResult as IOpenAiStoryData;
-
-    /*
-    const result = this.dataFromAnswer(textResult as string);
-
-    if (result.length !== chapterCount) {
-      await this.logManager.warn("Chapter count didn't match requirements... Regenerate", __filename, "GENERATE", this.bookRef);
-      console.log("WARNING: requestManager.requestStory: Generated story didn't have the requested number of chapters.")
-      return await this.requestStory(textPrompt, book);
-    }
-
     await this.logManager.log("Story text generated", __filename, "GENERATE", book);
 
-    return result;
-   */
+    return textResult as IOpenAiStoryData;
   }
 
   public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<boolean | string> {
