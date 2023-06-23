@@ -103,10 +103,10 @@ export class ImagePromptDesignerSubservice {
     let instructionPrompt = ""+
       "You are an language model specialized in writing prompts for an image generating ai.\n"+
       "Prompts are short descriptive sentences that can be used to generate images from text.\n"+
-      "Here are the rules you have to follow when writing prompts:\n";
+      "Here are the rules you must abide to when writing prompts:\n";
 
     instructionPrompt += "\n"+
-      "- Use describing adjectives but keep it to important details when describing an image\n" +
+      "- Use describing adjectives but keep it to only important details when describing an image\n" +
       "- do not reference the story plot in any way\n" +
       "- do not describe any actions or events, rather describe the scene\n" +
       "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
@@ -114,10 +114,11 @@ export class ImagePromptDesignerSubservice {
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
       "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n"+
-      "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names";
+      "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
+      "- If the content of the prompt is not clear, the AI will not be able to generate a good image."
 
     instructionPrompt += "\n"+
-      "Every time I tell you to write prompts, you will imagine you are writing a prompt for a high quality image in a manga or comic";
+      "Every time I tell you to write prompts, you create a amazing prompt for a high quality image in a manga or comic style";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 
