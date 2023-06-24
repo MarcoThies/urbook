@@ -91,7 +91,7 @@ export class DataManagerService {
   }
 
   public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
-
+    console.log("Try to update book content");
     // check if book uses images from online ressources, if yes, download them and link to local file
     const chapters = book.chapters;
     for (let ind in chapters) {
@@ -112,6 +112,7 @@ export class DataManagerService {
 
 
   public async updateBookState(book: BooksEntity, state: number) {
+    console.log("Try to update book state");
     book.state = state;
     await this.logManager.log(`New Book state: ${state}`, __filename, "DATABASE", book);
     await this.booksRepo.save(book);

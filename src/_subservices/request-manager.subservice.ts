@@ -77,15 +77,16 @@ export class RequestManagerSubservice {
       return false;
     }
     // Check results for plausibility
-    if((textResult as IOpenAiStoryData).title.length < 3){
+    const storyData = textResult as IOpenAiStoryData;
+    if(storyData.title.length < 3){
       await this.logManager.error("Generated title is to short", __filename, "GENERATE", book);
       return false;
     }
-    if((textResult as IOpenAiStoryData).chapters.length !== chapterCount){
-      await this.logManager.error("Did not get right chapter count back", __filename, "GENERATE", book);
+    if(storyData.chapters.length !== chapterCount){
+      await this.logManager.error(`Did not get right chapter count back ${storyData.chapters.length} != ${chapterCount}`, __filename, "GENERATE", book);
       return false;
     }
-    if((textResult as IOpenAiStoryData).characters.length < 1){
+    if(storyData.characters.length < 1){
       await this.logManager.error("Did not find any characters in the story", __filename, "GENERATE", book);
       return false;
     }

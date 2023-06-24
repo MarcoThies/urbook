@@ -80,14 +80,14 @@ export class BookGeneratorSubservice {
 
     // 2. Generate Story from Story-Prompt
     const story: IOpenAiStoryData | boolean = await this.tryRepeat(
-      () => this.requestManager.requestStory(storyPrompt, book)
+      async () => await this.requestManager.requestStory(storyPrompt, book),
+      () => this.abortFlag
     );
-    if(story === false){
-      await this.errorInPipeline(book);
+    if(this.abortFlag){
       return;
     }
-
-    if(this.abortFlag) {
+    if(story === false){
+      await this.errorInPipeline(book);
       return;
     }
 
@@ -106,11 +106,11 @@ export class BookGeneratorSubservice {
     // set new Chapter content to book entity
     book.chapters = chapterArr;
     // update Book status 2 => Story generated | Now generating Characters-Descriptions
-    book.state = 2; 
+    book.state = 2;
     await this.dataManager.updateBookContent(book);
 
     // update Book status 3 => Character Descriptions done | Now generating Character Images
-    await this.dataManager.updateBookState(book, 3);
+    // await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
     let imageAvatars: IImageAvatar[] = [];
@@ -137,6 +137,9 @@ export class BookGeneratorSubservice {
     });
    */
     const characterImagePrompts: boolean | IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars as IImageAvatar[], book);
+    if(this.abortFlag) {
+      return;
+    }
     if(characterImagePrompts === false){
       await this.logManager.log('Could not generate any character image prompts', __filename, "GENERATE", book);
 
@@ -190,43 +193,43 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book);
 
-    // update Book status 4 => Character Avatars Done | Now generating Story Images
+    // update Book status 4 => Character Avatars Done | Now generating Story Image Prompts
     if(this.abortFlag) {
       return;
     }
-    await this.dataManager.updateBookState(book, 4);
+    await this.dataManager.updateBookState(book, 3);
 
     // 8. Generate Text-Prompt from Story-Image-Prompt
     // Create empty Image-Prompt-Group
     // const chapters = book.chapters;
     book.chapters = chapters;
     const chaptersWithPrompts = await this.imagePromptDesigner.addImagePromptsToChapter(book);
+    if(this.abortFlag) {
+      return;
+    }
     if(chaptersWithPrompts === false){
       await this.errorInPipeline(book);
       return;
     }
-    if(this.abortFlag) {
-      return;
-    }
     book.chapters = chaptersWithPrompts as ChapterEntity[];
+    book.state = 4;
     await this.dataManager.updateBookContent(book);
 
     // 9. Request Story-Images from Image AI
     const chaptersWithImages : boolean|ChapterEntity[] = await this.requestManager.requestStoryImages(book);
+    if(this.abortFlag) {
+      return;
+    }
     if(chaptersWithImages === false){
       await this.errorInPipeline(book);
       return;
     }
     book.chapters = chaptersWithImages as ChapterEntity[];
+    book.state = 9;
     await this.dataManager.updateBookContent(book);
 
     await this.logManager.log('Chapter images generated', __filename, "GENERATE", book);
 
-    if(this.abortFlag) {
-      return;
-    }
-
-    await this.dataManager.updateBookState(book, 9);
     // 10. Create Book PDF
     await this.pdfGenerator.createA5Book(book);
     await this.logManager.log('Generated PDF-File from book', __filename, "GENERATE", book);
@@ -252,15 +255,27 @@ export class BookGeneratorSubservice {
 
   private async asyncNewChapterPipeline(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
 
-    const storySuccess = await this.tryRepeat(() => this.newChapterText(chapterId, book, user));
-    const promptSuccess = await this.tryRepeat(() => this.newChapterPrompt(chapterId, book, user));
+    const storySuccess: boolean | string = await this.tryRepeat(
+      async () => await this.newChapterText(chapterId, book, user),
+      () => this.abortFlag
+    );
+    if(this.abortFlag){
+      return;
+    }
 
-    if(!storySuccess || !promptSuccess) {
+    const promptSuccess: boolean | string = await this.tryRepeat(
+      async () => await this.newChapterPrompt(chapterId, book, user),
+      () => this.abortFlag
+    );
+    if(this.abortFlag){
+      return;
+    }
+
+    if(storySuccess === false || promptSuccess === false) {
       await this.errorInPipeline(book);
       return;
     }
 
-    book.state = 9; // set State to generate pdf
     await this.dataManager.updateBookState(book, 9);
 
     // write new PDF-File
@@ -270,13 +285,18 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 10);
   }
 
-  private async tryRepeat(callback: () => Promise<any>, tries: number= 3) : Promise<any>{
+  private async tryRepeat(callback: () => Promise<any>, abortFlag: () => boolean, try_count: number=4) : Promise<any>{
     let repeatSuccess = false;
-
+    let tries = 0;
     while(!repeatSuccess) {
       repeatSuccess = await callback();
 
-      if(tries > 4) break;
+      if(abortFlag()){
+        console.log("\nAbort flag has been triggered in TryRepeat function\n");
+        return false;
+      }
+
+      if(tries > try_count) break;
       tries++;
     }
     return repeatSuccess;
@@ -347,7 +367,8 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log(`Regenerating PDF-file`, __filename, "REGENERATE", book);
 
-    book.state = 9; // set state to generate pdf
+
+    await this.dataManager.updateBookState(book, 9);
     await this.dataManager.updateBookContent(book);
 
     // write new PDF-File

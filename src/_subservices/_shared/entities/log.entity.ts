@@ -34,7 +34,7 @@ export class LogEntity {
   apiKeyLink: ApiKeyEntity;
 
   @Exclude()
-  @ManyToOne(() => BooksEntity, { cascade : true, onDelete: "SET NULL"})
+  @ManyToOne(() => BooksEntity, { cascade : false, onDelete: "SET NULL"})
   @JoinColumn({ name: "bookId"})
   bookLink: BooksEntity;
 }

@@ -60,7 +60,7 @@ export const statusStrings = (status: number, queueLength:number=-1): IStatusInf
     "0": { code: 0,  status: "waiting to start..." },
     "1": { code: 1,  status: "story text", process: textAi},
     "2": { code: 2,  status: "character descriptions", process: textAi },
-    "3": { code: 3,  status: "avatar images - " + queueStr + " in queue", process: imgAi },
+    "3": { code: 3,  status: "story prompts", process: textAi },
     "4": { code: 4,  status: "story images - " + queueStr + " in queue", process: imgAi },
     "5": { code: 5,  status: "regenerating chapter text", process: textAi },
     "6": { code: 6,  status: "regenerating chapter image", process: imgAi },

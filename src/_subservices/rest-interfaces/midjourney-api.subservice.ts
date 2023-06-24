@@ -17,7 +17,8 @@ export class MidjourneyApiSubservice {
   }
 
   private imgQuality = 1; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
-  private suffix = "--ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
+  private suffix = "in the style of a children's storybook, colorful illustration --ar 2:1 --v 5.2 --style raw --q "+this.imgQuality;
+  // private suffix = "--ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
   // private suffix = "--ar 2:1 --v 5.1 --q "+this.imgQuality;
 
   async requestImage(prompt: string): Promise<string | boolean> {
