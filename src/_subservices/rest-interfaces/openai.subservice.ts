@@ -17,24 +17,27 @@ export class OpenAi {
 
   public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts | INewChapter | boolean> {
       console.log("\nPrompt:\n", messages);
-      console.log("\nJson:\n", functions);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
             model: "gpt-3.5-turbo-16k",
             messages: messages,
             functions: functions,
-            function_call: functions[0].name,
+            function_call: {
+              name: functions[0].name,
+            },
             top_p: 0.3,
             max_tokens: 2048,
             temperature: 1.69,
             presence_penalty: 0.25,
             frequency_penalty: 0.6
         });
-        const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
         if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
           return false;
         }
+        const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
+        if(!result) return false;
+
         console.log("\n\nDEBUG: parsed json: ", result);
         return result;
 

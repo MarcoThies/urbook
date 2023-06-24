@@ -110,14 +110,34 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 3);
 
     // 5. Generate Character-Prompts from Character-Description
+    let imageAvatars: IImageAvatar[] = [];
+    for(let char of storyData.characters) {
+      if(char.name.length > 0 && char.info.length > 0){
+        imageAvatars.push({
+          name: char.name,
+          description: char.info
+        } as IImageAvatar);
+      }
+    }
+    if(imageAvatars.length === 0){
+      // no characters found
+      await this.logManager.log('Could not generate any character descriptions', __filename, "GENERATE", book);
+
+      await this.errorInPipeline(book);
+      return;
+    }
+    /*
     const imageAvatars: IImageAvatar[] = storyData.characters.map((char: ICharacterList) => {
       return {
         name: char.name,
         description: char.info
       } as IImageAvatar;
     });
+   */
     const characterImagePrompts: boolean | IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars as IImageAvatar[], book);
     if(characterImagePrompts === false){
+      await this.logManager.log('Could not generate any character image prompts', __filename, "GENERATE", book);
+
       await this.errorInPipeline(book);
       return;
     }
