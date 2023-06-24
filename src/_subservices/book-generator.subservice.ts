@@ -249,8 +249,14 @@ export class BookGeneratorSubservice {
   }
 
   private async asyncNewChapterPipeline(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
-    await this.newChapterText(chapterId, book, user);
-    await this.newChapterPrompt(chapterId, book, user);
+
+    const storySuccess = await this.tryRepeat(() => this.newChapterText(chapterId, book, user));
+    const promptSuccess = await this.tryRepeat(() => this.newChapterPrompt(chapterId, book, user));
+
+    if(!storySuccess || !promptSuccess) {
+      await this.errorInPipeline(book);
+      return;
+    }
 
     book.state = 9; // set State to generate pdf
     await this.dataManager.updateBookState(book, 9);
@@ -262,7 +268,18 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 10);
   }
 
-  private async newChapterText(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
+  private async tryRepeat(callback: (...args: unknown[]) => Promise<boolean>, tries=3){
+    let repeatSuccess = false;
+    while(!repeatSuccess) {
+      repeatSuccess = await callback();
+
+      if(tries > 4) break;
+      tries++;
+    }
+    return repeatSuccess;
+  }
+
+  private async newChapterText(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<boolean> {
     await this.logManager.log(`Regenerate chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
     // re-assemble whole book text with paragraph numbers to be able to give it as context to AI for regeneration of chapter
     let bookText : string = book.chapters.map(( item, index ) =>  (index + 1) + ". " + item.paragraph ).join("\n");
@@ -272,26 +289,29 @@ export class BookGeneratorSubservice {
     // generate new chapter text utilising prompt
     const newPara: string|boolean = await this.requestManager.requestNewChapterText(regenerationPrompt);
     if(newPara === false) {
-      await this.errorInPipeline(book);
-      return;
+      await this.logManager.log(`New chapter story text could not be generated: Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
+      return false;
     }
     book.chapters[chapterId].paragraph = newPara as string;
 
     await this.dataManager.updateBookContent(book);
     await this.logManager.log(`New chapter text generated: ${newPara} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
+    return true
   }
 
-  private async newChapterPrompt(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
+  private async newChapterPrompt(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<boolean> {
     // update book prompt for new chapter
     const newChapterWithPrompt: boolean | ChapterEntity[] = await this.imagePromptDesigner.addImagePromptsToChapter(book, chapterId);
     if(newChapterWithPrompt === false){
-      await this.errorInPipeline(book);
-      return;
+      await this.logManager.log(`New chapter prompt could not be generated: Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
+      return false;
     }
     book.chapters[chapterId] = newChapterWithPrompt[0];
 
     await this.dataManager.updateBookContent(book);
-    await this.logManager.log(`New chapter prompt generated: ${newChapterWithPrompt[0]} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
+    await this.logManager.log(`New chapter prompt generated: ${newChapterWithPrompt[0].prompt} - Chapter: ${chapterId+1}`, __filename, "REGENERATE", book, user);
+
+    return true;
   }
 
   // REGENERATE ONE CHAPTER IMAGE

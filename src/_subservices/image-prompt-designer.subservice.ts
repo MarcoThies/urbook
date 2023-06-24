@@ -64,7 +64,7 @@ export class ImagePromptDesignerSubservice {
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
     // 2. Request Prompt from Request Manager to get image prompts
     const promptResults : boolean|string[]  = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-    if(promptResults === false || (promptResults as string[]).length !== chapters.length){
+    if(promptResults === false || (promptResults as string[]).length < chapters.length){
       return false;
     }
     // 3. Map the result to the chapters
@@ -81,7 +81,7 @@ export class ImagePromptDesignerSubservice {
 
     // let imageImagePrompt = this.addImageAiInstruction();
     let imagePrompt = ""+
-      "Please write exactly one prompt for each of the following paragraphs."+
+      "Please write exactly one prompt for each of the following enumerated paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       return (indx+1)+". "+cpt.paragraph;
