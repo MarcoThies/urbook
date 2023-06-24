@@ -80,7 +80,7 @@ export class BookGeneratorSubservice {
 
     // 2. Generate Story from Story-Prompt
     const story: IOpenAiStoryData | boolean = await this.tryRepeat(
-      async () => await this.requestManager.requestStory(storyPrompt, book),
+      () => this.requestManager.requestStory(storyPrompt, book),
       () => this.abortFlag
     );
     if(this.abortFlag){
@@ -136,13 +136,16 @@ export class BookGeneratorSubservice {
       } as IImageAvatar;
     });
    */
-    const characterImagePrompts: boolean | IImageAvatar[] = await this.imagePromptDesigner.generateCharacterPrompts(imageAvatars as IImageAvatar[], book);
+
+    const characterImagePrompts: IImageAvatar[] | boolean = await this.tryRepeat(
+      () => this.imagePromptDesigner.generateCharacterPrompts(imageAvatars, book),
+      () => this.abortFlag
+    );
     if(this.abortFlag) {
       return;
     }
     if(characterImagePrompts === false){
       await this.logManager.log('Could not generate any character image prompts', __filename, "GENERATE", book);
-
       await this.errorInPipeline(book);
       return;
     }
@@ -256,7 +259,7 @@ export class BookGeneratorSubservice {
   private async asyncNewChapterPipeline(chapterId: number, book: BooksEntity, user: ApiKeyEntity): Promise<void> {
 
     const storySuccess: boolean | string = await this.tryRepeat(
-      async () => await this.newChapterText(chapterId, book, user),
+      () => this.newChapterText(chapterId, book, user),
       () => this.abortFlag
     );
     if(this.abortFlag){
@@ -264,7 +267,7 @@ export class BookGeneratorSubservice {
     }
 
     const promptSuccess: boolean | string = await this.tryRepeat(
-      async () => await this.newChapterPrompt(chapterId, book, user),
+      () => this.newChapterPrompt(chapterId, book, user),
       () => this.abortFlag
     );
     if(this.abortFlag){

@@ -15,6 +15,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { BookIdDto } from "../_subservices/_shared/dto/book-id.dto";
 import { IDeletedBook } from "./interfaces/delete-book.interface";
+import { IBookInfo } from "../administration/interface/user-data.interface";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -26,7 +27,7 @@ export class ManageController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('list-books')
-  public async listBooks(@Request() req) : Promise<BooksEntity[]> {
+  public async listBooks(@Request() req) : Promise<IBookInfo[]> {
     return await this.manageService.listBooks(req.user);
   }
 

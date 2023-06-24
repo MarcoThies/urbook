@@ -34,8 +34,8 @@ export class DataManagerService {
     return await this.booksRepo.findOne({ where: { bookId: bookId }, relations : ['apiKeyLink', 'parameterLink'] });
   }
 
-  public async getBookList(user: ApiKeyEntity): Promise<BooksEntity[]> {
-    if(user.admin) {
+  public async getBookList(user: ApiKeyEntity, enforced=true): Promise<BooksEntity[]> {
+    if(user.admin && enforced) {
       await this.logManager.log("Admin receives list of all books", __filename, "DATABASE", undefined, user);
       return await this.booksRepo.find({
         relations: ['apiKeyLink']
@@ -79,7 +79,7 @@ export class DataManagerService {
     const fs = require("fs").promises;
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
-    if(!fileExists){
+    if(!fileExists) {
       await this.logManager.error(`No book PDF-found at ${pdfPath}`, __filename, "GET PDF", myBook, user);
       throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
     }

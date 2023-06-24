@@ -106,7 +106,7 @@ export class RequestManagerSubservice {
           "properties" : {
             "new_chapter" : {
               "type": "string",
-              "description": "One new paragraph for the existing story"
+              "description": "One new paragraph for the existing story. It should match the length of the chapter it is trying to replace."
             }
           },
           "required" : ["new_chapter"]

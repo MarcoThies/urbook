@@ -33,7 +33,8 @@ export class MidjourneyApiSubservice {
     if(!imgGrid) {
       return false;
     }
-    console.log("image generated", imgGrid);
+    console.log("image grid generated", imgGrid.uri);
+
     return await this.upscaleImage(imgGrid, 1);
   }
 
@@ -50,8 +51,6 @@ export class MidjourneyApiSubservice {
         console.log(uri, progress);
       }
     });
-
-    console.log(upscaleData);
 
     if(!upscaleData || !upscaleData.uri) {
       return false;

@@ -39,4 +39,13 @@ export class GenerateController {
     public async abortGeneration(@Body() bookIdDto: BookIdDto, @Request() req): Promise<Boolean> {
       return await this.generateService.abort(bookIdDto.bookId, req.user);
     }
+
+    @UseGuards(
+      AuthGuard('jwt'),
+      UserTypeGuard('admin')
+    )
+    @Post("regenerate-pdf")
+    public async regeneratePDF(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookId> {
+      return await this.generateService.regeneratePDF(bookIdDto.bookId, req.user);
+    }
 }
