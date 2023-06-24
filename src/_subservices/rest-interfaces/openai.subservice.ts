@@ -24,24 +24,29 @@ export class OpenAi {
             messages: messages,
             functions: functions,
             function_call: {
-              name: functions[0].name,
+              name: functions[0].name
             },
             top_p: 1,
             max_tokens: 2048,
-            temperature: 1.69,
-            presence_penalty: 0.25,
-            frequency_penalty: 0.6
-            // top_p: 0.3,
-            // max_tokens: 2048,
-            // temperature: 1.69,
-            // presence_penalty: 0.25,
-            // frequency_penalty: 0.6
+            temperature: .35,
+            presence_penalty: 0.2,
+            frequency_penalty: 0.2
         });
+        // top_p: 0.3,
+        // max_tokens: 2048,
+        // temperature: 1.69,
+        // presence_penalty: 0.25,
+        // frequency_penalty: 0.6
         if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
+          console.log(completion.data);
           return false;
         }
+
         const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
-        if(!result) return false;
+        if(!result){
+          console.log(completion.data.choices[0].message?.function_call.arguments);
+          return false;
+        }
 
         console.log("\n\nDEBUG: parsed json: ", result);
         return result;

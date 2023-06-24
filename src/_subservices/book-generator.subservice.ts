@@ -16,6 +16,7 @@ import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
 import { CharacterEntity } from "./_shared/entities/character.entity";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 import { ICharacterList, IOpenAiStoryData } from "./interfaces/story-data.interface";
+import { reportUnhandledError } from "rxjs/internal/util/reportUnhandledError";
 
 @Injectable()
 export class BookGeneratorSubservice {
