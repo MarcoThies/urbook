@@ -56,13 +56,14 @@ export class RequestManagerSubservice {
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the character found in the story"
+                    "description": "The name of the character found in the story. Not the type of animal or character just the plain name"
                   },
                   "info": {
                     "type": "string",
-                    "description": "A very detailed depiction of the character found in the story. Describe how you would imagine the character to look like."
+                    "description": "A very detailed description of the character found in the story. Describe in 100 words how you would imagine the character to look like."
                   }
-                }
+                },
+                "required" : ["name", "info"]
               }
             }
           },
@@ -75,6 +76,20 @@ export class RequestManagerSubservice {
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
     }
+    // Check results for plausibility
+    if((textResult as IOpenAiStoryData).title.length < 3){
+      await this.logManager.error("Generated title is to short", __filename, "GENERATE", book);
+      return false;
+    }
+    if((textResult as IOpenAiStoryData).chapters.length !== chapterCount){
+      await this.logManager.error("Did not get right chapter count back", __filename, "GENERATE", book);
+      return false;
+    }
+    if((textResult as IOpenAiStoryData).characters.length < 1){
+      await this.logManager.error("Did not find any characters in the story", __filename, "GENERATE", book);
+      return false;
+    }
+
     await this.logManager.log("Story text generated", __filename, "GENERATE", book);
 
     return textResult as IOpenAiStoryData;

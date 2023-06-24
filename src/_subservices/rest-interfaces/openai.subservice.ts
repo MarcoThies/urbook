@@ -26,11 +26,16 @@ export class OpenAi {
             function_call: {
               name: functions[0].name,
             },
-            top_p: 0.3,
+            top_p: 1,
             max_tokens: 2048,
             temperature: 1.69,
             presence_penalty: 0.25,
             frequency_penalty: 0.6
+            // top_p: 0.3,
+            // max_tokens: 2048,
+            // temperature: 1.69,
+            // presence_penalty: 0.25,
+            // frequency_penalty: 0.6
         });
         if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
           return false;

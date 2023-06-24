@@ -78,7 +78,9 @@ export class BookGeneratorSubservice {
     let storyPrompt: IOpenAiPromptMessage[] = this.textPromptDesigner.generateStoryPrompt(book.parameterLink);
 
     // 2. Generate Story from Story-Prompt
-    const story: IOpenAiStoryData | boolean = await this.requestManager.requestStory(storyPrompt, book);
+    const story: IOpenAiStoryData | boolean = await this.tryRepeat(
+      () => this.requestManager.requestStory(storyPrompt, book)
+    );
     if(story === false){
       await this.errorInPipeline(book);
       return;
@@ -122,7 +124,6 @@ export class BookGeneratorSubservice {
     if(imageAvatars.length === 0){
       // no characters found
       await this.logManager.log('Could not generate any character descriptions', __filename, "GENERATE", book);
-
       await this.errorInPipeline(book);
       return;
     }
@@ -268,8 +269,9 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 10);
   }
 
-  private async tryRepeat(callback: (...args: unknown[]) => Promise<boolean>, tries=3){
+  private async tryRepeat(callback: () => Promise<any>, tries: number= 3) : Promise<any>{
     let repeatSuccess = false;
+
     while(!repeatSuccess) {
       repeatSuccess = await callback();
 
