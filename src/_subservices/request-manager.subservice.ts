@@ -8,7 +8,7 @@ import { DataManagerService } from "./_shared/data-manager.service";
 import { OpenAi } from "./rest-interfaces/openai.subservice";
 import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 import { BooksEntity } from "./_shared/entities/books.entity";
-import { ICharacterList, IOpenAiStoryData, IStoryPrompts } from "./interfaces/story-data.interface";
+import { ICharacterList, INewChapter, IOpenAiStoryData, IStoryPrompts } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -24,7 +24,6 @@ export class RequestManagerSubservice {
   private chapterImageQueue = new RequestQueue();
   private abortFlag = false;
 
-  public bookRef: BooksEntity;
 
   public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | IOpenAiStoryData> {
     const chapterCount = book.parameterLink.topicChapterCount;
@@ -57,16 +56,17 @@ export class RequestManagerSubservice {
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the character"
+                    "description": "The name of the character found in the story"
                   },
                   "info": {
                     "type": "string",
-                    "description": "A very detailed depiction of the character"
+                    "description": "A very detailed depiction of the character found in the story. Describe how you would imagine the character to look like."
                   }
                 }
               }
             }
-          }
+          },
+          "required" : ["title", "chapters", "characters"]
         }
       }
     ]
@@ -80,39 +80,30 @@ export class RequestManagerSubservice {
     return textResult as IOpenAiStoryData;
   }
 
-  public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[], tempChapterId : number) : Promise<boolean | string> {
-
-    const textResult = await this.openAi.promptGPT35withContext(textPrompt);
+  public async requestNewChapterText(textPrompt: IOpenAiPromptMessage[]) : Promise<boolean | string> {
+    const structure = [
+      {
+        "name" : "regenerate_chapter",
+        "description" : "Regenerated chapter for the existing story",
+        "parameters" : {
+          "type"  : "object",
+          "properties" : {
+            "new_chapter" : {
+              "type": "string",
+              "description": "One new paragraph for the existing story"
+            }
+          },
+          "required" : ["new_chapter"]
+        }
+      }
+    ];
+    const textResult = await this.openAi.promptGPT35(textPrompt, structure);
     if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       return false;
     }
 
-    let splitData = this.dataFromAnswer(textResult as string);
-
-    if(splitData.length === 1) return splitData[0][1];
-    return textResult as string;
-  }
-
-  public async requestCharacterDescription(charactersPrompt: IOpenAiPromptMessage[], bookRef: BooksEntity) : Promise<boolean | IImageAvatar[]> {
-    await this.logManager.log("Request character description from text-ai", __filename, "GENERATE", bookRef);
-
-    const textResult = await this.openAi.promptGPT35withContext(charactersPrompt);
-    if(!textResult){
-      await this.logManager.error("No answer from text ai", __filename, "GENERATE", bookRef);
-      return false;
-    }
-
-    let splitData = this.dataFromAnswer(textResult as string);
-
-    await this.logManager.log("Character descriptions generated successfully", __filename, "GENERATE", bookRef);
-
-    return splitData.map((char)=>{
-      return {
-        name: char[0].trim(),
-        description: char[1].trim()
-      } as IImageAvatar
-    });
+    return (textResult as INewChapter).new_chapter as string;
   }
 
   public async requestCharacterPromptsForImage(characterAvatarPrompt: IOpenAiPromptMessage[]) : Promise<boolean | ICharacterList[]> {
@@ -140,7 +131,8 @@ export class RequestManagerSubservice {
                 }
               }
             }
-          }
+          },
+          "required" : ["charPrompts"]
         }
       }
     ]
@@ -153,33 +145,7 @@ export class RequestManagerSubservice {
     return textResult as ICharacterList[];
   }
 
-  /*
-  public async requestCharacterImages(AvatarList: IImageAvatar[]) : Promise<IImageAvatar[]> {
 
-    for(let x in AvatarList) {
-
-      this.avatarImageQueue.addJob(
-        async () => await this.requestCharacterImage(AvatarList[x]),
-         (imageURL: string) => {
-            // safe character Image to DB
-           AvatarList[x].avatarUrl = imageURL;
-        }
-      );
-
-    }
-    await this.avatarImageQueue.onEmpty();
-    return AvatarList;
-  }
-
-  public async requestCharacterImage(avatar: IImageAvatar) : Promise<string> {
-    const prompt = avatar.prompt;
-    if(!prompt){
-      await this.logManager.error("No prompt for character image request", __filename, "GENERATE", this.bookRef.apiKeyLink, this.bookRef);
-      throw new HttpException("No Prompt for Image Request", HttpStatus.CONFLICT);
-    }
-    return await this.imageAPI.requestImage(prompt)
-  }
-  */
   public async requestImagePromptsForImage(storyImagePromptPrompt: IOpenAiPromptMessage[]) : Promise<boolean|string[]> {
 
     const structure = [
@@ -206,42 +172,6 @@ export class RequestManagerSubservice {
       return false;
     }
     return (textResult as IStoryPrompts).chapterPrompts;
-  }
-
-  // Some helper function to extract important data from the AIs response
-  private dataFromAnswer(str: string) : string[][] {
-    let result: string[][] = [];
-    let offset = 0;
-
-    while(true){
-      const nextCharacterPrompt = str.indexOf("[", offset);
-      if(nextCharacterPrompt < 0) break;
-
-      let nextCharacterNameEnd = str.indexOf("]", nextCharacterPrompt+1);
-
-      const paragrapghEnd = str.indexOf("\n", nextCharacterNameEnd+1);
-
-      const endPointer = paragrapghEnd < 0 ? str.length : paragrapghEnd;
-
-      const IndexValue = str.substring(nextCharacterPrompt + 1, nextCharacterNameEnd).trim();
-      // check if next space is within range -> set character end to next space
-      const nextSpace = str.indexOf(" ", nextCharacterNameEnd+1);
-      if(nextSpace >= 0 && nextSpace - nextCharacterNameEnd < 3) {
-        nextCharacterNameEnd = nextSpace;
-      }
-
-      const Value = str.substring(nextCharacterNameEnd + 1, endPointer).trim();
-      result.push([IndexValue, Value.replace(/"/g, "")]);
-
-      if(paragrapghEnd < 0) break;
-
-      offset = paragrapghEnd;
-    }
-
-    const output = (result.length > 0) ? result : str.split("\n").map((val,ind) => [ind.toString(), val]);
-    console.log(output);
-
-    return output;
   }
 
   public async requestStoryImages(book: BooksEntity, chapterId?:number) : Promise<boolean|ChapterEntity[]> {

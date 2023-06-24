@@ -1,13 +1,11 @@
 import { Configuration, OpenAIApi } from "openai";
 import { Injectable } from "@nestjs/common";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
-import { ICharacterList, IOpenAiStoryData, IStoryPrompts } from "../interfaces/story-data.interface";
+import { ICharacterList, INewChapter, IOpenAiStoryData, IStoryPrompts } from "../interfaces/story-data.interface";
 
 @Injectable()
 export class OpenAi {
   constructor(
-    dataLogger: DatabaseLoggerService
   ) {}
 
   private configuration = new Configuration({
@@ -17,14 +15,16 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts| boolean> {
+  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts | INewChapter | boolean> {
       console.log("\nPrompt:\n", messages);
+      console.log("\nJson:\n", functions);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
             model: "gpt-3.5-turbo-16k",
             messages: messages,
             functions: functions,
+            function_call: functions[0].name,
             top_p: 0.3,
             max_tokens: 2048,
             temperature: 1.69,
@@ -32,7 +32,10 @@ export class OpenAi {
             frequency_penalty: 0.6
         });
         const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
-        console.log("\n\nDEBUG: plain answer: ", result);
+        if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
+          return false;
+        }
+        console.log("\n\nDEBUG: parsed json: ", result);
         return result;
 
     } catch (error) {

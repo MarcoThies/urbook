@@ -43,7 +43,7 @@ export class TextPromptDesignerSubservice {
       "Das Buch muss " + paragraphCount + " Absätze mit je  " + (avgWordsPerParagraph - 5) + " bis " + (avgWordsPerParagraph + 5) + "  Wörtern haben.";
 
       const userContent =
-      "Hallo, ich suche ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
+      "Generiere mir ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. Hier sind einige Details über mein Kind:\n" +
 
       "Name: " + parameter.childName + "\n" +
       "Alter: " + parameter.childAge + "\n" +
@@ -57,7 +57,6 @@ export class TextPromptDesignerSubservice {
       "Erwähne die Lieblingsfarbe und das Lieblingstier/-charakter im ersten Absatz nicht! \n" +
       "Achte auf eine ausreichende Länge der Absätze. \n";
 
-      console.log(systemContent + "\n" + userContent);
     return [
         { role : messageRole.system , content : systemContent },
         { role : messageRole.user , content : userContent }
@@ -76,15 +75,4 @@ export class TextPromptDesignerSubservice {
     ] as IOpenAiPromptMessage[] ;
   }
 
-  public generateCharacterDescriptionsPrompt(): IOpenAiPromptMessage {
-    let characterPrompt = "Search for each named character in your story and look for parts, where the look of a character is detailed. \n"+
-      "Then write a very descriptive character bio, which describes the character in a very visual way. Don't include any behavioral description or reference to the story plot in any way. But try to include everything that is mentioned in the story. \n\n";
-
-    characterPrompt += "Use short sentences in english for your answer.";
-
-    return {
-      role: messageRole.user,
-      content: characterPrompt
-    }
-  }
 }

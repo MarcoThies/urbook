@@ -13,3 +13,7 @@ export interface ICharacterList {
 export interface IStoryPrompts {
   chapterPrompts: string[];
 }
+
+export interface INewChapter {
+  new_chapter: string;
+}

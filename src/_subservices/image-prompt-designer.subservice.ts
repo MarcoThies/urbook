@@ -64,7 +64,7 @@ export class ImagePromptDesignerSubservice {
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
     // 2. Request Prompt from Request Manager to get image prompts
     const promptResults : boolean|string[]  = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-    if(promptResults === false) {
+    if(promptResults === false || (promptResults as string[]).length !== chapters.length){
       return false;
     }
     // 3. Map the result to the chapters
@@ -84,7 +84,7 @@ export class ImagePromptDesignerSubservice {
       "Please write exactly one prompt for each of the following paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
-      return "["+(indx+1)+"] "+cpt.paragraph;
+      return (indx+1)+". "+cpt.paragraph;
     });
     imagePrompt += storyTextJoin.join("\n");
 
@@ -116,6 +116,15 @@ export class ImagePromptDesignerSubservice {
       "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n"+
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
       "- If the content of the prompt is not clear, the AI will not be able to generate a good image."
+
+    instructionPrompt += "\n"+
+      "These rules should enable you to create prompts that work like these examples:\n"+
+      "Input: Es war einmal ein kleiner Junge namens Tom. Er war immer neugierig und liebte es, neue Dinge zu entdecken. Eines Tages fand er eine geheimnisvolle Uhr in seinem Garten. Die Uhr hatte bunte Knöpfe und blinkende Lichter.\n"+
+      "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
+      "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
+      "Output: A boy with brown curly hair and adventures glare but frightened looks enters a time wrap environment::30 it's bright and full of saturated colors and lights::40\n\n"+
+      "Input In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
+      "Output A boy with brown curly hair stand next to a giraffe with a friendly smile::20 they are visiting an old city from medieval times::15\n\n"
 
     instructionPrompt += "\n"+
       "Every time I tell you to write prompts, you create a amazing prompt for a high quality image in a manga or comic style";
