@@ -80,7 +80,7 @@ export class PdfGeneratorSubservice {
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
     await this.addImage(page, this.coverImage, 0.55);
-    this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 500);
+    this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 400);
   }
 
   private async addPage(pageNumber : number) {
@@ -140,21 +140,32 @@ export class PdfGeneratorSubservice {
   // -------------------------------------------------------------------------------------------------------
 
   private addTitle(page : PDFPage, text : string, xpos : number, ypos : number, fontSize : number, maxTextWidth : number = 300) {
-    page.drawRectangle({
-      x: xpos - 10,
-      y: ypos - 15,
-      width: maxTextWidth+20,
-      height: 50,
-      borderWidth: 0,
-      color: rgb(1,1,1)
+    // page.drawRectangle({
+    //   x: xpos - 10,
+    //   y: ypos - 15,
+    //   width: maxTextWidth+20,
+    //   height: 50,
+    //   borderWidth: 0,
+    //   color: rgb(1,1,1)
+    // });
+    page.drawText(text, {
+      x: xpos +2,
+      y: ypos -2,
+      size: fontSize,
+      font: this.titleFont,
+      color: rgb(1, 1, 1),
+      maxWidth: maxTextWidth,
+      lineHeight: fontSize*1.5
+
     });
     page.drawText(text, {
       x: xpos,
       y: ypos,
       size: fontSize,
       font: this.titleFont,
-      color: rgb(0, 0, 0),
-      maxWidth: maxTextWidth
+      color: rgb(152/255, 55/255, 41/255),
+      maxWidth: maxTextWidth,
+      lineHeight: fontSize*1.5
     });
   }
 
