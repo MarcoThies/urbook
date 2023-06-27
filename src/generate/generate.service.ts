@@ -1,6 +1,6 @@
 // Common
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { statusStrings } from "../_shared/utils";
+import { IQueueInfo, statusStrings } from "../_shared/utils";
 
 // Interface & DTO
 import { CreateBookDto } from "./dto/create-book.dto";
@@ -44,9 +44,16 @@ export class GenerateService {
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+
     const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state);
 
-    const statusInfo = statusStrings(myBook.state, currentQueueLength);
+    const queueInfo = (currentQueueLength) ? {
+      index: currentQueueLength[0],
+      target: currentQueueLength[1],
+      percent: Math.round(((currentQueueLength[1]-(currentQueueLength[0]+0.75)) / currentQueueLength[1]) * 100) / 100
+    } as IQueueInfo : undefined;
+
+    const statusInfo = statusStrings(myBook.state, queueInfo);
 
     return {
       bookId: myBook.bookId,
@@ -99,7 +106,7 @@ export class GenerateService {
 
     return {
       bookId: userBook.bookId,
-      status: pdfSaved,
+      status: true,
       timeStamp: new Date().toUTCString
     } as IBookId;
   }

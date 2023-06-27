@@ -115,7 +115,9 @@ export class ImagePromptDesignerSubservice {
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
       "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n"+
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
-      "- If the content of the prompt is not clear, the AI will not be able to generate a good image."
+      "- Do use \"a person..\" or \"a big blue bunny...\" instead of \"the person...\" or \"the bunny...\"! Don't use \"the\" to refer to anything in general \n"+
+
+      "If the content of the prompt is not clear, the AI will not be able to generate a good image."
 
     instructionPrompt += "\n"+
       "These rules should enable you to create prompts that work like these examples:\n"+
@@ -124,7 +126,7 @@ export class ImagePromptDesignerSubservice {
       "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
       "Output: A boy with brown curly hair and adventures glare but frightened looks enters a time wrap environment::30 it's bright and full of saturated colors and lights::40\n\n"+
       "Input In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
-      "Output A boy with brown curly hair stand next to a giraffe with a friendly smile::20 they are visiting an old city from medieval times::15\n\n"
+      "Output A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n"
 
     instructionPrompt += "\n"+
       "Every time I tell you to write prompts, you create a amazing prompt for a high quality image in a manga or comic style";

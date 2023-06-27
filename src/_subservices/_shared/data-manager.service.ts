@@ -6,12 +6,9 @@ import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { ApiKeyEntity } from "./entities/api-keys.entity";
 import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
-import fs from "fs";
-import { BookIdDto } from "./dto/book-id.dto";
 import { LogEntity } from "./entities/log.entity";
-import { urlencoded } from "express";
 import { DatabaseLoggerService } from "./database-logger.service";
-import { LogsDto } from "../../administration/dto/logs.dto";
+import { extname } from 'path';
 
 @Injectable()
 export class DataManagerService {
@@ -92,14 +89,8 @@ export class DataManagerService {
 
   public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
     console.log("Try to update book content");
-    // check if book uses images from online ressources, if yes, download them and link to local file
-    const chapters = book.chapters;
-    for (let ind in chapters) {
-      const currImagePath: string | undefined = chapters[ind].imageUrl;
-      if (currImagePath && currImagePath.includes('https:')){
-        chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
-      }
-    }
+
+    await this.loadAllImages(book);
 
     await this.logManager.log("Book content updated", __filename, "DATABASE", book);
 
@@ -110,7 +101,6 @@ export class DataManagerService {
     return await this.chapterRepo.save(newChapter);
   }
 
-
   public async updateBookState(book: BooksEntity, state: number) {
     console.log("Try to update book state");
     book.state = state;
@@ -118,21 +108,30 @@ export class DataManagerService {
     await this.booksRepo.save(book);
   }
 
+  public async loadAllImages(book: BooksEntity){
+    const chapters = book.chapters;
+    for (let ind in chapters) {
+      const currImagePath: string | undefined = chapters[ind].imageUrl;
+      if (currImagePath && currImagePath.includes('https:')){
+        chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
+      }
+    }
+  }
   private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
-
+    let urlObj = new URL(book.chapters[chapterId].imageUrl);
+    const originalFileEnding = extname(urlObj.pathname);
     // download image and convert it to be writabel to a file
-    const response = await fetch(book.chapters[chapterId].imageUrl);
+    const response = await fetch(urlObj.href);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     // generate path and filename
     const path = "."+this.getBookPath(book) + 'img/';
-    const fileName = chapterId + '.png'
+    const fileName = chapterId + originalFileEnding;
 
     await this.writeFile(buffer, path, fileName);
     await this.logManager.log(`New image saved to system: ${path+fileName}`, __filename, "DATABASE", book);
-
 
     return path + fileName;
   }

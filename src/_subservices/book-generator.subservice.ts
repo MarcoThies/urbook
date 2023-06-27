@@ -105,14 +105,11 @@ export class BookGeneratorSubservice {
 
     // set new Chapter content to book entity
     book.chapters = chapterArr;
-    // update Book status 2 => Story generated | Now generating Characters-Descriptions
+    // update Book status 2 => Story generated | Now generating Characters info
     book.state = 2;
     await this.dataManager.updateBookContent(book);
 
-    // update Book status 3 => Character Descriptions done | Now generating Character Images
-    // await this.dataManager.updateBookState(book, 3);
-
-    // 5. Generate Character-Prompts from Character-Description
+    // list character descriptions into IImageAvatar[]
     let imageAvatars: IImageAvatar[] = [];
     for(let char of storyData.characters) {
       if(char.name.length > 0 && char.info.length > 0){
@@ -123,20 +120,13 @@ export class BookGeneratorSubservice {
       }
     }
     if(imageAvatars.length === 0){
-      // no characters found
+      // no characters found -> failsafe
       await this.logManager.log('Could not generate any character descriptions', __filename, "GENERATE", book);
       await this.errorInPipeline(book);
       return;
     }
-    /*
-    const imageAvatars: IImageAvatar[] = storyData.characters.map((char: ICharacterList) => {
-      return {
-        name: char.name,
-        description: char.info
-      } as IImageAvatar;
-    });
-   */
 
+    // generate Character Image Prompts -> deprecated
     const characterImagePrompts: IImageAvatar[] | boolean = await this.tryRepeat(
       () => this.imagePromptDesigner.generateCharacterPrompts(imageAvatars, book),
       () => this.abortFlag
@@ -151,15 +141,7 @@ export class BookGeneratorSubservice {
     }
     await this.logManager.log('Character image prompts accepted', __filename, "GENERATE", book);
 
-    /*
-    // 6. Request Avatar Images from Image AI
-    const fullAvatarGroup: IImageAvatar[] = await this.requestManager.requestCharacterImages(characterImagePrompts);
-    if(this.abortFlag) {
-      return;
-    }
-    */
-
-    // 7. Match Character-Entities to Chapters story -> Search
+    // match character-Entities to Chapters story -> Search
     const characterMap = new Map<string, CharacterEntity>();
     const chapters = book.chapters;
     for(let ind in chapters) {
@@ -196,15 +178,13 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book);
 
-    // update Book status 4 => Character Avatars Done | Now generating Story Image Prompts
+    // update Book status 3 => Character info done | Now generating Story Image Prompts
     if(this.abortFlag) {
       return;
     }
     await this.dataManager.updateBookState(book, 3);
 
-    // 8. Generate Text-Prompt from Story-Image-Prompt
-    // Create empty Image-Prompt-Group
-    // const chapters = book.chapters;
+    // Generate Text-Prompt from Story-Image-Prompt
     book.chapters = chapters;
     const chaptersWithPrompts = await this.imagePromptDesigner.addImagePromptsToChapter(book);
     if(this.abortFlag) {

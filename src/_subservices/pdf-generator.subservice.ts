@@ -40,6 +40,7 @@ export class PdfGeneratorSubservice {
 
   // generate PDF in A5 format
   public async createA5Book(book: BooksEntity) : Promise<boolean> {
+
     // define PDF attributes
     this.pdfDoc = await PDFDocument.create();
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -47,6 +48,9 @@ export class PdfGeneratorSubservice {
     this.pageDimensions = [PageSizes.A5[1], PageSizes.A5[0] ] as [number, number];
     this.numberOfPages = book.chapters.length * 2;
     this.book = book;
+
+    // ensure that every image is local file
+    await this.dataManager.loadAllImages(book);
 
     this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
 
@@ -240,25 +244,24 @@ export class PdfGeneratorSubservice {
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
 
-    // get image from either weblink or file
-    let pngImageBytes: Buffer;
-    if (imagePath && imagePath.includes('https:')){
-      pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer;
-    } else {
-      pngImageBytes = await this.dataManager.readFile(imagePath) as Buffer;
-    }
-    
-    // embed image into PDF
-    const pngImage = await this.pdfDoc.embedPng(pngImageBytes as ArrayBuffer);
+    // get image from file
+    const pngImageBytes = await this.dataManager.readFile(imagePath) as ArrayBuffer;
 
-    // draw image onto page
-    const pngDims = pngImage.scale(scale);
-    page.drawImage(pngImage, {
-      x: 0 + offset,
-      y: 0,
-      width: pngDims.width,
-      height: pngDims.height,
-    })
+    try {
+      // embed image into PDF
+      const pngImage = await this.pdfDoc.embedPng(pngImageBytes);
+
+      // draw image onto page
+      const pngDims = pngImage.scale(scale);
+      page.drawImage(pngImage, {
+        x: offset,
+        y: 0,
+        width: pngDims.width,
+        height: pngDims.height,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------

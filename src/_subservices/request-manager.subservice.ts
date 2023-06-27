@@ -20,10 +20,8 @@ export class RequestManagerSubservice {
     private readonly dataManager : DataManagerService
   ) {}
 
-  private avatarImageQueue = new RequestQueue();
   private chapterImageQueue = new RequestQueue();
   private abortFlag = false;
-
 
   public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | IOpenAiStoryData> {
     const chapterCount = book.parameterLink.topicChapterCount;
@@ -234,16 +232,14 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt);
   }
 
-  public getCurrentRequestQueueLength(state : number) : number {
+  public getCurrentRequestQueueLength(state : number) : undefined | [number, number] {
     switch (state) {
-      case 3  : return this.avatarImageQueue.length;
-      case 4  : return this.chapterImageQueue.length;
-      default : return 0;
+      case 4  : return [this.chapterImageQueue.length, this.chapterImageQueue.maxLength]; // image midjourney queue
+      default : return undefined;
     }
   }
 
   public clearQueues() {
-    this.avatarImageQueue.clearQueue();
     this.chapterImageQueue.clearQueue();
   }
   
