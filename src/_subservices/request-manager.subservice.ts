@@ -30,20 +30,20 @@ export class RequestManagerSubservice {
     const structure = [
       {
         "name" : "create_child_story",
-        "description" : "A full children's story with "+book.parameterLink.topicChapterCount+" chapters",
+        "description" : "A full children's story with "+book.parameterLink.topicChapterCount+" paragraphs",
         "parameters" : {
           "type"  : "object",
           "properties" : {
             "title" : {
               "type" : "string",
-              "description" : "A fitting title of the story"
+              "description" : "A fitting title for the story"
             },
             "chapters" : {
               "type": "array",
-              "description": "A list of story paragraphs with as many items as required chapters",
+              "description": "A list of text-paragraphs with as many entries as required chapters",
               "items": {
                 "type": "string",
-                "description": "One text paragraph of the story with at least three full sentences or more"
+                "description": "A text paragraph of the story with a minimum of 60 words"
               }
             },
             "characters" : {

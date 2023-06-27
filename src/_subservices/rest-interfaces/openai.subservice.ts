@@ -27,8 +27,8 @@ export class OpenAi {
               name: functions[0].name
             },
             top_p: 1,
-            max_tokens: 2048,
-            temperature: .35,
+            max_tokens: 4096,
+            temperature: .8,
             presence_penalty: 0.2,
             frequency_penalty: 0.2
         });
