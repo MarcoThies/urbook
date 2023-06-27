@@ -42,10 +42,10 @@ export class RequestManagerSubservice {
             },
             "chapters" : {
               "type": "array",
-              "description": "A list of story paragraphs that are at least 45-60 characters in length",
+              "description": "A list of story paragraphs with as many items as required chapters",
               "items": {
                 "type": "string",
-                "description": "One single paragraph of the story"
+                "description": "One single text paragraph of the story with at least 2 sentences"
               }
             },
             "characters" : {
