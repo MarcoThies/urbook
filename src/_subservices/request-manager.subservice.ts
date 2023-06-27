@@ -43,7 +43,7 @@ export class RequestManagerSubservice {
               "description": "A list of story paragraphs with as many items as required chapters",
               "items": {
                 "type": "string",
-                "description": "One single text paragraph of the story with at least 2 sentences"
+                "description": "One text paragraph of the story with at least three full sentences or more"
               }
             },
             "characters" : {
@@ -83,7 +83,17 @@ export class RequestManagerSubservice {
     if(storyData.chapters.length !== chapterCount){
       await this.logManager.error(`Did not get right chapter count back ${storyData.chapters.length} != ${chapterCount}`, __filename, "GENERATE", book);
       return false;
+    }else{
+      // check if all chapters are long enough
+      const minLength = Math.min( ...storyData.chapters.map((chapter) => {
+        return chapter.length;
+      }));
+      if(minLength < 40) {
+        await this.logManager.error(`One chapter didn't reach the required length: ${minLength}/40`, __filename, "GENERATE", book);
+        return false;
+      }
     }
+
     if(storyData.characters.length < 1){
       await this.logManager.error("Did not find any characters in the story", __filename, "GENERATE", book);
       return false;
