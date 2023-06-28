@@ -85,11 +85,11 @@ export class RequestManagerSubservice {
       return false;
     }else{
       // check if all chapters are long enough
-      const minLength = Math.min( ...storyData.chapters.map((chapter) => {
+      const minParaLength = Math.min( ...storyData.chapters.map((chapter) => {
         return chapter.length;
       }));
-      if(minLength < 40) {
-        await this.logManager.error(`One chapter didn't reach the required length: ${minLength}/40`, __filename, "GENERATE", book);
+      if(minParaLength < 40) {
+        await this.logManager.error(`One chapter didn't reach the required length: ${minParaLength}/40`, __filename, "GENERATE", book);
         return false;
       }
     }
@@ -97,6 +97,14 @@ export class RequestManagerSubservice {
     if(storyData.characters.length < 1){
       await this.logManager.error("Did not find any characters in the story", __filename, "GENERATE", book);
       return false;
+    }else{
+      const minCharLength = Math.min( ...storyData.characters.map((char) => {
+        return char.info.length;
+      }));
+      if(minCharLength < 10) {
+        await this.logManager.error(`One character info didn't reach the required length: ${minCharLength}/10`, __filename, "GENERATE", book);
+        return false;
+      }
     }
 
     await this.logManager.log("Story text generated", __filename, "GENERATE", book);

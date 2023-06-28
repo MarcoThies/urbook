@@ -16,7 +16,7 @@ export class MidjourneyApiSubservice {
     });
   }
 
-  private imgQuality = .25; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
+  private imgQuality = 1; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
   // private suffix = "in the style of a children's storybook illustration --ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
   private suffix = "In the style of a children's storybook illustration --no photograph --ar 2:1 --v 5.2 --q "+this.imgQuality;
   // private suffix = "--ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;

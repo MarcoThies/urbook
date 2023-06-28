@@ -81,7 +81,8 @@ export class BookGeneratorSubservice {
     // 2. Generate Story from Story-Prompt
     const story: IOpenAiStoryData | boolean = await this.tryRepeat(
       () => this.requestManager.requestStory(storyPrompt, book),
-      () => this.abortFlag
+      () => this.abortFlag,
+      6
     );
     if(this.abortFlag){
       return;
