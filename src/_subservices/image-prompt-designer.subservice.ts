@@ -84,11 +84,10 @@ export class ImagePromptDesignerSubservice {
       "Please write exactly one prompt for each of the following enumerated paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
+      // Todo add some more character specific info into or before the paragraph and refer to it
       return (indx+1)+". "+cpt.paragraph;
     });
     imagePrompt += storyTextJoin.join("\n");
-
-    // TODO: Map character-description text to appearance of names in the chapter
 
     // place paragraphs
     imagePrompt += "\n\nDo not output any further text except the required answer.";
