@@ -49,6 +49,8 @@ export class DatabaseLoggerService implements LoggerService {
       logEntry.apiKeyLink = user;
     }
 
+    console.log('INFO', message);
+
     await this.logRepo.save(logEntry);
   }
 

@@ -45,13 +45,22 @@ export interface IStatusInfo {
   code: number;
   status: string;
   process?: string;
+  queue?: IQueueInfo;
 }
-export const statusStrings = (status: number, queueLength:number=-1): IStatusInfo => {
+
+export interface IQueueInfo {
+  index: number;
+  target: number;
+  percent: number;
+}
+
+export const statusStrings = (status: number, queueInfo:IQueueInfo|undefined = undefined): IStatusInfo => {
 
 
   const textAi = "openAi - gpt3.5-turbo";
-  const imgAi = "MidJourney - Niji v5";
-  const queueStr = (queueLength > 0) ? queueLength + " more images" : "last image";
+  const imgAi = "MidJourney - v5.2";
+
+  const queueStr = (queueInfo && queueInfo.index > 0) ? queueInfo.index + " more images" : "last image";
 
   let statusDict = {
     "-3": { code: -3,  status: "unknown error" },
@@ -59,9 +68,9 @@ export const statusStrings = (status: number, queueLength:number=-1): IStatusInf
     "-1": { code: -1,  status: "user aborted process" },
     "0": { code: 0,  status: "waiting to start..." },
     "1": { code: 1,  status: "story text", process: textAi},
-    "2": { code: 2,  status: "character descriptions", process: textAi },
-    "3": { code: 3,  status: "avatar images - " + queueStr + " in queue", process: imgAi },
-    "4": { code: 4,  status: "story images - " + queueStr + " in queue", process: imgAi },
+    "2": { code: 2,  status: "character information", process: textAi },
+    "3": { code: 3,  status: "story prompts", process: textAi },
+    "4": { code: 4,  status: "story images - " + queueStr + " in queue", process: imgAi, queue: queueInfo },
     "5": { code: 5,  status: "regenerating chapter text", process: textAi },
     "6": { code: 6,  status: "regenerating chapter image", process: imgAi },
     "9": { code: 9,  status: "generating pdf file", process: "pdf-generator" },

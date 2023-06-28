@@ -6,6 +6,7 @@ import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { IOpenAiPromptMessage, messageRole } from "./interfaces/openai-prompt.interface";
 import { BooksEntity } from "./_shared/entities/books.entity";
+import { ICharacterList } from "./interfaces/story-data.interface";
 
 @Injectable()
 export class ImagePromptDesignerSubservice {
@@ -20,31 +21,23 @@ export class ImagePromptDesignerSubservice {
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
     // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = [];
-    //    Assure that there are as many prompts characters
-    while (characters.length !== promptResultText.length) {
-      if(promptResultText.length !== 0) {
-        await this.logManager.warn('Character prompts dont match required count... retry', __filename, "GENERATE", bookRef);
-        console.log("DEBUG: Detected mismatching no of characters and character prompts - regenerating prompts..");
-      }
-      const resultFromAi = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
-      if(resultFromAi === false) {
-        return false;
-      }
-      promptResultText = resultFromAi as string[][];
-      await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
+    const resultFromAi = await this.requestManager.requestCharacterPromptsForImage(characterPromptConversation);
+    if(resultFromAi === false){
+      return false;
     }
+
+    await this.logManager.log('Generated character image prompts', __filename, "GENERATE", bookRef);
 
     // 3. Map the result to the characters
     for(let i in characters) {
       const charName = characters[i].name;
 
-      const promptMatch = promptResultText.find((item: string[]) => {
-        return item[0] === charName;
+      const promptMatch = Array.from(resultFromAi as ICharacterList[]).find((item: ICharacterList) => {
+        return item.name === charName;
       });
 
       if(promptMatch) {
-        characters[i].prompt = promptMatch[1];
+        characters[i].prompt = promptMatch.prompt;
       }
     }
 
@@ -60,7 +53,6 @@ export class ImagePromptDesignerSubservice {
     });
     characterImagePrompt += charaTextJoin.join("\n\n");
 
-    characterImagePrompt += "\n\nWrite the name of the character in square brackets before the generated prompt. (e.g.: [Max] This is a prompt). Do not output any further text except the required answer.";
     promptConversation.push({role: messageRole.user, content: characterImagePrompt} as IOpenAiPromptMessage);
 
     return promptConversation;
@@ -69,36 +61,17 @@ export class ImagePromptDesignerSubservice {
   public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<boolean|ChapterEntity[]>{
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
     // 1. Generate one Text Prompt for creating image Prompts
-    console.log("DBG: started");
     const textForImagePrompt: IOpenAiPromptMessage[] = this.generateStoryImagePrompts(chapters);
-    // 2. Request Prompt from Request Manager to get single image prompts
-    let promptResultText: string[][] = [];
-    //    Assure that there are as many prompts characters
-    console.log("DBG: started2" + promptResultText.length + chapters.length);
-    while (promptResultText.length !== chapters.length) {
-      if (promptResultText.length !== 0) {
-        await this.logManager.warn('Story image prompts dont match required count... retry', __filename, "GENERATE", book);
-        console.log("DEBUG: Detected mismatching no. of chapters and chapter prompts - regenerating prompts..");
-      }
-      console.log("DBG: loop started");
-      const promptResults : boolean|string[][]  = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
-      if(promptResults === false) {
-        return false;
-      }
-      promptResultText = promptResults as string[][];
-      await this.logManager.log('Generated story image prompts successfully', __filename, "GENERATE", book);
+    // 2. Request Prompt from Request Manager to get image prompts
+    const promptResults : boolean|string[]  = await this.requestManager.requestImagePromptsForImage(textForImagePrompt);
+    if(promptResults === false || (promptResults as string[]).length < chapters.length){
+      return false;
     }
-    console.log("DBG: started3");
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      if(!promptResultText[i] || promptResultText[i].length < 2) {
-        console.log("Chapter " + i + ": \n" + promptResultText[i] + "\n");
-        continue;
-      }
-      chapters[i].prompt = promptResultText[i][1];
+      chapters[i].prompt = promptResults[i];
       chapters[i].changed = new Date();
     }
-    console.log("DBG: Length " + chapters.length + "\nContent" + chapters[0].prompt + " \nimgUrl" + chapters[0].imageUrl);
 
     return chapters;
   }
@@ -108,17 +81,16 @@ export class ImagePromptDesignerSubservice {
 
     // let imageImagePrompt = this.addImageAiInstruction();
     let imagePrompt = ""+
-      "Please write exactly one prompt for each of the following paragraphs."+
+      "Please write exactly one prompt for each of the following enumerated paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
-      return "["+(indx+1)+"] "+cpt.paragraph;
+      // Todo add some more character specific info into or before the paragraph and refer to it
+      return (indx+1)+". "+cpt.paragraph;
     });
     imagePrompt += storyTextJoin.join("\n");
 
-    // TODO: Map character-description text to appearance of names in the chapter
-
     // place paragraphs
-    imagePrompt += "\n\nDo not output any further text except the required answer. Write the index of the paragraph in square brackets before the generated prompt. (e.g.: [1] This is the first prompt).";
+    imagePrompt += "\n\nDo not output any further text except the required answer.";
     promptConversation.push(
       {role: messageRole.user, content: imagePrompt} as IOpenAiPromptMessage
     );
@@ -130,23 +102,33 @@ export class ImagePromptDesignerSubservice {
     let instructionPrompt = ""+
       "You are an language model specialized in writing prompts for an image generating ai.\n"+
       "Prompts are short descriptive sentences that can be used to generate images from text.\n"+
-      "Here are the rules you have to follow when writing prompts:\n\n";
+      "Here are the rules you must abide to when writing prompts:\n";
 
-    instructionPrompt += "\n\n"+
-      "- Use describing adjectives but keep it to important details when describing an image\n" +
-      "- do not use character names, or any names at all" +
+    instructionPrompt += "\n"+
+      "- Use describing adjectives but keep it to only important details when describing an image\n" +
       "- do not reference the story plot in any way\n" +
       "- do not describe any actions or events, rather describe the scene\n" +
-      "- don not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a scene\n" +
+      "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
       "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
-      "- Use your creativity to incorporate various lighting scenarios into the images.\n" +
-      "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n";
+      "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n"+
+      "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
+      "- Do use \"a person..\" or \"a big blue bunny...\" instead of \"the person...\" or \"the bunny...\"! Don't use \"the\" to refer to anything in general \n"+
 
-    instructionPrompt += "\n\n"+
-      "Every time I tell you to write prompts, you will imagine you are writing a prompt for a specific high budget film director to create an image that will he or she will use to pitch a scene to executives that will convince them, based on its creativity, concept, depth of intrigue and imagery to invest billions of dollars into the production of this movie.\n"+
-      "Describe the image in the prompt. Write a prompt.";
+      "If the content of the prompt is not clear, the AI will not be able to generate a good image."
+
+    instructionPrompt += "\n"+
+      "These rules should enable you to create prompts that work like these examples:\n"+
+      "Input: Es war einmal ein kleiner Junge namens Tom. Er war immer neugierig und liebte es, neue Dinge zu entdecken. Eines Tages fand er eine geheimnisvolle Uhr in seinem Garten. Die Uhr hatte bunte Knöpfe und blinkende Lichter.\n"+
+      "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
+      "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
+      "Output: A boy with brown curly hair and adventures glare but frightened looks enters a time wrap environment::30 it's bright and full of saturated colors and lights::40\n\n"+
+      "Input In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
+      "Output A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n"
+
+    instructionPrompt += "\n"+
+      "Every time I tell you to write prompts, you create a amazing prompt for a high quality image in a manga or comic style";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 

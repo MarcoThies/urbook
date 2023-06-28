@@ -1,25 +1,27 @@
 // Common
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { IQueueInfo, statusStrings } from "../_shared/utils";
 
 // Interface & DTO
 import { CreateBookDto } from "./dto/create-book.dto";
 import { IBookId } from "./interfaces/book-id.interface";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
+import { IBookState } from "./interfaces/book-state.interface";
 
 // Sub-Services
 import { BookGeneratorSubservice } from "../_subservices/book-generator.subservice";
 import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
-import { IBookState } from "./interfaces/book-state.interface";
 import { RequestManagerSubservice } from '../_subservices/request-manager.subservice';
-import { statusStrings } from "../_shared/utils";
+import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
 
 @Injectable()
 export class GenerateService {
   constructor(
     private readonly dataManager: DataManagerService,
     private readonly bookGenSubservice : BookGeneratorSubservice,
+    private readonly pdfGenSubservice : PdfGeneratorSubservice,
     private readonly logManager : DatabaseLoggerService,
     private readonly requestManager : RequestManagerSubservice
   ) {}
@@ -42,9 +44,16 @@ export class GenerateService {
   public async checkStatus(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+
     const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state);
 
-    const statusInfo = statusStrings(myBook.state, currentQueueLength);
+    const queueInfo = (currentQueueLength) ? {
+      index: currentQueueLength[0],
+      target: currentQueueLength[1],
+      percent: Math.round(((currentQueueLength[1]-(currentQueueLength[0]+0.75)) / currentQueueLength[1]) * 100) / 100
+    } as IQueueInfo : undefined;
+
+    const statusInfo = statusStrings(myBook.state, queueInfo);
 
     return {
       bookId: myBook.bookId,
@@ -86,5 +95,19 @@ export class GenerateService {
   }
 
 
+  async regeneratePDF(bookId: string, user: ApiKeyEntity) {
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
 
+    const userBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+
+    const pdfSaved = await this.pdfGenSubservice.createA5Book(userBook);
+
+    return {
+      bookId: userBook.bookId,
+      status: true,
+      timeStamp: new Date().toUTCString
+    } as IBookId;
+  }
 }

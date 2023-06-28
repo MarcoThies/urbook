@@ -1,12 +1,11 @@
 import { Configuration, OpenAIApi } from "openai";
 import { Injectable } from "@nestjs/common";
-import { DatabaseLoggerService } from "../_shared/database-logger.service";
 import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
+import { ICharacterList, INewChapter, IOpenAiStoryData, IStoryPrompts } from "../interfaces/story-data.interface";
 
 @Injectable()
 export class OpenAi {
   constructor(
-    dataLogger: DatabaseLoggerService
   ) {}
 
   private configuration = new Configuration({
@@ -16,20 +15,40 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT35(prompt: string) : Promise<string | boolean> {
-    console.log({prompt: prompt} as any);
+  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts | INewChapter | boolean> {
+      console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
         let completion = await this.openai.createChatCompletion( {
-            model: "gpt-3.5-turbo",
-            messages: [{role: "user", content: prompt}],
-            max_tokens: 2048,
-            temperature: 1.69,
-            presence_penalty: 0.25,
-            frequency_penalty: 0.6
+            model: "gpt-3.5-turbo-16k",
+            messages: messages,
+            functions: functions,
+            function_call: {
+              name: functions[0].name
+            },
+            top_p: 1,
+            max_tokens: 4096,
+            temperature: .8,
+            presence_penalty: 0.2,
+            frequency_penalty: 0.2
         });
-        const result = completion.data.choices[0].message?.content as string;
-        console.log("\n\nDEBUG: plain answer: ", result);
+        // top_p: 0.3,
+        // max_tokens: 2048,
+        // temperature: 1.69,
+        // presence_penalty: 0.25,
+        // frequency_penalty: 0.6
+        if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
+          console.log(completion.data);
+          return false;
+        }
+
+        const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
+        if(!result){
+          console.log(completion.data.choices[0].message?.function_call.arguments);
+          return false;
+        }
+
+        console.log("\n\nDEBUG: parsed json: ", result);
         return result;
 
     } catch (error) {

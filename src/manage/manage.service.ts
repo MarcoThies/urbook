@@ -7,6 +7,8 @@ import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { BookIdDto } from '../_subservices/_shared/dto/book-id.dto';
 import { IDeletedBook } from './interfaces/delete-book.interface';
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
+import { statusStrings } from "../_shared/utils";
+import { IBookInfo } from "../administration/interface/user-data.interface";
 
 
 @Injectable()
@@ -16,9 +18,18 @@ export class ManageService {
     private readonly logManager : DatabaseLoggerService,
   ) {}
 
-  public async listBooks(user: ApiKeyEntity): Promise<BooksEntity[]> {
+  public async listBooks(user: ApiKeyEntity): Promise<IBookInfo[]> {
     await this.logManager.log("Receives list of his books", __filename, "MANAGE", undefined, user);
-    return await this.dataManager.getBookList(user);
+    const allUserBooks = await this.dataManager.getBookList(user, false); // not enforced, to only get own books
+    return allUserBooks.map(book => {
+      return {
+        title: book.title,
+        bookId: book.bookId,
+        created: book.createdAt.toUTCString(),
+        chapterCount: book.chapters.length,
+        state: statusStrings(book.state),
+      } as IBookInfo;
+    })
   }
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<IDeletedBook> {

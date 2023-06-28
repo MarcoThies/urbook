@@ -1,5 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PDFDocument, PDFPage, PDFFont, StandardFonts, rgb, PageSizes} from "pdf-lib";
+import {
+  PDFDocument,
+  PDFPage,
+  PDFFont,
+  StandardFonts,
+  rgb,
+  PageSizes,
+  Color,
+  BlendMode,
+  Rotation
+} from "pdf-lib";
 import { BooksEntity } from "./_shared/entities/books.entity";
 import { DataManagerService } from "./_shared/data-manager.service";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
@@ -30,6 +40,7 @@ export class PdfGeneratorSubservice {
 
   // generate PDF in A5 format
   public async createA5Book(book: BooksEntity) : Promise<boolean> {
+
     // define PDF attributes
     this.pdfDoc = await PDFDocument.create();
     this.textFont = await this.pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -37,6 +48,9 @@ export class PdfGeneratorSubservice {
     this.pageDimensions = [PageSizes.A5[1], PageSizes.A5[0] ] as [number, number];
     this.numberOfPages = book.chapters.length * 2;
     this.book = book;
+
+    // ensure that every image is local file
+    await this.dataManager.loadAllImages(book);
 
     this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
 
@@ -80,7 +94,7 @@ export class PdfGeneratorSubservice {
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
     await this.addImage(page, this.coverImage, 0.55);
-    this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 30, 500);
+    this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 35, 500);
   }
 
   private async addPage(pageNumber : number) {
@@ -140,22 +154,59 @@ export class PdfGeneratorSubservice {
   // -------------------------------------------------------------------------------------------------------
 
   private addTitle(page : PDFPage, text : string, xpos : number, ypos : number, fontSize : number, maxTextWidth : number = 300) {
-    page.drawRectangle({
-      x: xpos - 10,
-      y: ypos - 15,
-      width: maxTextWidth+20,
-      height: 50,
-      borderWidth: 0,
-      color: rgb(1,1,1)
-    });
-    page.drawText(text, {
-      x: xpos,
-      y: ypos,
-      size: fontSize,
-      font: this.titleFont,
-      color: rgb(0, 0, 0),
-      maxWidth: maxTextWidth
-    });
+
+    const bgColor: Color = rgb(0, 0, 0);
+    const frontTextColor: Color = rgb(220/255, 130/255, 80/255);
+    this.drawTitleTextBox(page, text, xpos, ypos, -2, 15, 5, fontSize, 1.3*fontSize, bgColor, frontTextColor, maxTextWidth);
+
+  }
+
+  private drawTitleTextBox(page:PDFPage, text:string, xStart:number, yStart:number,
+                           charDistance=0, wordDistance=0, bgPadding=0, fontSize: number, lineHeight,
+                           bgcolor:Color, color:Color, maxWidth=300){
+    const words = text.split(" ");
+    let y = yStart;
+    let x = xStart;
+    const spaceWidth = this.titleFont.widthOfTextAtSize(" ", fontSize);
+
+    const boxLineHeight = lineHeight*.65;
+
+    for (let w of words){
+      // get width of next word
+      const wordWidth = this.titleFont.widthOfTextAtSize(w, fontSize);
+      if(x + wordWidth >= maxWidth){
+        y -= lineHeight;
+        x = xStart;
+      }
+
+      // draw background
+      page.drawRectangle({
+        x: x - bgPadding,
+        y: y - (fontSize*0.3) + ((lineHeight-boxLineHeight)/2) - bgPadding,
+        width: wordWidth + 2*bgPadding + ((w.length-1) * charDistance),
+        height: boxLineHeight + 2*bgPadding,
+        borderWidth: 0,
+        blendMode: BlendMode.Normal,
+        color: bgcolor,
+        opacity: 0.6
+      });
+
+      // draw single character
+      for(let i=0; i<w.length; i++){
+        const char = w.charAt(i);
+        const charWidth = this.titleFont.widthOfTextAtSize(char, fontSize);
+        page.drawText(char, {
+          x: x,
+          y: y,
+          size: fontSize,
+          font: this.titleFont,
+          color: color,
+          lineHeight: lineHeight
+        });
+        x += charWidth + charDistance;
+      }
+      x += spaceWidth + wordDistance;
+    }
   }
 
   private addText(page : PDFPage, text : string, xpos : number, ypos : number, fontSize : number, maxTextWidth = 300, lineHeight = fontSize*1.5) {
@@ -193,25 +244,24 @@ export class PdfGeneratorSubservice {
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
 
-    // get image from either weblink or file
-    let pngImageBytes: Buffer;
-    if (imagePath && imagePath.includes('https:')){
-      pngImageBytes = await fetch(imagePath).then((res) => res.arrayBuffer()) as Buffer;
-    } else {
-      pngImageBytes = await this.dataManager.readFile(imagePath) as Buffer;
-    }
-    
-    // embed image into PDF
-    const pngImage = await this.pdfDoc.embedPng(pngImageBytes as ArrayBuffer);
+    // get image from file
+    const pngImageBytes = await this.dataManager.readFile(imagePath) as ArrayBuffer;
 
-    // draw image onto page
-    const pngDims = pngImage.scale(scale);
-    page.drawImage(pngImage, {
-      x: 0 + offset,
-      y: 0,
-      width: pngDims.width,
-      height: pngDims.height,
-    })
+    try {
+      // embed image into PDF
+      const pngImage = await this.pdfDoc.embedPng(pngImageBytes);
+
+      // draw image onto page
+      const pngDims = pngImage.scale(scale);
+      page.drawImage(pngImage, {
+        x: offset,
+        y: 0,
+        width: pngDims.width,
+        height: pngDims.height,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // -------------------------------------------------------------------------------------------------------
