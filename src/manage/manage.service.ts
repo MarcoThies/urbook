@@ -22,13 +22,22 @@ export class ManageService {
     await this.logManager.log("Receives list of his books", __filename, "MANAGE", undefined, user);
     const allUserBooks = await this.dataManager.getBookList(user, false); // not enforced, to only get own books
     return allUserBooks.map(book => {
-      return {
+
+
+      const chapterLength = book.chapters ? book.chapters.length : 0;
+
+      let newBookEntry = {
         title: book.title,
         bookId: book.bookId,
         created: book.createdAt.toUTCString(),
         chapterCount: book.chapters.length,
         state: statusStrings(book.state),
       } as IBookInfo;
+
+      if(chapterLength > 0 && book.chapters[chapterLength-1].imageUrl && book.chapters[chapterLength-1].imageUrl.length > 0){
+        newBookEntry.cover = book.chapters[chapterLength-1].imageUrl;
+      }
+      return newBookEntry;
     })
   }
 

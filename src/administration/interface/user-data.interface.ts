@@ -11,6 +11,7 @@ export interface IUserData{
 export interface IBookInfo {
   title: string,
   bookId: string,
+  cover?: string,
   created: string,
   chapterCount: number,
   state: IStatusInfo
