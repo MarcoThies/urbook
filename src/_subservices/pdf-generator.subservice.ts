@@ -50,7 +50,7 @@ export class PdfGeneratorSubservice {
     this.book = book;
 
     // ensure that every image is local file
-    await this.dataManager.loadAllImages(book);
+    // await this.dataManager.loadAllImages(book);
 
     this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
 
@@ -91,6 +91,10 @@ export class PdfGeneratorSubservice {
   // --- - the schematics in which pages and content is organised are procided by utility method          --
   // -------------------------------------------------------------------------------------------------------
 
+  private async fetchImage(imageUrl : string) : Promise<ArrayBuffer> {
+    // Fetch image
+    return await fetch(imageUrl).then(res => res.arrayBuffer());
+  }
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
     await this.addImage(page, this.coverImage, 0.55);
@@ -245,7 +249,12 @@ export class PdfGeneratorSubservice {
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
 
     // get image from file
-    const pngImageBytes = await this.dataManager.readFile(imagePath) as ArrayBuffer;
+    let pngImageBytes;
+    if (imagePath.includes('https:')) {
+      pngImageBytes = await this.fetchImage(imagePath) as ArrayBuffer;
+    } else {
+      pngImageBytes = await this.dataManager.readFile(imagePath) as ArrayBuffer;
+    }
 
     try {
       // embed image into PDF

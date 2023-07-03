@@ -90,7 +90,7 @@ export class DataManagerService {
   public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
     console.log("Try to update book content");
 
-    await this.loadAllImages(book);
+    // await this.loadAllImages(book);
 
     await this.logManager.log("Book content updated", __filename, "DATABASE", book);
 
