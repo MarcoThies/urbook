@@ -10,6 +10,7 @@ import { LogEntity } from "./entities/log.entity";
 import { DatabaseLoggerService } from "./database-logger.service";
 import * as path from 'path';
 import { extname } from 'path';
+import * as process from "process";
 
 @Injectable()
 export class DataManagerService {
@@ -148,14 +149,15 @@ export class DataManagerService {
   }
 
   public getLivePath(filePath: string): string{
-    if(!process.env.LIVE_URL || !process.env.FILE_PORT) return filePath;
+    if(!process.env.LIVE_URL || !process.env.FILE_SSL || !process.env.FILE_PORT) return filePath;
 
     const stripedDomain = (process.env.LIVE_URL as string).endsWith('/') ? (process.env.LIVE_URL as string).slice(0, -1) : (process.env.LIVE_URL as string);
     const liveDomain = stripedDomain + ":" + process.env.FILE_PORT as string;
 
     if (filePath.includes('./exports')) {
       const newUrl = filePath.replace('./exports', '');
-      filePath = path.join(liveDomain, newUrl);
+      filePath = ((process.env.FILE_SSL).toLowerCase() === "false") ? 'https://' : 'http://';
+      filePath += path.join(liveDomain, newUrl);
     }
 
     return filePath;
