@@ -164,8 +164,6 @@ export class DataManagerService {
       imageFile = filePath;
     }
 
-    console.log(imageFile);
-
     return imageFile;
   }
 
