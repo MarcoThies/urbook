@@ -69,7 +69,6 @@ export class ManageService {
   public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
     const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
     await this.logManager.log(`Request single book ${bookIdDto.bookId}`, __filename, "MANAGE", userBook, user);
-    if(!process.env.LIVE_URL || !process.env.FILE_PORT) return userBook;
 
     userBook.chapters = userBook.chapters.map((chapter) => {
       chapter.imageUrl = this.dataManager.getLivePath(chapter.imageUrl);

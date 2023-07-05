@@ -149,7 +149,9 @@ export class DataManagerService {
 
   public getLivePath(filePath: string): string{
     if(!process.env.LIVE_URL || !process.env.FILE_PORT) return filePath;
-    const liveDomain = process.env.LIVE_URL as string + ":" + process.env.FILE_PORT as string;
+
+    const stripedDomain = (process.env.LIVE_URL as string).endsWith('/') ? (process.env.LIVE_URL as string).slice(0, -1) : (process.env.LIVE_URL as string);
+    const liveDomain = stripedDomain + ":" + process.env.FILE_PORT as string;
 
     if (filePath.includes('./exports')) {
       const newUrl = filePath.replace('./exports', '');
