@@ -8,8 +8,8 @@ import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
 import { LogEntity } from "./entities/log.entity";
 import { DatabaseLoggerService } from "./database-logger.service";
-import { extname } from "path";
-import path from "path";
+import * as path from 'path';
+import { extname } from 'path';
 
 @Injectable()
 export class DataManagerService {
