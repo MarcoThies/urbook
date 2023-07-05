@@ -153,14 +153,20 @@ export class DataManagerService {
 
     const stripedDomain = (process.env.LIVE_URL as string).endsWith('/') ? (process.env.LIVE_URL as string).slice(0, -1) : (process.env.LIVE_URL as string);
     const liveDomain = stripedDomain + ":" + process.env.FILE_PORT as string;
+    let imageFile;
 
     if (filePath.includes('./exports')) {
       const newUrl = filePath.replace('./exports', '');
-      filePath = ((process.env.FILE_SSL).toLowerCase() === "false") ? 'https://' : 'http://';
-      filePath += path.join(liveDomain, newUrl);
+      const joinedUrl = path.join(liveDomain, newUrl);
+      const sslPrefix = ((process.env.FILE_SSL).toLowerCase() === "false") ? 'http' : 'https';
+      imageFile = sslPrefix + "://" + joinedUrl;
+    }else{
+      imageFile = filePath;
     }
 
-    return filePath;
+    console.log(imageFile);
+
+    return imageFile;
   }
 
   public async fileExists(filePath : string, fileSystem: any) : Promise<Boolean> {
