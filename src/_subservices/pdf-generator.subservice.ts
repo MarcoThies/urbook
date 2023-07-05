@@ -71,7 +71,7 @@ export class PdfGeneratorSubservice {
     // write PDf into file
     const pdfBytes = await this.pdfDoc.save();
 
-    const fileName = book.title + '-v2' + '.pdf'
+    const fileName = book.title + '.pdf'
     const path = "."+this.dataManager.getBookPath(book);
 
     const pdfSuccessfullySaved = await this.dataManager.writeFile(pdfBytes, path, fileName);
