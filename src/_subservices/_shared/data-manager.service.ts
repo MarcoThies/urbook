@@ -42,7 +42,8 @@ export class DataManagerService {
     } else {
       await this.logManager.log("User receives list of his books", __filename, "DATABASE", undefined, user);
       return await this.booksRepo.find({
-        where: { apiKeyLink: user }
+        where: { apiKeyLink: user },
+        relations: ['apiKeyLink']
       });
     }
   }
@@ -112,14 +113,31 @@ export class DataManagerService {
 
   public async loadAllImages(book: BooksEntity){
     const chapters = book.chapters;
-    for (let ind in chapters) {
-      const currImagePath: string | undefined = chapters[ind].imageUrl;
-      if (currImagePath && currImagePath.includes('https:')){
-        chapters[ind].imageUrl = await this.downloadChapterImage(book, ind);
+
+    const fs = require("fs").promises;
+    // get List of saved images
+    const bookPath = this.getLocalImageDir(book);
+
+    let imgList: string[] = [];
+    // just loop throug missing files
+    for(let ind in chapters) {
+      const localImgPath = bookPath + ind + '.png';
+      if(await this.fileExists(localImgPath, fs)){
+        console.log("Image file already downloaded", localImgPath);
+        imgList[ind] = localImgPath;
+        continue;
+      }
+
+      const currImageUrl: string | undefined = chapters[ind].imageUrl;
+      if (currImageUrl && currImageUrl.includes('https:')){
+        imgList[ind] = await this.downloadChapterImage(book, ind);;
       }
     }
+
+    return imgList;
   }
-  private async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
+
+  public async downloadChapterImage(book : BooksEntity, chapterId : string): Promise<string> {
     let urlObj = new URL(book.chapters[chapterId].imageUrl);
     const originalFileEnding = extname(urlObj.pathname);
     // download image and convert it to be writabel to a file
@@ -129,7 +147,7 @@ export class DataManagerService {
     const buffer = Buffer.from(arrayBuffer);
 
     // generate path and filename
-    const path = "."+this.getBookPath(book) + 'img/';
+    const path = this.getLocalImageDir(book);
     const fileName = chapterId + originalFileEnding;
 
     await this.writeFile(buffer, path, fileName);
@@ -138,6 +156,9 @@ export class DataManagerService {
     return path + fileName;
   }
 
+  public getLocalImageDir(book: BooksEntity): string {
+    return "." + this.getBookPath(book) + "img/";
+  }
   public getBookPath(book : BooksEntity) : string {
     const book_id = book.bookId;
     return this.getUserPath(book) + book_id + '/';
@@ -148,6 +169,7 @@ export class DataManagerService {
     return '/exports/' + user_id + '/';
   }
 
+
   public getLivePath(filePath: string): string{
     if(!process.env.LIVE_URL || !process.env.FILE_SSL || !process.env.FILE_PORT) return filePath;
 
@@ -155,7 +177,7 @@ export class DataManagerService {
     const liveDomain = stripedDomain + ":" + process.env.FILE_PORT as string;
     let imageFile;
 
-    if (filePath.includes('./exports')) {
+    if (filePath.length > 0 && filePath.includes('./exports')) {
       const newUrl = filePath.replace('./exports', '');
       const joinedUrl = path.join(liveDomain, newUrl);
       const sslPrefix = ((process.env.FILE_SSL).toLowerCase() === "false") ? 'http' : 'https';
