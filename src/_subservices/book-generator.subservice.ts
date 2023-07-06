@@ -348,6 +348,7 @@ export class BookGeneratorSubservice {
       return;
     }
 
+    console.log(newChapterArray);
     book.chapters[chapterId] = (newChapterArray as ChapterEntity[])[0];
 
     // write File to disk

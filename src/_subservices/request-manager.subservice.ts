@@ -209,6 +209,7 @@ export class RequestManagerSubservice {
   public async requestStoryImages(book: BooksEntity, chapterId?:number) : Promise<boolean|ChapterEntity[]> {
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
 
+    console.log(chapterId, chapters);
     await this.logManager.log(`Adding ${chapters.length} requests to MidJourney queue`, __filename, "GENERATE", book);
 
     for(let x in chapters) {
