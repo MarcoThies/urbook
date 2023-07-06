@@ -50,14 +50,8 @@ export class PdfGeneratorSubservice {
     this.book = book;
 
     // ensure that every image is local file
-<<<<<<< HEAD
-    // await this.dataManager.loadAllImages(book);
-
-    this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
-
-=======
     this.imageList = await this.dataManager.loadAllImages(book);
->>>>>>> 8dcbc6dc93f52b9c8a4643a852a9031f8241aa22
+
     // add cover page
     await this.addCoverPage();
     await this.logManager.log(`Cover generated`, __filename, "PDF", book);
