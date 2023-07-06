@@ -10,7 +10,6 @@ export class RequestQueue {
         this.isRunning = false;
     }
 
-
     private queue : IQueueEntry[];
     private isRunning : boolean;
     private resolveEmptyPromise: null | Function = null;
@@ -63,9 +62,8 @@ export class RequestQueue {
     }
 
     public get length(): number {
-        return this.queue.length;
+        return this.queue.length | 0;
     }
-
 
     public clearQueue() {
         this.queue = [] as IQueueEntry[];

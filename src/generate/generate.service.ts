@@ -46,11 +46,12 @@ export class GenerateService {
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
 
     const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state);
+
     const queueLength = myBook.chapters.length;
-    const queueInfo = (currentQueueLength) ? {
-      index: currentQueueLength,
+    const queueInfo = (currentQueueLength !== false) ? {
+      left: currentQueueLength,
       target: queueLength,
-      percent: Math.round(((queueLength-(currentQueueLength[0]+0.75)) / queueLength) * 100) / 100
+      percent: Math.round(((queueLength-currentQueueLength) / queueLength) * 100) / 100
     } as IQueueInfo : undefined;
 
     const statusInfo = statusStrings(myBook.state, queueInfo);
@@ -106,7 +107,7 @@ export class GenerateService {
 
     return {
       bookId: userBook.bookId,
-      status: true,
+      status: pdfSaved,
       timeStamp: new Date().toUTCString
     } as IBookId;
   }

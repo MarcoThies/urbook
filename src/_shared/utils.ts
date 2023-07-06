@@ -49,7 +49,7 @@ export interface IStatusInfo {
 }
 
 export interface IQueueInfo {
-  index: number;
+  left: number;
   target: number;
   percent: number;
 }
@@ -60,7 +60,7 @@ export const statusStrings = (status: number, queueInfo:IQueueInfo|undefined = u
   const textAi = "openAi - gpt3.5-turbo";
   const imgAi = "MidJourney - v5.2";
 
-  const queueStr = (queueInfo && queueInfo.index > 0) ? queueInfo.index + " more images" : "last image";
+  const queueStr = (queueInfo && queueInfo.left > 0) ? queueInfo.left + " more images" : "last image";
 
   let statusDict = {
     "-3": { code: -3,  status: "unknown error" },

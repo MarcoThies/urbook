@@ -250,10 +250,10 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt);
   }
 
-  public getCurrentRequestQueueLength(state : number) : undefined | number {
+  public getCurrentRequestQueueLength(state : number) : false | number {
     switch (state) {
       case 4  : return this.chapterImageQueue.length; // image midjourney queue
-      default : return undefined;
+      default : return false;
     }
   }
 
