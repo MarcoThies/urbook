@@ -130,7 +130,7 @@ export class DataManagerService {
 
       const currImageUrl: string | undefined = chapters[ind].imageUrl;
       if (currImageUrl && currImageUrl.includes('https:')){
-        imgList[ind] = await this.downloadChapterImage(book, ind);;
+        imgList[ind] = await this.downloadChapterImage(book, ind);
       }
     }
 
