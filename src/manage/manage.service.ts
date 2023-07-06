@@ -9,6 +9,7 @@ import { IDeletedBook } from './interfaces/delete-book.interface';
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 import { statusStrings } from "../_shared/utils";
 import { IBookInfo } from "../administration/interface/user-data.interface";
+import { promises as fs } from "fs";
 
 
 @Injectable()
@@ -21,9 +22,9 @@ export class ManageService {
   public async listBooks(user: ApiKeyEntity): Promise<IBookInfo[]> {
     await this.logManager.log("Receives list of his books", __filename, "MANAGE", undefined, user);
     const allUserBooks = await this.dataManager.getBookList(user, false); // not enforced, to only get own books
-    return allUserBooks.map(book => {
 
-
+    const BookArray: IBookInfo[] = [];
+    for(const book of allUserBooks){
       const chapterLength = book.chapters ? book.chapters.length : 0;
 
       let newBookEntry = {
@@ -34,11 +35,21 @@ export class ManageService {
         state: statusStrings(book.state),
       } as IBookInfo;
 
+      const localImageDir = this.dataManager.getLocalImageDir(book);
+      const imgFiles = await this.getLocalImages(localImageDir);
+
       if(chapterLength > 0 && book.chapters[chapterLength-1].imageUrl && book.chapters[chapterLength-1].imageUrl.length > 0){
-        newBookEntry.cover = this.dataManager.getLivePath(book.chapters[chapterLength-1].imageUrl);
+        if(!imgFiles){
+          newBookEntry.cover = book.chapters[chapterLength - 1].imageUrl;
+        }else{
+          // check if book cover is downloaded
+          const localCoverName = (chapterLength-1).toString()+".png";
+          newBookEntry.cover = imgFiles.includes(localCoverName) ? this.dataManager.getLivePath(localImageDir+localCoverName) : book.chapters[chapterLength - 1].imageUrl;
+        }
       }
-      return newBookEntry;
-    })
+      BookArray.push(newBookEntry);
+    }
+    return BookArray
   }
 
   public async deleteBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<IDeletedBook> {
@@ -70,11 +81,35 @@ export class ManageService {
     const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
     await this.logManager.log(`Request single book ${bookIdDto.bookId}`, __filename, "MANAGE", userBook, user);
 
-    userBook.chapters = userBook.chapters.map((chapter) => {
-      chapter.imageUrl = this.dataManager.getLivePath(chapter.imageUrl);
+    const localImageDir = this.dataManager.getLocalImageDir(userBook);
+    const imgFiles = await this.getLocalImages(localImageDir);
+
+    if(!imgFiles) {
+      return userBook;
+    }
+    // map live URLs to chapter if images are local
+    userBook.chapters = userBook.chapters.map((chapter, index) => {
+      // check if File already exists
+      const localImageName = index.toString()+".png";
+
+      if(imgFiles.includes(localImageName)){
+        // Bild local heruntergeladen
+        chapter.imageUrl = this.dataManager.getLivePath(localImageDir+localImageName);
+      }
       return chapter;
     });
+
     return userBook;
+  }
+
+  private async getLocalImages(dir: string): Promise<string[]|false> {
+    try {
+      const fs = require("fs").promises;
+      return await fs.readdir(dir);
+    } catch (e) {
+      console.log('Book directory missing', dir);
+      return false;
+    }
   }
 
   public async getPdf(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<any> {

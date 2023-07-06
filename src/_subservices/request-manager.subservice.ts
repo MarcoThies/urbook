@@ -250,9 +250,9 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt);
   }
 
-  public getCurrentRequestQueueLength(state : number) : undefined | [number, number] {
+  public getCurrentRequestQueueLength(state : number) : undefined | number {
     switch (state) {
-      case 4  : return [this.chapterImageQueue.length, this.chapterImageQueue.maxLength]; // image midjourney queue
+      case 4  : return this.chapterImageQueue.length; // image midjourney queue
       default : return undefined;
     }
   }

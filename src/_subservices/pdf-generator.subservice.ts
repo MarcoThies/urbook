@@ -28,7 +28,7 @@ export class PdfGeneratorSubservice {
   private pageDimensions;
   private numberOfPages;
   private book;
-  private coverImage;
+  private imageList: string[] = [];
 
   private gradients: any = {
     left: "./src/_assets/gradient-left.png",
@@ -50,10 +50,14 @@ export class PdfGeneratorSubservice {
     this.book = book;
 
     // ensure that every image is local file
+<<<<<<< HEAD
     // await this.dataManager.loadAllImages(book);
 
     this.coverImage = this.book.chapters[this.book.chapters.length-1].imageUrl;
 
+=======
+    this.imageList = await this.dataManager.loadAllImages(book);
+>>>>>>> 8dcbc6dc93f52b9c8a4643a852a9031f8241aa22
     // add cover page
     await this.addCoverPage();
     await this.logManager.log(`Cover generated`, __filename, "PDF", book);
@@ -97,34 +101,30 @@ export class PdfGeneratorSubservice {
   }
   private async addCoverPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.coverImage, 0.55);
+    await this.addImage(page, this.imageList[this.imageList.length-1], 0.55);
     this.addTitle(page, this.book.title, 50, this.pageDimensions[1] - 210, 35, 500);
   }
 
   private async addPage(pageNumber : number) {
 
+    const chapterId= Math.floor((pageNumber - 1) / 2);
+    const pageText = this.book.chapters[chapterId].paragraph;
+    const chapterImageUrl = this.imageList[chapterId];
+
     switch(this.getCurrentPageType_alternating(pageNumber)) {
       case 'text_left': {
-        const pageText = this.book.chapters[(pageNumber - 1) / 2].paragraph
-        // const bgImageUrl = "https://i.postimg.cc/nzGFWnVy/bg-text-l.png"
-        const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
         await this.addTextPage(pageNumber, pageText, this.pageDimensions[0]-180, 80, 100, this.gradients.left, chapterImageUrl);
         break;
       }
       case 'text_right': {
-        const pageText = this.book.chapters[(pageNumber - 2) / 2].paragraph
-        // const bgImageUrl = "https://i.postimg.cc/MHZ62gvv/bg-text-r.png"
-        const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
         await this.addTextPage(pageNumber, pageText, -this.pageDimensions[0], 230, this.pageDimensions[0] - 100, this.gradients.right, chapterImageUrl);
         break;
       }
       case 'image_left': {
-        const chapterImageUrl = this.book.chapters[(pageNumber - 1) / 2].imageUrl
         await this.addImagePage(pageNumber, chapterImageUrl, 0, 100);
         break;
       }
       case 'image_right': {
-        const chapterImageUrl = this.book.chapters[(pageNumber - 2) / 2].imageUrl
         await this.addImagePage(pageNumber, chapterImageUrl, -180, this.pageDimensions[0] - 100);
         break;
       }
@@ -133,7 +133,7 @@ export class PdfGeneratorSubservice {
 
   private async addLastPage() {
     const page = this.pdfDoc.addPage(this.pageDimensions);
-    await this.addImage(page, this.coverImage, 0.55, this.pageDimensions[0]-180);
+    await this.addImage(page, this.imageList[this.imageList.length-1], 0.55, this.pageDimensions[0]-180);
     await this.addImage(page, this.gradients.left, 1);
     const pageText = "urContent GmbH \nUnter den Linden 1 \n10117 Berlin \ninfo@urBook.de \nwww.urbook.de";
     this.addText(page, pageText, 100, 160, 10, 100, 12);
@@ -247,7 +247,6 @@ export class PdfGeneratorSubservice {
   }
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
-
     // get image from file
     let pngImageBytes;
     if (imagePath.includes('https:')) {
@@ -279,22 +278,15 @@ export class PdfGeneratorSubservice {
 
   // provide schematics of how content pages are organised in book
   private getCurrentPageType_alternating(pageNumber : number) : string {
-    let returnPosition = "";
     switch(pageNumber % 4) {
       case 1:
-        returnPosition= 'text_left';
-        break;
+        return 'text_left';
       case 2:
-        returnPosition= 'image_right';
-        break;
+        return 'image_right';
       case 3:
-        returnPosition= 'image_left';
-        break;
-      case 0:
-        returnPosition= 'text_right';
-        break;
+        return 'image_left';
+      case 0: default:
+        return 'text_right';
     }
-
-    return returnPosition;
   }
 }

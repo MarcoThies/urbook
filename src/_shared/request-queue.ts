@@ -14,7 +14,6 @@ export class RequestQueue {
     private queue : IQueueEntry[];
     private isRunning : boolean;
     private resolveEmptyPromise: null | Function = null;
-    private queueMaxLength = 0;
 
 
     private awaitEmpty = () => {
@@ -31,7 +30,6 @@ export class RequestQueue {
     }
   
     addJob(jobFnc:Function, resolveFnc:Function) {
-        this.queueMaxLength++;
         this.queue.push({
             job:    jobFnc,
             resolve: (result:any) => {
@@ -48,7 +46,6 @@ export class RequestQueue {
     async runNextJob() {
         if (this.queue.length === 0) {
             this.isRunning = false;
-            this.queueMaxLength = 0;
             this.awaitEmpty();
             return;
         }
@@ -69,9 +66,6 @@ export class RequestQueue {
         return this.queue.length;
     }
 
-    public get maxLength(): number {
-        return this.queueMaxLength;
-    }
 
     public clearQueue() {
         this.queue = [] as IQueueEntry[];

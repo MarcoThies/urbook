@@ -347,7 +347,12 @@ export class BookGeneratorSubservice {
       await this.errorInPipeline(book);
       return;
     }
+
     book.chapters[chapterId] = (newChapterArray as ChapterEntity[])[0];
+
+    // write File to disk
+    await this.dataManager.downloadChapterImage(book, chapterId.toString());
+
 
     await this.logManager.log(`Regenerating PDF-file`, __filename, "REGENERATE", book);
 

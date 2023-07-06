@@ -13,27 +13,39 @@
 
 ## Installation and requirements
 1) Clone the repository
-2) Ask the team for the .env file -> contains live db-credentials
-   - Place the .env file in the root directory
-   - (optional) create your own .env file with the following attributes:
+   2) Ask the team for the .env file -> contains live db-credentials
+      - Place the .env file in the root directory
+      - (optional) create your own .env file with the following attributes:
    
-   ```
-    JWT_SECRETKEY=       [your_secret_key]
-    JWT_EXPIRATION=         1h
-    JWT_IGNORE_EXPIRATION=  false
-   
-    PORT=       [dev_port]
+      ```
+       JWT_SECRETKEY=       [your_secret_key]
+       JWT_EXPIRATION=         1h
+       JWT_IGNORE_EXPIRATION=  false
 
-    API_SALT=    [some_bcrypt_balt]
+       LIVE_URL=    api.urbook.de
+       #LIVE_URL=   localhost
+       PORT=        [port]
+       FILE_PORT=   [file_port]
+       FILE_SSL=    false
 
-    TYPEORM_HOST=           [db_host]
-    TYPEORM_PORT=           [db_port]
-    TYPEORM_USERNAME=       [db_user]
-    TYPEORM_PASSWORD=       [db_password]
-    TYPEORM_DATABASE=       [db_name]
-    TYPEORM_SYNC=           true
+       API_SALT=    [some_bcrypt_balt]
 
-   ```
+       OPENAI_API_KEY=  [ai_key]
+       OPENAI_API_ORG=  [ai_org]
+      
+       MID_SALAI=   [discord_account_key]
+      
+       MID_SERVER  = [discord_server_number]
+       MID_CHANNEL = [discord_channel_number]
+      
+       TYPEORM_HOST=           [db_host]
+       TYPEORM_PORT=           [db_port]
+       TYPEORM_USERNAME=       [db_user]
+       TYPEORM_PASSWORD=       [db_password]
+       TYPEORM_DATABASE=       [db_name]
+       TYPEORM_SYNC=           true
+
+      ```
 3) Run 'npm install' in the root directory to solve dependencies
 
 ## Usage and Testing
@@ -57,17 +69,23 @@ In the first step we will develop an MVP for this use case to ensure the basic f
 The MVP also lays the foundation for demonstrating the potential of such a service to potential customers.
 
 ## Support
-For support and questions email us at info@urbook.com
+For support and questions email us at admin@urbook.com
 
 ## Roadmap
 After the MVP we plan to further develop the software into a proper commercial service.
 
 - [x] Authentication
 - [x] Dummybook generation in db and to pdf
-- [ ] Book generation with AI data
-- [ ] Prompt-optimisation
+- [x] Book generation with AI data
+- [x] Prompt-optimisation
 - [ ] Upload photo of child for story main character similarity
 - [ ] Book-Quality control
+
+Bonus:
+
+- [x] Integrate AWS Cloud
+- [x] Create frontend
+- [x] get it running in docker
 
 ## Project status
 The project is currently in development. We antivipate that the MVP will be ready for demonstration by and the next steps are being planned.
