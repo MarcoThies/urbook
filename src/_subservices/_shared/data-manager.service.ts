@@ -8,7 +8,9 @@ import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
 import { LogEntity } from "./entities/log.entity";
 import { DatabaseLoggerService } from "./database-logger.service";
+import * as path from 'path';
 import { extname } from 'path';
+import * as process from "process";
 
 @Injectable()
 export class DataManagerService {
@@ -72,7 +74,7 @@ export class DataManagerService {
     }
 
     // check if pdf exists
-    const pdfPath = this.getBookPath(myBook) + myBook.title + '-v2.pdf';
+    const pdfPath = this.getBookPath(myBook) + myBook.title + '.pdf';
     const fs = require("fs").promises;
     const fileExists = await this.fileExists("."+pdfPath, fs);
 
@@ -83,7 +85,7 @@ export class DataManagerService {
 
     await this.logManager.log(`PDF-File accessed`, __filename, "GET PDF", myBook, user);
     return {
-      pdfUrl: 'http://localhost:3000' + encodeURI(pdfPath)
+      pdfUrl: encodeURI(this.getLivePath(pdfPath))
     };
   }
 
@@ -146,6 +148,24 @@ export class DataManagerService {
     return '/exports/' + user_id + '/';
   }
 
+  public getLivePath(filePath: string): string{
+    if(!process.env.LIVE_URL || !process.env.FILE_SSL || !process.env.FILE_PORT) return filePath;
+
+    const stripedDomain = (process.env.LIVE_URL as string).endsWith('/') ? (process.env.LIVE_URL as string).slice(0, -1) : (process.env.LIVE_URL as string);
+    const liveDomain = stripedDomain + ":" + process.env.FILE_PORT as string;
+    let imageFile;
+
+    if (filePath.includes('./exports')) {
+      const newUrl = filePath.replace('./exports', '');
+      const joinedUrl = path.join(liveDomain, newUrl);
+      const sslPrefix = ((process.env.FILE_SSL).toLowerCase() === "false") ? 'http' : 'https';
+      imageFile = sslPrefix + "://" + joinedUrl;
+    }else{
+      imageFile = filePath;
+    }
+
+    return imageFile;
+  }
 
   public async fileExists(filePath : string, fileSystem: any) : Promise<Boolean> {
     try {

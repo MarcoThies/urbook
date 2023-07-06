@@ -35,7 +35,7 @@ export class ManageService {
       } as IBookInfo;
 
       if(chapterLength > 0 && book.chapters[chapterLength-1].imageUrl && book.chapters[chapterLength-1].imageUrl.length > 0){
-        newBookEntry.cover = book.chapters[chapterLength-1].imageUrl;
+        newBookEntry.cover = this.dataManager.getLivePath(book.chapters[chapterLength-1].imageUrl);
       }
       return newBookEntry;
     })
@@ -69,6 +69,11 @@ export class ManageService {
   public async getBook(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<BooksEntity> {
     const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
     await this.logManager.log(`Request single book ${bookIdDto.bookId}`, __filename, "MANAGE", userBook, user);
+
+    userBook.chapters = userBook.chapters.map((chapter) => {
+      chapter.imageUrl = this.dataManager.getLivePath(chapter.imageUrl);
+      return chapter;
+    });
     return userBook;
   }
 
