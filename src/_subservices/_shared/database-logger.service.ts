@@ -54,7 +54,7 @@ export class DatabaseLoggerService implements LoggerService {
     try {
       await this.logRepo.save(logEntry);
     } catch(e) {
-      console.log('LOG-DB-ERROR', e);
+      console.log('DB-WARNING', e);
     }
   }
 
@@ -63,7 +63,7 @@ export class DatabaseLoggerService implements LoggerService {
       const dataset = await this.logRepo.find();
       await this.logRepo.remove(dataset);
     } catch(e) {
-      console.log('LOG-DB-ERROR', e);
+      console.log('DB-WARNING', e);
     }
     return true;
   }

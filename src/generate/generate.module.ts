@@ -19,18 +19,18 @@ import { OpenAi } from '../_subservices/rest-interfaces/openai.subservice';
   controllers: [GenerateController],
   providers: [
     GenerateService,
-    RequestManagerSubservice,
-    BookGeneratorSubservice,
-    // {
-    //   provide: BookGeneratorSubservice,
-    //   useClass: BookGeneratorSubservice,
-    //   scope: Scope.REQUEST,
-    // },
-    // {
-    //   provide: RequestManagerSubservice,
-    //   useClass: RequestManagerSubservice,
-    //   scope: Scope.REQUEST,
-    // },
+    // RequestManagerSubservice,
+    // BookGeneratorSubservice,
+    {
+      provide: BookGeneratorSubservice,
+      useClass: BookGeneratorSubservice,
+      scope: Scope.REQUEST,
+    },
+    {
+      provide: RequestManagerSubservice,
+      useClass: RequestManagerSubservice,
+      scope: Scope.REQUEST,
+    },
     ImagePromptDesignerSubservice, TextPromptDesignerSubservice,
     PdfGeneratorSubservice,
     OpenAi, MidjourneyApiSubservice

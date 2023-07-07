@@ -30,12 +30,9 @@ export class BookGeneratorSubservice {
     private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
 
-  abortFlag = false;
 
   public async generateNewBook(createBookDto: CreateBookDto, user: ApiKeyEntity) : Promise<BooksEntity>{
     // begin Book generation Process
-    this.abortFlag = false;
-
     const newBookId = generateId(3,4);
     const bookIdExists = await this.dataManager.getBookById(newBookId);
     if(bookIdExists) return await this.generateNewBook(createBookDto, user);
@@ -81,10 +78,10 @@ export class BookGeneratorSubservice {
     // 2. Generate Story from Story-Prompt
     const story: IOpenAiStoryData | boolean = await this.tryRepeat(
       () => this.requestManager.requestStory(storyPrompt, book),
-      () => this.abortFlag,
+      book.bookId,
       6
     );
-    if(this.abortFlag){
+    if(await this.bookAborted(book.bookId)){
       return;
     }
     if(story === false){
@@ -130,9 +127,9 @@ export class BookGeneratorSubservice {
     // generate Character Image Prompts -> deprecated
     const characterImagePrompts: IImageAvatar[] | boolean = await this.tryRepeat(
       () => this.imagePromptDesigner.generateCharacterPrompts(imageAvatars, book),
-      () => this.abortFlag
+      book.bookId
     );
-    if(this.abortFlag) {
+    if(await this.bookAborted(book.bookId)){
       return;
     }
     if(characterImagePrompts === false){
@@ -180,15 +177,20 @@ export class BookGeneratorSubservice {
     await this.logManager.log('Mapped characters to chapters', __filename, "GENERATE", book);
 
     // update Book status 3 => Character info done | Now generating Story Image Prompts
-    if(this.abortFlag) {
+    if(await this.bookAborted(book.bookId)) {
       return;
     }
     await this.dataManager.updateBookState(book, 3);
 
     // Generate Text-Prompt from Story-Image-Prompt
     book.chapters = chapters;
-    const chaptersWithPrompts = await this.imagePromptDesigner.addImagePromptsToChapter(book);
-    if(this.abortFlag) {
+
+    // generate Character Image Prompts -> deprecated
+    const chaptersWithPrompts: ChapterEntity[] | boolean = await this.tryRepeat(
+      () => this.imagePromptDesigner.addImagePromptsToChapter(book),
+      book.bookId
+    );
+    if(await this.bookAborted(book.bookId)){
       return;
     }
     if(chaptersWithPrompts === false){
@@ -201,7 +203,7 @@ export class BookGeneratorSubservice {
 
     // 9. Request Story-Images from Image AI
     const chaptersWithImages : boolean|ChapterEntity[] = await this.requestManager.requestStoryImages(book);
-    if(this.abortFlag) {
+    if(await this.bookAborted(book.bookId)) {
       return;
     }
     if(chaptersWithImages === false){
@@ -241,17 +243,17 @@ export class BookGeneratorSubservice {
 
     const storySuccess: boolean | string = await this.tryRepeat(
       () => this.newChapterText(chapterId, book, user),
-      () => this.abortFlag
+      book.bookId
     );
-    if(this.abortFlag){
+    if(await this.bookAborted(book.bookId)) {
       return;
     }
 
     const promptSuccess: boolean | string = await this.tryRepeat(
       () => this.newChapterPrompt(chapterId, book, user),
-      () => this.abortFlag
+      book.bookId
     );
-    if(this.abortFlag){
+    if(await this.bookAborted(book.bookId)) {
       return;
     }
 
@@ -269,13 +271,14 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 10);
   }
 
-  private async tryRepeat(callback: () => Promise<any>, abortFlag: () => boolean, try_count: number=4) : Promise<any>{
+  private async tryRepeat(callback: () => Promise<any>, bookId: string, try_count: number=4) : Promise<any>{
+
     let repeatSuccess = false;
     let tries = 0;
     while(!repeatSuccess) {
       repeatSuccess = await callback();
 
-      if(abortFlag()){
+      if(await this.bookAborted(bookId)){
         console.log("\nAbort flag has been triggered in TryRepeat function\n");
         return false;
       }
@@ -396,13 +399,19 @@ export class BookGeneratorSubservice {
       throw new HttpException(`Generation of book with ID ${bookId} not running. Nothing to abort!`, HttpStatus.CONFLICT);
     }
 
-    this.abortFlag = true;
-    this.requestManager.clearQueues();
-
     await this.dataManager.updateBookState(myBook, -1);
     await this.logManager.log(`Cancel Job Book: ${myBook.bookId}`, __filename, "ABORT", myBook, user);
 
     return true;
+  }
+
+  private async bookAborted(bookId: string): Promise<boolean>{
+    // get book
+    const myBook = await this.dataManager.getBookById(bookId);
+    if(!myBook) return true;
+
+    // return true if aborted
+    return (myBook.state < 0);
   }
 
   private async errorInPipeline(book: BooksEntity){

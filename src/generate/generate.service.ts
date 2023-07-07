@@ -45,13 +45,13 @@ export class GenerateService {
 
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
 
-    const currentQueueLength = this.requestManager.getCurrentRequestQueueLength(myBook.state);
-
     const queueLength = myBook.chapters.length;
-    const queueInfo = (currentQueueLength !== false) ? {
-      left: currentQueueLength,
+    const chapterDoneCount = myBook.chapters.filter(chapter => chapter.imageUrl !== undefined).length;
+
+    const queueInfo = (queueLength > 0) ? {
+      left: queueLength - chapterDoneCount,
       target: queueLength,
-      percent: Math.round(((queueLength-currentQueueLength) / queueLength) * 100) / 100
+      percent: Math.round((chapterDoneCount / queueLength) * 100) / 100
     } as IQueueInfo : undefined;
 
     const statusInfo = statusStrings(myBook.state, queueInfo);

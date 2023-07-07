@@ -31,8 +31,8 @@ export class RequestQueue {
     addJob(jobFnc:Function, resolveFnc:Function) {
         this.queue.push({
             job:    jobFnc,
-            resolve: (result:any) => {
-                resolveFnc(result);
+            resolve: async (result:any) => {
+                await resolveFnc(result);
                 this.runNextJob();
             }
         } as IQueueEntry);
@@ -59,10 +59,6 @@ export class RequestQueue {
             console.error("Job in request queue failed with error: ", error);
             this.runNextJob();
         }
-    }
-
-    public get length(): number {
-        return this.queue.length | 0;
     }
 
     public clearQueue() {

@@ -209,21 +209,24 @@ export class RequestManagerSubservice {
   public async requestStoryImages(book: BooksEntity, chapterId?:number) : Promise<boolean|ChapterEntity[]> {
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
 
-    console.log(chapterId, chapters);
     await this.logManager.log(`Adding ${chapters.length} requests to MidJourney queue`, __filename, "GENERATE", book);
 
     for(let x in chapters) {
       this.chapterImageQueue.addJob(
         async() => await this.requestStoryImage(chapters[x]),
-        (imgUrl: string|boolean) => {
-          if(imgUrl === false) {
+        async (imgUrl: string|boolean) => {
+
+          // check if abort flag is set -> communicate to generator-subservice
+          const bookState = await this.dataManager.getBookById(book.bookId);
+          if(imgUrl === false || !bookState || bookState.state < 0) {
             this.abortFlag = true;
+            console.log("aborted MidJourney-job in pipeline")
             return;
           }
           // safe image to entity
           chapters[x].imageUrl = imgUrl as string;
-          this.dataManager.updateChapter(chapters[x]);
-          this.logManager.log(`Saved MidJourney image`, __filename, "GENERATE", book);
+          await this.dataManager.updateChapter(chapters[x]);
+          await this.logManager.log(`Saved MidJourney image`, __filename, "GENERATE", book);
         }
       );
 
@@ -251,15 +254,6 @@ export class RequestManagerSubservice {
     return await this.imageAPI.requestImage(prompt);
   }
 
-  public getCurrentRequestQueueLength(state : number) : false | number {
-    switch (state) {
-      case 4  : return this.chapterImageQueue.length; // image midjourney queue
-      default : return false;
-    }
-  }
 
-  public clearQueues() {
-    this.chapterImageQueue.clearQueue();
-  }
   
 }
