@@ -46,7 +46,8 @@ export class GenerateService {
     const myBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
 
     const queueLength = myBook.chapters.length;
-    const chapterDoneCount = myBook.chapters.filter(chapter => chapter.imageUrl !== undefined).length;
+    const chapterDoneCount = myBook.chapters.reduce((count, chapter) =>
+      chapter.imageUrl && chapter.imageUrl.length > 1 ? count + 1 : count, 0);
 
     const queueInfo = (queueLength > 0) ? {
       left: queueLength - chapterDoneCount,
