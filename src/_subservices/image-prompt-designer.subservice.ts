@@ -47,8 +47,9 @@ export class ImagePromptDesignerSubservice {
   private generateCharacterImagePrompt(characters: IImageAvatar[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters." +
-      "Write down the appearance of the characters very precisely, go into detail about hair color, skin color and clothes." +
+    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters.\n" +
+      "Write down the appearance of the characters very precisely, go into detail about hair color, skin color and clothes.\n" +
+      "Don't describe the location or surroundings of the character. Just focus on personal looks and details.\n" +
       "Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
 
     const charaTextJoin = characters.map((char: CharacterEntity) => {
@@ -91,15 +92,16 @@ export class ImagePromptDesignerSubservice {
       let editParagraph = cpt.paragraph;
       if(cpt.characters.length > 0){
         for(let char of cpt.characters){
+          let strPoint = 0;
           while(true){
-            let strPoint = 0;
             let occurrence = editParagraph.indexOf(char.name, strPoint);
             if(occurrence < 0){
               break;
             }
             // insert character specific info
-            editParagraph = editParagraph.slice(0, occurrence) + ` (${char.description})` + editParagraph.slice(occurrence+char.name.length);
-            strPoint = occurrence + char.description.length;
+            const nameCut = occurrence+char.name.length;
+            editParagraph = editParagraph.slice(0, nameCut) + ` (${char.prompt})` + editParagraph.slice(nameCut);
+            strPoint = nameCut + char.prompt.length;
           }
         }
       }
