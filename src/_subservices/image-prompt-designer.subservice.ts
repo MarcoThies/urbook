@@ -74,15 +74,13 @@ export class ImagePromptDesignerSubservice {
 
     // 3. Map the result to the chapters
     for(let i in chapters) {
-
-      // add character descriptions to finish prompt
-      let editedPrompt = promptResults[i] as string;
-
-      for(let char of chapters[i].characters){
-        editedPrompt = editedPrompt.replace(char.name, char.prompt);
+      let chapterPrompt = promptResults[i];
+      if(chapters[i].characters.length > 0){
+        for(let char of chapters[i].characters){
+          chapterPrompt = char.prompt+"::25 "+chapterPrompt;
+        }
       }
-
-      chapters[i].prompt = editedPrompt;
+      chapters[i].prompt = chapterPrompt
       chapters[i].changed = new Date();
     }
 
@@ -96,23 +94,25 @@ export class ImagePromptDesignerSubservice {
       "Please write exactly one prompt for each of the following enumerated paragraphs:\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
-      let editParagraph = cpt.paragraph;
-      if(cpt.characters.length > 0){
-        for(let char of cpt.characters){
-          let strPoint = 0;
-          while(true){
-            let occurrence = editParagraph.indexOf(char.name, strPoint);
-            if(occurrence < 0){
-              break;
-            }
-            // insert character specific info
-            const nameCut = occurrence+char.name.length;
-            editParagraph = editParagraph.slice(0, nameCut) + ` (${char.prompt})` + editParagraph.slice(nameCut);
-            strPoint = nameCut + char.prompt.length;
-          }
-        }
-      }
-      return (indx+1)+". "+editParagraph;
+      return (indx+1)+". "+cpt.paragraph;
+
+      // let editParagraph = cpt.paragraph;
+      // if(cpt.characters.length > 0){
+      //   for(let char of cpt.characters){
+      //     let strPoint = 0;
+      //     while(true){
+      //       let occurrence = editParagraph.indexOf(char.name, strPoint);
+      //       if(occurrence < 0){
+      //         break;
+      //       }
+      //       // insert character specific info
+      //       const nameCut = occurrence+char.name.length;
+      //       editParagraph = editParagraph.slice(0, nameCut) + ` (${char.prompt})` + editParagraph.slice(nameCut);
+      //       strPoint = nameCut + char.prompt.length;
+      //     }
+      //   }
+      // }
+      // return (indx+1)+". "+editParagraph;
     });
     imagePrompt += storyTextJoin.join("\n");
 
@@ -138,7 +138,6 @@ export class ImagePromptDesignerSubservice {
       "- Use describing adjectives but keep it to only important details when describing an image\n" +
       "- do not reference the story plot in any way\n" +
       "- do not reference any information from previous generated prompts\n" +
-      "- tell a independent story with each single prompt. Different prompts should not build upon each other\n" +
       "- do not describe any actions or events, rather describe a visual scene\n" +
       "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
       "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
@@ -147,8 +146,8 @@ export class ImagePromptDesignerSubservice {
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
       "- Do use \"a person..\" or \"a big blue bunny...\" instead of \"the person...\" or \"the bunny...\"! Don't use \"the\" to refer to anything in general \n"+
       "- Do not use any punctuation except commas (,) and double colons (::) for soft and hard breaks\n"+
-      "- Output the prompt in correct english language. No other language should be present\n\n"+
-      "If the content of the prompt is not clear, the AI will not be able to generate a good image."
+      "- Output the prompt in correct english language. No other language should be present\n"+
+      "- tell a independent story with each single prompt. Different prompts should not build upon each other\n\n";
 
     instructionPrompt += "\n"+
       "These rules should enable you to create prompts that work like these examples:\n"+
@@ -157,14 +156,13 @@ export class ImagePromptDesignerSubservice {
       "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
       "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
       "Output: A boy with brown curly hair and adventures glare but frightened looks enters a time wrap environment::30 it's bright and full of saturated colors and lights::40\n\n"+
-      "Input In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
-      "Output A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n"
+      "Input: In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
+      "Output: A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n";
 
     instructionPrompt += "\n"+
-      "Each and every prompt should work on its own, even though I may ask you to generate many at once. So please do not refer to any previous prompt in any way, do not name any characters or persons by their name.\n";
-
-    instructionPrompt += "\n"+
-      "Every time I tell you to write prompts, you create a amazing prompt for a high quality storybook-image.";
+      "Each and every prompt should work on its own, even though I may ask you to generate more than one at once." +
+      "So please do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
+      "Double check every prompt you output if it complies to these guidelines and is in correct english language\n";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 

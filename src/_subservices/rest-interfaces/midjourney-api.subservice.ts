@@ -2,6 +2,12 @@ import { Midjourney } from "midjourney";
 import { MJMessage } from "midjourney/src/interfaces/message";
 import { HttpException, Injectable } from "@nestjs/common";
 
+const ImgArtists = [
+  "Don Bluth",
+  "Tatsuro Kiuchi",
+  "Raymond Briggs",
+  "Ted Nasmith"
+];
 @Injectable()
 export class MidjourneyApiSubservice {
   private client: Midjourney;
@@ -16,16 +22,18 @@ export class MidjourneyApiSubservice {
     });
   }
 
+  private selectedArtist = ImgArtists[Math.floor(Math.random() * ImgArtists.length)];
+
   private imgQuality = 0.5; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
   // private suffix = "in the style of a children's storybook illustration --ar 2:1 --niji 5 --style expressive --q "+this.imgQuality;
-  // private suffix = "In the style of a children's storybook illustration --no photograph --ar 2:1 --v 5.2 --q "+this.imgQuality;
-  private suffix = "--ar 2:1 --niji 5 --style scenic --q "+this.imgQuality;
+  private suffix = `:: In the style of a children's storybook illustration by ${this.selectedArtist}::50 --no photograph --ar 2:1 --v 5.2 --q ${this.imgQuality}`;
+  // private suffix = "--ar 2:1 --niji 5 --style scenic --q "+this.imgQuality;
   // private suffix = "--ar 2:1 --v 5.1 --q "+this.imgQuality;
 
   async requestImage(prompt: string): Promise<string | boolean> {
     console.log("\n\n... requesting new image");
     const imgGrid =  await this.client.Imagine(
-      prompt+" "+this.suffix,
+      prompt+this.suffix,
       (uri, progress)=>{
         console.log(uri, progress);
       }
