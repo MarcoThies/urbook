@@ -124,7 +124,7 @@ export class BookGeneratorSubservice {
       return;
     }
 
-    // generate Character Image Prompts -> deprecated
+    // generate Character Image Prompts from Character Descriptions
     const characterImagePrompts: IImageAvatar[] | boolean = await this.tryRepeat(
       () => this.imagePromptDesigner.generateCharacterPrompts(imageAvatars, book),
       book.bookId

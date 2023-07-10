@@ -83,11 +83,27 @@ export class ImagePromptDesignerSubservice {
     let promptConversation = this.addImageAiInstruction();
 
     let imagePrompt = ""+
-      "Please write exactly one prompt for each of the following enumerated paragraphs."+
+      "Please write exactly one prompt for each of the following enumerated paragraphs.\n"+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
+
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       // Todo add some more character specific info into or before the paragraph and refer to it
-      return (indx+1)+". "+cpt.paragraph;
+      let editParagraph = cpt.paragraph;
+      if(cpt.characters.length > 0){
+        for(let char of cpt.characters){
+          while(true){
+            let strPoint = 0;
+            let occurrence = editParagraph.indexOf(char.name, strPoint);
+            if(occurrence < 0){
+              break;
+            }
+            // insert character specific info
+            editParagraph = editParagraph.slice(0, occurrence) + ` (${char.description})` + editParagraph.slice(occurrence+char.name.length);
+            strPoint = occurrence + char.description.length;
+          }
+        }
+      }
+      return (indx+1)+". "+editParagraph;
     });
     imagePrompt += storyTextJoin.join("\n");
 
@@ -109,19 +125,22 @@ export class ImagePromptDesignerSubservice {
     instructionPrompt += "\n"+
       "- Use describing adjectives but keep it to only important details when describing an image\n" +
       "- do not reference the story plot in any way\n" +
-      "- do not describe any actions or events, rather describe the scene\n" +
+      "- do not reference any information from previous generated prompts\n" +
+      "- tell a independent story with each single prompt. Different prompts should not build upon each other\n" +
+      "- do not describe any actions or events, rather describe a visual scene\n" +
       "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
       "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
-      "- Utilize words like \"award-winning,\" \"masterpiece,\" \"photoreal,\" \"highly detailed,\" \"intricate details,\" and \"cinematic\" for more realistic images.\n"+
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
       "- Do use \"a person..\" or \"a big blue bunny...\" instead of \"the person...\" or \"the bunny...\"! Don't use \"the\" to refer to anything in general \n"+
-
+      "- Do not use any punctuation except commas (,) and double colons (::) for soft and hard breaks\n"+
+      "- Output the prompt in correct english language. No other language should be present\n\n"+
       "If the content of the prompt is not clear, the AI will not be able to generate a good image."
 
     instructionPrompt += "\n"+
       "These rules should enable you to create prompts that work like these examples:\n"+
+
       "Input: Es war einmal ein kleiner Junge namens Tom. Er war immer neugierig und liebte es, neue Dinge zu entdecken. Eines Tages fand er eine geheimnisvolle Uhr in seinem Garten. Die Uhr hatte bunte Knöpfe und blinkende Lichter.\n"+
       "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
       "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
