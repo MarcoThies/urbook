@@ -32,7 +32,7 @@ export class ImagePromptDesignerSubservice {
     for(let i in characters) {
       const charName = characters[i].name;
 
-      const promptMatch = Array.from(resultFromAi as ICharacterList[]).find((item: ICharacterList) => {
+      const promptMatch = (resultFromAi as ICharacterList[]).find((item: ICharacterList) => {
         return item.name === charName;
       });
 
@@ -47,7 +47,10 @@ export class ImagePromptDesignerSubservice {
   private generateCharacterImagePrompt(characters: IImageAvatar[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters. Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
+    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters." +
+      "Write down the appearance of the characters very precisely, go into detail about hair color, skin color and clothes." +
+      "Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
+
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return "["+char.name+"] "+char.description;
     });
@@ -79,7 +82,6 @@ export class ImagePromptDesignerSubservice {
   private generateStoryImagePrompts(chapter: ChapterEntity[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    // let imageImagePrompt = this.addImageAiInstruction();
     let imagePrompt = ""+
       "Please write exactly one prompt for each of the following enumerated paragraphs."+
       "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";

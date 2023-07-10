@@ -1,7 +1,12 @@
 import { Configuration, OpenAIApi } from "openai";
 import { Injectable } from "@nestjs/common";
 import { IOpenAiPromptMessage } from "../interfaces/openai-prompt.interface";
-import { ICharacterList, INewChapter, IOpenAiStoryData, IStoryPrompts } from "../interfaces/story-data.interface";
+import {
+  ICharacterPromptReturn,
+  INewChapter,
+  IOpenAiStoryData,
+  IStoryPrompts
+} from "../interfaces/story-data.interface";
 
 @Injectable()
 export class OpenAi {
@@ -15,7 +20,7 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterList[] | IStoryPrompts | INewChapter | boolean> {
+  public async promptGPT35(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterPromptReturn | IStoryPrompts | INewChapter | boolean> {
       console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
@@ -29,8 +34,8 @@ export class OpenAi {
             top_p: 1,
             max_tokens: 4096,
             temperature: .8,
-            presence_penalty: 0.2,
-            frequency_penalty: 0.2
+            presence_penalty: 0.3,
+            frequency_penalty: 0.3
         });
         // top_p: 0.3,
         // max_tokens: 2048,

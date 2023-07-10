@@ -1,5 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { IImageAvatar } from "./interfaces/image-character-prompt.interface";
+import { Injectable } from "@nestjs/common";
 import { ChapterEntity } from "./_shared/entities/chapter.entity";
 import { DatabaseLoggerService } from "./_shared/database-logger.service";
 import { RequestQueue } from "../_shared/request-queue";
@@ -8,7 +7,13 @@ import { DataManagerService } from "./_shared/data-manager.service";
 import { OpenAi } from "./rest-interfaces/openai.subservice";
 import { IOpenAiPromptMessage } from "./interfaces/openai-prompt.interface";
 import { BooksEntity } from "./_shared/entities/books.entity";
-import { ICharacterList, INewChapter, IOpenAiStoryData, IStoryPrompts } from "./interfaces/story-data.interface";
+import {
+  ICharacterList,
+  ICharacterPromptReturn,
+  INewChapter,
+  IOpenAiStoryData,
+  IStoryPrompts
+} from "./interfaces/story-data.interface";
 
 @Injectable()
 export class RequestManagerSubservice {
@@ -158,7 +163,7 @@ export class RequestManagerSubservice {
                   },
                   "prompt": {
                     "type": "string",
-                    "description": "A prompt for the image ai, that depicts the character"
+                    "description": "A prompt for the image ai, that depicts only the look of the character"
                   }
                 }
               }
@@ -174,7 +179,7 @@ export class RequestManagerSubservice {
       return false;
     }
 
-    return textResult as ICharacterList[];
+    return (textResult as ICharacterPromptReturn).charPrompts as ICharacterList[];
   }
 
 

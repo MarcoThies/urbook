@@ -4,11 +4,16 @@ export interface IOpenAiStoryData {
   characters: ICharacterList[]
 }
 
+export interface ICharacterPromptReturn {
+  charPrompts: ICharacterList[]
+}
+
 export interface ICharacterList {
   name: string;
   info: string;
   prompt?: string;
 }
+
 
 export interface IStoryPrompts {
   chapterPrompts: string[];
