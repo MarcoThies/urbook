@@ -34,7 +34,7 @@ export class OpenAi {
             top_p: 1,
             max_tokens: 4096,
             temperature: .8,
-            presence_penalty: 0.3,
+            presence_penalty: 0.5,
             frequency_penalty: 0.3
         });
         // top_p: 0.3,

@@ -208,6 +208,7 @@ export class RequestManagerSubservice {
     if(!textResult){
       return false;
     }
+
     return (textResult as IStoryPrompts).chapterPrompts;
   }
 

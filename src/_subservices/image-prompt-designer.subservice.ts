@@ -71,9 +71,18 @@ export class ImagePromptDesignerSubservice {
     if(promptResults === false || (promptResults as string[]).length < chapters.length){
       return false;
     }
+
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      chapters[i].prompt = promptResults[i];
+
+      // add character descriptions to finish prompt
+      let editedPrompt = promptResults[i] as string;
+
+      for(let char of chapters[i].characters){
+        editedPrompt = editedPrompt.replace(char.name, char.prompt);
+      }
+
+      chapters[i].prompt = editedPrompt;
       chapters[i].changed = new Date();
     }
 
@@ -85,10 +94,9 @@ export class ImagePromptDesignerSubservice {
 
     let imagePrompt = ""+
       "Please write exactly one prompt for each of the following enumerated paragraphs.\n"+
-      "Do not refer to the story plot or any character name, but describe exactly one moment from each paragraph that can visualized in a picture:\n\n";
+      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture:\n\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
-      // Todo add some more character specific info into or before the paragraph and refer to it
       let editParagraph = cpt.paragraph;
       if(cpt.characters.length > 0){
         for(let char of cpt.characters){
@@ -151,7 +159,10 @@ export class ImagePromptDesignerSubservice {
       "Output A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n"
 
     instructionPrompt += "\n"+
-      "Every time I tell you to write prompts, you create a amazing prompt for a high quality image in a manga or comic style";
+      "Each and every prompt should work on its own, even though I may ask you to generate many at once. So please do not refer to any previous prompt in any way, do not name any characters or persons by their name.\n";
+
+    instructionPrompt += "\n"+
+      "Every time I tell you to write prompts, you create a amazing prompt for a high quality storybook-image.";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 
