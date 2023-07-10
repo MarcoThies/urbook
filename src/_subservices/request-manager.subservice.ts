@@ -41,7 +41,7 @@ export class RequestManagerSubservice {
           "properties" : {
             "title" : {
               "type" : "string",
-              "description" : "A fitting title for the story"
+              "description" : "A fitting, creative title for the story. Make it catchy and interesting"
             },
             "chapters" : {
               "type": "array",
@@ -63,7 +63,7 @@ export class RequestManagerSubservice {
                   },
                   "info": {
                     "type": "string",
-                    "description": "A very detailed description of the character found in the story. Describe in 100 words how you would imagine the character to look like."
+                    "description": "A very detailed description of the character found in the story. Give at least 100 words that describe the looks of the character. Include everything you find in the story paragraphs and also make up how you would imagine the character to look like."
                   }
                 },
                 "required" : ["name", "info"]

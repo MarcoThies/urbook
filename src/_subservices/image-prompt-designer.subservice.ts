@@ -93,8 +93,7 @@ export class ImagePromptDesignerSubservice {
     let promptConversation = this.addImageAiInstruction();
 
     let imagePrompt = ""+
-      "Please write exactly one prompt for each of the following enumerated paragraphs.\n"+
-      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture:\n\n";
+      "Please write exactly one prompt for each of the following enumerated paragraphs:\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       let editParagraph = cpt.paragraph;
@@ -118,7 +117,10 @@ export class ImagePromptDesignerSubservice {
     imagePrompt += storyTextJoin.join("\n");
 
     // place paragraphs
-    imagePrompt += "\n\nDo not output any further text except the required answer.";
+    imagePrompt += "\n\nDo not output any further text except the required answer.\n"+
+      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture.\n"+
+      "Use the provided character description (stated in brackets within the paragraph) to describe the characters in each prompt with great detail.";
+
     promptConversation.push(
       {role: messageRole.user, content: imagePrompt} as IOpenAiPromptMessage
     );
