@@ -77,7 +77,7 @@ export class ImagePromptDesignerSubservice {
       let chapterPrompt = promptResults[i];
       if(chapters[i].characters.length > 0){
         for(let char of chapters[i].characters){
-          chapterPrompt = char.prompt+"::25 "+chapterPrompt;
+          chapterPrompt = char.prompt+"::15 "+chapterPrompt;
         }
       }
       chapters[i].prompt = chapterPrompt
@@ -135,12 +135,12 @@ export class ImagePromptDesignerSubservice {
       "Here are the rules you must abide to when writing prompts:\n";
 
     instructionPrompt += "\n"+
-      "- Use describing adjectives but keep it to only important details when describing an image\n" +
-      "- do not reference the story plot in any way\n" +
+      "- Use describing adjectives and only describe important details\n" +
+      "- do not reference the story plot\n" +
       "- do not reference any information from previous generated prompts\n" +
       "- do not describe any actions or events, rather describe a visual scene\n" +
       "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
-      "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word that’s being emphasized, not before.\n"+
+      "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word to be emphasized, not before.\n"+
       "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
       "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
@@ -150,7 +150,7 @@ export class ImagePromptDesignerSubservice {
       "- tell a independent story with each single prompt. Different prompts should not build upon each other\n\n";
 
     instructionPrompt += "\n"+
-      "These rules should enable you to create prompts that work like these examples:\n"+
+      "These rules enable you to create prompts that work like these examples:\n"+
 
       "Input: Es war einmal ein kleiner Junge namens Tom. Er war immer neugierig und liebte es, neue Dinge zu entdecken. Eines Tages fand er eine geheimnisvolle Uhr in seinem Garten. Die Uhr hatte bunte Knöpfe und blinkende Lichter.\n"+
       "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
@@ -160,7 +160,7 @@ export class ImagePromptDesignerSubservice {
       "Output: A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n";
 
     instructionPrompt += "\n"+
-      "Each and every prompt should work on its own, even though I may ask you to generate more than one at once." +
+      "Each and every prompt must work on its own, even though I may ask you to generate more than one at once." +
       "So please do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
       "Double check every prompt you output if it complies to these guidelines and is in correct english language\n";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
