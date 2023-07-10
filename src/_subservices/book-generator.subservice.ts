@@ -148,7 +148,12 @@ export class BookGeneratorSubservice {
       // Search for each character Name in Chapter Text
       for(let n in characterImagePrompts as IImageAvatar[]) {
         const currAvatar = characterImagePrompts[n] as IImageAvatar;
-        if(currChapter.paragraph.includes(currAvatar.name)) {
+        const avatarOccurrence = currChapter.paragraph.indexOf(currAvatar.name);
+        if(avatarOccurrence > -1) {
+          // check if next two chars are 's
+          if(currChapter.paragraph[avatarOccurrence + currAvatar.name.length] === "'"){
+            continue;
+          }
           // Character found in current Paragraph
           // Check if Character-Entity already exists
           let character = characterMap.get(currAvatar.name);

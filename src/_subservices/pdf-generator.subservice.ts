@@ -242,6 +242,8 @@ export class PdfGeneratorSubservice {
 
   private async addImage(page : PDFPage, imagePath : string, scale : number, offset : number = 0) {
     // get image from file
+    if(!imagePath) return;
+
     let pngImageBytes;
     if (imagePath.includes('https:')) {
       pngImageBytes = await this.fetchImage(imagePath) as ArrayBuffer;

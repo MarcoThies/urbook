@@ -38,7 +38,11 @@ export class TextPromptDesignerSubservice {
       "Bitte stelle sicher, dass die Geschichte altersgerecht und ansprechend ist, mit einer klaren Erzählung, die die gewählte Moral und das Thema beinhaltet. \n" +
       "Die Geschichte sollte auch Elemente enthalten, die die Interessen und Persönlichkeitsmerkmale meines Kindes widerspiegeln. \n" +
       "Erwähne sie aber nicht explizit, sondern richte die Geschichte geschickt an ihnen aus. Erwähne die Moral nicht öfter als ein mal. \n" +
-      "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen.";
+      "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen."+
+      "\n\n" +
+      "Eine Geschichte besteht immer aus einem Titel und mehreren paragraphen Text.\n" +
+      "Außerdem gehört zu jeder Geschichte eine Liste mit auftretenden Characteren jeweils mit einer bildlichen Beschreibung.\n" +
+      "Die Character-Beschreibung sollte sehr genau auf das Aussehen, Kleidung und Außenwirkung des jeweiligen Characters eingehen.";
 
       const userContent =
       "Generiere mir ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. \n" +

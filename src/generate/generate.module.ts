@@ -33,7 +33,13 @@ import { OpenAi } from '../_subservices/rest-interfaces/openai.subservice';
     },
     ImagePromptDesignerSubservice, TextPromptDesignerSubservice,
     PdfGeneratorSubservice,
-    OpenAi, MidjourneyApiSubservice
+    {
+      provide: MidjourneyApiSubservice,
+      useClass: MidjourneyApiSubservice,
+      scope: Scope.REQUEST,
+    },
+    // MidjourneyApiSubservice,
+    OpenAi,
   ],
   exports: [GenerateService],
 })

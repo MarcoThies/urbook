@@ -17,6 +17,8 @@ export class ImagePromptDesignerSubservice {
 
   public async generateCharacterPrompts(characters:IImageAvatar[], bookRef: BooksEntity) : Promise<boolean|IImageAvatar[]> {
 
+
+
     // 1. Generate one Text Prompt for creating image Prompts
     const characterPromptConversation: IOpenAiPromptMessage[] = this.generateCharacterImagePrompt(characters);
 
@@ -47,10 +49,10 @@ export class ImagePromptDesignerSubservice {
   private generateCharacterImagePrompt(characters: IImageAvatar[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
-    let characterImagePrompt = "Write exactly one prompt to create a profile image for each of the following characters.\n" +
+    let characterImagePrompt = "Write exactly one prompt to best describe a given character.\n" +
       "Write down the appearance of the characters very precisely, go into detail about hair color, skin color and clothes.\n" +
-      "Don't describe the location or surroundings of the character. Just focus on personal looks and details.\n" +
-      "Make sure the amount of prompts in your answer matches the character descriptions given below.\n\n";
+      "Don't describe the location or surroundings of the character. Just focus on the looks. \n" +
+      "Make sure the amount of prompts in your answer matches the count of character descriptions given below.\n\n";
 
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return "["+char.name+"] "+char.description;
@@ -62,6 +64,25 @@ export class ImagePromptDesignerSubservice {
     return promptConversation;
   }
 
+
+  private ImgArtists = [
+    "Don Bluth",
+    "Tatsuro Kiuchi",
+    "Raymond Briggs",
+    "Ted Nasmith",
+    "Mike Allred",
+    "Carl Barks",
+    "Alison Bechdel",
+    "Guy Billout",
+    "Matt Bors",
+    "Allie Brosh",
+    "Dick Bruna",
+    "Hsiao Ron Cheng",
+    "Joey Chou",
+    "Bob Clampett",
+    "Gemma Correll"
+  ];
+
   public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<boolean|ChapterEntity[]>{
     const chapters= (!chapterId) ? book.chapters : [book.chapters[chapterId]];
     // 1. Generate one Text Prompt for creating image Prompts
@@ -72,54 +93,57 @@ export class ImagePromptDesignerSubservice {
       return false;
     }
 
+    // select random Artist
+    const bookImgArtist = this.ImgArtists[Math.floor(Math.random() * this.ImgArtists.length)];
+
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      let chapterPrompt = promptResults[i];
-      if(chapters[i].characters.length > 0){
+      let chapterPrompt = this.replaceStringWeight(promptResults[i].trim(), 50);
+      const characterLen = (chapters[i].characters) ? chapters[i].characters.length : 0;
+      if(characterLen > 0){
+        const weight = Math.floor(30 / characterLen);
         for(let char of chapters[i].characters){
-          chapterPrompt = char.prompt+"::15 "+chapterPrompt;
+          if(!char.prompt) continue;
+          const charPrompt = this.replaceStringWeight(char.prompt.trim(), weight);
+          chapterPrompt += ' '+charPrompt;
         }
       }
-      chapters[i].prompt = chapterPrompt
+      chapters[i].prompt = `${chapterPrompt} In the style of illustration like ${bookImgArtist}::25`
       chapters[i].changed = new Date();
     }
 
+    console.log(chapters.map((c) => c.prompt));
+
     return chapters;
+  }
+
+  private replaceStringWeight(str: string, weight: number){
+    // Check if the string ends with "::[int]" or just "::"
+    const regexMatch = /::\d+$|::$|\.$/;
+    if (str.match(regexMatch)) {
+      // Replace the ending with "::[weight]"
+      return str.replace(regexMatch, "::"+weight);
+    } else {
+      // Add "::[weight]" to the end of the string
+      return str + "::"+weight;
+    }
   }
 
   private generateStoryImagePrompts(chapter: ChapterEntity[]): IOpenAiPromptMessage[] {
     let promptConversation = this.addImageAiInstruction();
 
     let imagePrompt = ""+
-      "Please write exactly one prompt for each of the following enumerated paragraphs:\n";
+      "Please give me exactly one prompt for each of the following enumerated paragraphs. Include a detailed description of the location and surroundings in each prompt\n";
 
     const storyTextJoin = chapter.map((cpt: ChapterEntity, indx : number) => {
       return (indx+1)+". "+cpt.paragraph;
-
-      // let editParagraph = cpt.paragraph;
-      // if(cpt.characters.length > 0){
-      //   for(let char of cpt.characters){
-      //     let strPoint = 0;
-      //     while(true){
-      //       let occurrence = editParagraph.indexOf(char.name, strPoint);
-      //       if(occurrence < 0){
-      //         break;
-      //       }
-      //       // insert character specific info
-      //       const nameCut = occurrence+char.name.length;
-      //       editParagraph = editParagraph.slice(0, nameCut) + ` (${char.prompt})` + editParagraph.slice(nameCut);
-      //       strPoint = nameCut + char.prompt.length;
-      //     }
-      //   }
-      // }
-      // return (indx+1)+". "+editParagraph;
     });
     imagePrompt += storyTextJoin.join("\n");
 
     // place paragraphs
-    imagePrompt += "\n\nDo not output any further text except the required answer.\n"+
-      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture.\n"+
-      "Use the provided character description (stated in brackets within the paragraph) to describe the characters in each prompt with great detail.";
+    imagePrompt += "\n\n"+
+      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture. " +
+      "Start by describing what you can see in the foreground and then describe how the background should look like";
 
     promptConversation.push(
       {role: messageRole.user, content: imagePrompt} as IOpenAiPromptMessage
@@ -131,38 +155,28 @@ export class ImagePromptDesignerSubservice {
   private addImageAiInstruction(): IOpenAiPromptMessage[]{
     let instructionPrompt = ""+
       "You are an language model specialized in writing prompts for an image generating ai.\n"+
-      "Prompts are short descriptive sentences that can be used to generate images from text.\n"+
+      "A Prompt is one short descriptive sentence that can be used to generate an image from text.\n"+
       "Here are the rules you must abide to when writing prompts:\n";
 
     instructionPrompt += "\n"+
       "- Use describing adjectives and only describe important details\n" +
+      "- Answer in only one coherent sentence\n" +
+      "- Use only present-temps for anything described\n" +
       "- do not reference the story plot\n" +
       "- do not reference any information from previous generated prompts\n" +
       "- do not describe any actions or events, rather describe a visual scene\n" +
       "- do not use commanding words like “Produce”, “Generate”, “Create” in the prompt but rather start describing the a specific scene\n" +
-      "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts. You can also use numerical weights (e.g., “::2” or “::5”) after double colons to emphasize certain sections. These are placed after the word to be emphasized, not before.\n"+
-      "- To discourage the use of a concept, use negative image weights (e.g., “::-1”) these are placed after the word that’s being depreciated\n" +
-      "- Incorporate descriptive language and specific details, such as camera angles, artists’ names, lighting, styles, processing techniques, camera settings, post-processing terms, and effects.\n"+
+      "- Use commas (,) for soft breaks and double colons (::) for hard breaks to separate distinct concepts.\n"+
+      "- Do not use any punctuation except commas (,) and double colons (::) for soft and hard breaks\n"+
       "- Do not state any character names, nor use names in any context. Character and things should only be described by adjectives not by names. \n"+
       "- Do use \"a person..\" or \"a big blue bunny...\" instead of \"the person...\" or \"the bunny...\"! Don't use \"the\" to refer to anything in general \n"+
-      "- Do not use any punctuation except commas (,) and double colons (::) for soft and hard breaks\n"+
       "- Output the prompt in correct english language. No other language should be present\n"+
-      "- tell a independent story with each single prompt. Different prompts should not build upon each other\n\n";
+      "- Tell an independent story with each single prompt. Different prompts should not build upon each other\n\n";
 
     instructionPrompt += "\n"+
-      "These rules enable you to create prompts that work like these examples:\n"+
-
-      "Input: Es war einmal ein kleiner Junge namens Tom. Er war immer neugierig und liebte es, neue Dinge zu entdecken. Eines Tages fand er eine geheimnisvolle Uhr in seinem Garten. Die Uhr hatte bunte Knöpfe und blinkende Lichter.\n"+
-      "Output: A boy with brown curly hair and adventures glare in his eyes stands inside his garden::20 he seems to have spotted something in the tall green grass.\n\n"+
-      "Input:  Als Tom die Uhr berührte, begann sie plötzlich zu leuchten und zu ticken. Plötzlich wurde er von einem grellen Licht umgeben und fand sich in einer anderen Zeit wieder! Er war aufgeregt und ein wenig ängstlich zugleich.\n"+
-      "Output: A boy with brown curly hair and adventures glare but frightened looks enters a time wrap environment::30 it's bright and full of saturated colors and lights::40\n\n"+
-      "Input: In dieser neuen Zeit traf Tom auf eine freundliche Giraffe namens Greta. Sie war genauso neugierig wie er und gemeinsam beschlossen sie, die Welt der Zeitreisen zu erkunden. Mit der magischen Uhr konnten sie in verschiedene Zeiten reisen und spannende Abenteuer erleben.\n"+
-      "Output: A boy with brown curly hair stand next to a big giraffe with a friendly smile::20 they are visiting an adventures place in a different time:15\n\n";
-
-    instructionPrompt += "\n"+
-      "Each and every prompt must work on its own, even though I may ask you to generate more than one at once." +
-      "So please do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
-      "Double check every prompt you output if it complies to these guidelines and is in correct english language\n";
+      "Each and every prompt must work on its own, even though I may ask you to generate more than one at once. " +
+      "Please do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
+      "Give me short, descriptive and on their own coherent sentences\n";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }
 
