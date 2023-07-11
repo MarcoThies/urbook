@@ -15,7 +15,66 @@ export class ParameterEntity {
     nullable: false,
     unique: false
   })
-  childName: string
+  charName: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: false,
+    unique: false
+  })
+  charGender: string;
+
+  @Column({
+    type: 'int',
+    nullable: false,
+    unique: false
+  })
+  charAge: number;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  optTopic: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  optSidekick: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  optPlace: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  optColor: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  optMoral: string;
+
+  @Column({
+    type: 'tinyint',
+    nullable: false,
+    unique: false
+  })
+  optChapterCount: number;
+}
+
+  /* OLD
 
   @Column({
     type: 'varchar',
@@ -31,12 +90,6 @@ export class ParameterEntity {
   })
   childFavAnimal: string
 
-  @Column({
-    type: 'tinyint',
-    nullable: false,
-    unique: false
-  })
-  childAge: number
 
   @Column({
     type: 'varchar',
@@ -52,12 +105,6 @@ export class ParameterEntity {
   })
   childLanguage: string
 
-  @Column({
-    type: 'varchar',
-    nullable: false,
-    unique: false
-  })
-  childGender: string
 
   @Column({
     type: 'varchar',
@@ -86,4 +133,4 @@ export class ParameterEntity {
     unique: false
   })
   topicSpecialTopic: string
-}
+} */

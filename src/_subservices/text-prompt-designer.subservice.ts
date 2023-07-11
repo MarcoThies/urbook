@@ -7,8 +7,12 @@ export class TextPromptDesignerSubservice {
   constructor() {}
 
   public generateStoryPrompt(parameter: ParameterEntity): IOpenAiPromptMessage[] {
+    console.log(parameter);
+
+    const moral = (parameter.optMoral) ? parameter.optMoral : 'default moral';
+
     // generate Text-Prompt from Child Parameters
-    const paragraphCount = parameter.topicChapterCount;
+    const paragraphCount = parameter.optChapterCount;
     const avgWordsPerParagraph = 60;
     let author : string = 'Lewis Carroll';
 
@@ -44,21 +48,18 @@ export class TextPromptDesignerSubservice {
       "Außerdem gehört zu jeder Geschichte eine Liste mit auftretenden Characteren jeweils mit einer bildlichen Beschreibung.\n" +
       "Die Character-Beschreibung sollte sehr genau auf das Aussehen, Kleidung und Außenwirkung des jeweiligen Characters eingehen.";
 
-      const userContent =
+      let userContent =
       "Generiere mir ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. \n" +
       "Das Buch muss " + paragraphCount + " Paragraphen mit je mindestens " + avgWordsPerParagraph + " Wörtern haben (mindestens zwei volle Sätze). \n" +
       "Hier sind Details über mein Kind, die du auf die Geschichte anwenden kannst:\n\n" +
 
-      "- Name: " + parameter.childName + "\n" +
-      "- Alter: " + parameter.childAge + "\n" +
-      "- Geschlecht: " + parameter.childGender + "\n" +
-      "- Ethnie: " + parameter.childCountry + "\n" +
-      "- Lieblingsfarbe: " + parameter.childFavColor + "\n" +
-      "- Lieblingstier/-charakter: " + parameter.childFavAnimal + "\n\n" +
+      "- Name: " + parameter.charName + "\n" +
+      "- Alter: " + parameter.charAge + "\n" +
+      "- Geschlecht: " + parameter.charGender + "\n";
 
-      "Behandle mit der Geschichte folgende Moral: " + parameter.topicMoralType + "\n" +
-      "Die besondere Thematik der Geschichte lautet: " + parameter.topicSpecialTopic + ".\n" +
+      if(parameter.optTopic) userContent += "- Lieblingsthema: " + parameter.optTopic + "\n";
 
+      userContent += ""+
       "Erwähne die Lieblingsfarbe und das Lieblingstier/-charakter im ersten Absatz nicht! \n" +
       "Achte auf eine ausreichende Länge der Absätze. (Wie gesagt, mindestens "+ avgWordsPerParagraph +" Wörter pro Paragraph)";
 

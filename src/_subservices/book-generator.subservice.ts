@@ -38,7 +38,7 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log(`Request new book: ${newBookId}`, __filename, "GENERATE", undefined, user);
 
-    const demoTitle: string = `${createBookDto.child_name} - ${createBookDto.topic_specialTopic}`;
+    const demoTitle: string = `${createBookDto.char_name} - neues Buch`;
 
     // Generate new Book & Parameter entity-data-object
     const newBook = {
@@ -47,17 +47,17 @@ export class BookGeneratorSubservice {
       state: 1,
       apiKeyLink: user,
       parameterLink: {
-        childName: createBookDto.child_name,
-        childFavColor: createBookDto.child_favColor,
-        childFavAnimal: createBookDto.child_favAnimals,
-        childAge: createBookDto.child_age,
-        childCountry: createBookDto.child_country,
-        childLanguage: createBookDto.child_language,
-        childGender: createBookDto.child_gender,
-        topicMoralType: createBookDto.topic_moralType,
-        topicChapterCount: createBookDto.topic_chapterCount,
-        topicImageStyle: createBookDto.topic_imageStyle,
-        topicSpecialTopic: createBookDto.topic_specialTopic
+        charName: createBookDto.char_name,
+        charGender: createBookDto.char_gender,
+        charAge: createBookDto.char_age,
+
+        optTopic: createBookDto.opt_topic,
+        optSidekick: createBookDto.opt_sidekick,
+        optPlace: createBookDto.opt_place,
+        optColor: createBookDto.opt_color,
+        optMoral: createBookDto.opt_moral,
+
+        optChapterCount: createBookDto.opt_chapterCount,
       } as ParameterEntity
     } as BooksEntity;
 

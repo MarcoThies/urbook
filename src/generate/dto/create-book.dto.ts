@@ -1,48 +1,39 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsNumber, IsString } from "class-validator";
 
 export class CreateBookDto {
   @IsNotEmpty()
   @IsString()
-  child_name: string;
+  char_name: string;
 
   @IsNotEmpty()
   @IsString()
-  child_favColor: string;
-
-  @IsNotEmpty()
-  @IsString()
-  child_favAnimals: string;
+  char_gender: string;
 
   @IsNotEmpty()
   @IsNumber()
-  child_age: number;
-
-  @IsNotEmpty()
-  @IsString()
-  child_country: string;
-
-  @IsNotEmpty()
-  @IsString()
-  child_language: string;
-
-  @IsNotEmpty()
-  @IsString()
-  child_gender: string;
-
-  @IsNotEmpty()
-  @IsString()
-  topic_moralType: string;
+  char_age: number;
 
   @IsNotEmpty()
   @IsNumber()
-  topic_chapterCount: number;
+  opt_chapterCount: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  topic_imageStyle: string;
+  opt_topic?: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  topic_specialTopic: string;
+  opt_sidekick?: string;
 
+  @IsOptional()
+  @IsString()
+  opt_place?: string;
+
+  @IsOptional()
+  @IsString()
+  opt_color?: string;
+
+  @IsOptional()
+  @IsString()
+  opt_moral?: string;
 }

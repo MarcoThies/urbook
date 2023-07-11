@@ -29,13 +29,13 @@ export class RequestManagerSubservice {
   private abortFlag = false;
 
   public async requestStory(textPrompt: IOpenAiPromptMessage[], book : BooksEntity) : Promise<boolean | IOpenAiStoryData> {
-    const chapterCount = book.parameterLink.topicChapterCount;
+    const chapterCount = book.parameterLink.optChapterCount;
     await this.logManager.log(`Request new Story from Text-KI.`, __filename, "GENERATE", book);
 
     const structure = [
       {
         "name" : "create_child_story",
-        "description" : "A full children's story with "+book.parameterLink.topicChapterCount+" paragraphs",
+        "description" : "A full children's story with "+book.parameterLink.optChapterCount+" paragraphs",
         "parameters" : {
           "type"  : "object",
           "properties" : {
