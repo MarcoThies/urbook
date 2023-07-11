@@ -221,10 +221,6 @@ export class BookGeneratorSubservice {
 
     await this.logManager.log('Chapter images generated', __filename, "GENERATE", book);
 
-    // 10. Create Book PDF
-    await this.pdfGenerator.createA5Book(book);
-    await this.logManager.log('Generated PDF-File from book', __filename, "GENERATE", book);
-
     // update Book status 5 => Building Done
     await this.dataManager.updateBookState(book,  10);
   }
@@ -268,9 +264,6 @@ export class BookGeneratorSubservice {
     }
 
     await this.dataManager.updateBookState(book, 9);
-
-    // write new PDF-File
-    await this.pdfGenerator.createA5Book(book);
 
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
@@ -369,10 +362,6 @@ export class BookGeneratorSubservice {
     await this.dataManager.updateBookState(book, 9);
     await this.dataManager.updateBookContent(book);
 
-    // write new PDF-File
-    await this.pdfGenerator.createA5Book(book);
-
-    await this.logManager.log(`PDF-file regenerated`, __filename, "REGENERATE",book);
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
   }

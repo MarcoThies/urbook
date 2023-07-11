@@ -97,7 +97,7 @@ export class GenerateService {
   }
 
 
-  async regeneratePDF(bookId: string, user: ApiKeyEntity) {
+  async generatePDF(bookId: string, user: ApiKeyEntity) {
     if(await this.dataManager.userIsGenerating(user)) {
       throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
     }

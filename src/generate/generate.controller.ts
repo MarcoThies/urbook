@@ -45,7 +45,7 @@ export class GenerateController {
       UserTypeGuard('admin')
     )
     @Post("regenerate-pdf")
-    public async regeneratePDF(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookId> {
-      return await this.generateService.regeneratePDF(bookIdDto.bookId, req.user);
+    public async generatePDF(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookId> {
+      return await this.generateService.generatePDF(bookIdDto.bookId, req.user);
     }
 }
