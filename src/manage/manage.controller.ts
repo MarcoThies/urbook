@@ -41,9 +41,4 @@ export class ManageController {
   public async getBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
     return await this.manageService.getBook(req.user, bookIdDto);
   }
-
-  @Post('pdf')
-  public async getPdf(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
-    return await this.manageService.getPdf(req.user, bookIdDto);
-  }
 }

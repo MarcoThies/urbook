@@ -15,6 +15,7 @@ import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.s
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
 import { RequestManagerSubservice } from '../_subservices/request-manager.subservice';
 import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
+import { promises as fs } from "fs";
 
 @Injectable()
 export class GenerateService {
@@ -23,7 +24,6 @@ export class GenerateService {
     private readonly bookGenSubservice : BookGeneratorSubservice,
     private readonly pdfGenSubservice : PdfGeneratorSubservice,
     private readonly logManager : DatabaseLoggerService,
-    private readonly requestManager : RequestManagerSubservice
   ) {}
 
   public async create(createBookDto: CreateBookDto, user: ApiKeyEntity): Promise<IBookId> {
@@ -104,11 +104,19 @@ export class GenerateService {
 
     const userBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
 
+    // check if status is ready
+    if(userBook.state < 9){
+      await this.logManager.error('Book is still generating. Abort...', __filename, "GET PDF", userBook, user);
+      throw new HttpException('Book is still generating. Abort...', HttpStatus.CONFLICT);
+    }
+
     const pdfSaved = await this.pdfGenSubservice.createA5Book(userBook);
+    const pdfPath = this.dataManager.getLivePath("."+this.dataManager.getBookPath(userBook) + userBook.title+ ".pdf");
 
     return {
       bookId: userBook.bookId,
       status: pdfSaved,
+      bookPdf: encodeURI(pdfPath),
       timeStamp: new Date().toUTCString
     } as IBookId;
   }

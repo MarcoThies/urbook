@@ -95,7 +95,7 @@ export class DataManagerService {
   public async updateBookContent(book: BooksEntity): Promise<BooksEntity> {
     console.log("Try to update book content");
 
-    // await this.loadAllImages(book);
+    await this.loadAllImages(book);
 
     await this.logManager.log("Book content updated", __filename, "DATABASE", book);
 
@@ -170,7 +170,6 @@ export class DataManagerService {
     const user_id = book.apiKeyLink.apiId;
     return '/exports/' + user_id + '/';
   }
-
 
   public getLivePath(filePath: string): string{
     if(!process.env.FILE_URL || !process.env.FILE_SSL || !process.env.FILE_PORT) return filePath;

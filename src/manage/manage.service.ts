@@ -112,7 +112,4 @@ export class ManageService {
     }
   }
 
-  public async getPdf(user: ApiKeyEntity, bookIdDto: BookIdDto): Promise<any> {
-    return await this.dataManager.getBookPdf(user, bookIdDto.bookId);
-  }
 }

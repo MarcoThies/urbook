@@ -27,7 +27,6 @@ export class BookGeneratorSubservice {
     private readonly imagePromptDesigner: ImagePromptDesignerSubservice,
     private readonly textPromptDesigner: TextPromptDesignerSubservice,
     private readonly requestManager: RequestManagerSubservice,
-    private readonly pdfGenerator: PdfGeneratorSubservice
   ) {}
 
 
@@ -216,13 +215,12 @@ export class BookGeneratorSubservice {
       return;
     }
     book.chapters = chaptersWithImages as ChapterEntity[];
-    book.state = 9;
+    book.state = 10;
     await this.dataManager.updateBookContent(book);
 
     await this.logManager.log('Chapter images generated', __filename, "GENERATE", book);
 
-    // update Book status 5 => Building Done
-    await this.dataManager.updateBookState(book,  10);
+    // await this.dataManager.updateBookState(book,  10);
   }
 
   // REGENERATE ONE CHAPTER CONTENT
@@ -263,7 +261,7 @@ export class BookGeneratorSubservice {
       return;
     }
 
-    await this.dataManager.updateBookState(book, 9);
+    // await this.dataManager.updateBookState(book, 9);
 
     // set book state to done
     await this.dataManager.updateBookState(book, 10);
