@@ -81,7 +81,9 @@ export class DataManagerService {
 
     if(!fileExists) {
       await this.logManager.error(`No book PDF-found at ${pdfPath}`, __filename, "GET PDF", myBook, user);
-      throw new HttpException(`No book PDF-found at ${pdfPath}`, HttpStatus.CONFLICT);
+      return {
+        error: "No book PDF-found for this book!"
+      };
     }
 
     await this.logManager.log(`PDF-File accessed`, __filename, "GET PDF", myBook, user);

@@ -40,11 +40,7 @@ export class GenerateController {
       return await this.generateService.abort(bookIdDto.bookId, req.user);
     }
 
-    @UseGuards(
-      AuthGuard('jwt'),
-      UserTypeGuard('admin')
-    )
-    @Post("regenerate-pdf")
+    @Post("generate-pdf")
     public async generatePDF(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookId> {
       return await this.generateService.generatePDF(bookIdDto.bookId, req.user);
     }
