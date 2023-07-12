@@ -16,6 +16,8 @@ import { UserTypeGuard } from "../authentification/roles/type.guard";
 import { BookIdDto } from "../_subservices/_shared/dto/book-id.dto";
 import { IDeletedBook } from "./interfaces/delete-book.interface";
 import { IBookInfo } from "../administration/interface/user-data.interface";
+import { IReviewBookStatus } from "./interfaces/review-book-status.interface";
+import { BookReviewDto } from "../_subservices/_shared/dto/book-review.dto";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -39,6 +41,14 @@ export class ManageController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('book')
   public async getBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {
-    return await this.manageService.getBook(req.user, bookIdDto);
+    let book = await this.manageService.getBook(req.user, bookIdDto);
+    // check if book is reviewed
+    (book as any).reviewed = book.hasText;
+    return book;
+  }
+
+  @Post('review-book')
+  public async reviewBook(@Body() bookReviewDto: BookReviewDto, @Request() req): Promise<IReviewBookStatus> {
+    return await this.manageService.reviewBook(req.user, bookReviewDto);
   }
 }

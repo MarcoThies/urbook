@@ -1,5 +1,5 @@
 export interface IDeletedBook {
     deletedBookId: string;
-    status: true;
+    status: boolean;
     timeStamp: string;
   }

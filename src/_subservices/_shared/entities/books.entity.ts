@@ -57,4 +57,17 @@ export class BooksEntity {
   })
   createdAt: Date;
 
+
+  @Exclude()
+  @Column({
+    type: 'varchar',
+    nullable: true,
+    unique: false
+  })
+  review: string;
+
+  get hasText(): boolean {
+    return !(!this.review || this.review.trim().length < 1);
+  }
+
 }

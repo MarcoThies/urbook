@@ -10,6 +10,9 @@ import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.s
 import { statusStrings } from "../_shared/utils";
 import { IBookInfo } from "../administration/interface/user-data.interface";
 import { promises as fs } from "fs";
+import { BookReviewDto } from "../_subservices/_shared/dto/book-review.dto";
+import { IReviewBookStatus } from "./interfaces/review-book-status.interface";
+import { IBookId } from "../generate/interfaces/book-id.interface";
 
 
 @Injectable()
@@ -112,4 +115,20 @@ export class ManageService {
     }
   }
 
+  async reviewBook(user: ApiKeyEntity, reviewDto: BookReviewDto): Promise<IReviewBookStatus> {
+    const userBook = await this.dataManager.getBookWithAccessCheck(user, reviewDto.bookId);
+    await this.logManager.log(`Request single book for Review${reviewDto.bookId}`, __filename, "MANAGE", userBook, user);
+
+    console.log("Review Book", reviewDto.review);
+    userBook.review = reviewDto.review;
+    await this.dataManager.updateBookContent(userBook);
+
+    await this.logManager.log(`Reviewd book with id ${reviewDto.bookId}`, __filename, "MANAGE", userBook, user);
+
+    return {
+      reviewedBookId: userBook.bookId,
+      status: true,
+      timeStamp: new Date().toUTCString()
+    } as IReviewBookStatus;
+  }
 }
