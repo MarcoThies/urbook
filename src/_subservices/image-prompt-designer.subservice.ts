@@ -52,7 +52,8 @@ export class ImagePromptDesignerSubservice {
     let characterImagePrompt = "Write exactly one prompt to best describe a given character.\n" +
       "Write down the appearance of the characters very precisely, go into detail about hair color, skin color and clothes.\n" +
       "Don't describe the location or surroundings of the character. Just focus on the looks. \n" +
-      "Make sure the amount of prompts in your answer matches the count of character descriptions given below.\n\n";
+      "Make sure the amount of prompts in your answer matches the count of character descriptions given below.\n\n" +
+      "Each prompt must have less than 15 words!";
 
     const charaTextJoin = characters.map((char: CharacterEntity) => {
       return "["+char.name+"] "+char.description;
@@ -68,11 +69,9 @@ export class ImagePromptDesignerSubservice {
   private ImgArtists = [
     "Don Bluth",
     "Tatsuro Kiuchi",
-    "Raymond Briggs",
     "Ted Nasmith",
     "Mike Allred",
     "Carl Barks",
-    "Alison Bechdel",
     "Guy Billout",
     "Matt Bors",
     "Allie Brosh",
@@ -98,7 +97,7 @@ export class ImagePromptDesignerSubservice {
 
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      let chapterPrompt = this.replaceStringWeight(promptResults[i].trim(), 50);
+      let chapterPrompt = this.replaceStringWeight(promptResults[i].trim(), 40);
       const characterLen = (chapters[i].characters) ? chapters[i].characters.length : 0;
       if(characterLen > 0){
         const weight = Math.floor(30 / characterLen);
@@ -142,8 +141,9 @@ export class ImagePromptDesignerSubservice {
 
     // place paragraphs
     imagePrompt += "\n\n"+
-      "Do not refer to the story plot, dialogs within the story or any character name, but describe exactly one visual moment from each paragraph that can be displayed by a picture. " +
-      "Start by describing what you can see in the foreground and then describe how the background should look like";
+      "Do not mention the story plot, dialogues within the story or any character name. Describe exactly one visual moment from each paragraph that can be displayed by a picture. " +
+      "Start by describing what you can see in the foreground and then describe how the background should look like" +
+      "Each prompt must have less than 15 words!";
 
     promptConversation.push(
       {role: messageRole.user, content: imagePrompt} as IOpenAiPromptMessage
@@ -175,7 +175,7 @@ export class ImagePromptDesignerSubservice {
 
     instructionPrompt += "\n"+
       "Each and every prompt must work on its own, even though I may ask you to generate more than one at once. " +
-      "Please do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
+      "Do not refer to any previous prompt in any way, do not name any characters or persons by their name. " +
       "Give me short, descriptive and on their own coherent sentences\n";
     return [{ role: messageRole.system, content: instructionPrompt} as IOpenAiPromptMessage];
   }

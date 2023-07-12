@@ -159,7 +159,7 @@ export class RequestManagerSubservice {
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the character"
+                    "description": "Firstname of the character"
                   },
                   "prompt": {
                     "type": "string",
@@ -204,7 +204,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT35(storyImagePromptPrompt, structure);
+    const textResult = await this.openAi.promptGPT35Short(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }

@@ -33,15 +33,10 @@ export class OpenAi {
             },
             top_p: 1,
             max_tokens: 2048,
-            temperature: .5,
+            temperature: 0.5,
             presence_penalty: 0.1,
             frequency_penalty: 0.1
         });
-        // top_p: 0.3,
-        // max_tokens: 2048,
-        // temperature: 1.69,
-        // presence_penalty: 0.25,
-        // frequency_penalty: 0.6
         if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
           console.log(completion.data);
           return false;
@@ -63,29 +58,44 @@ export class OpenAi {
 
   }
 
+    public async promptGPT35Short(messages: IOpenAiPromptMessage[], functions : any) : Promise<IOpenAiStoryData | ICharacterPromptReturn | IStoryPrompts | INewChapter | boolean> {
+        console.log("\nPrompt:\n", messages);
+        // send text prompt to chatGpt and get response
+        try {
+            let completion = await this.openai.createChatCompletion( {
+                model: "gpt-3.5-turbo-16k",
+                messages: messages,
+                functions: functions,
+                function_call: {
+                    name: functions[0].name
+                },
+                top_p: 1,
+                max_tokens: 300,
+                temperature: 1,
+                presence_penalty: 0,
+                frequency_penalty: 0
+            });
+            if(typeof completion.data.choices[0].message?.function_call?.arguments === "undefined"){
+                console.log(completion.data);
+                return false;
+            }
 
-  public async promptGPT35withContext(messages: IOpenAiPromptMessage[]) : Promise<string | boolean> {
-    console.log("\nPrompt:\n", messages);
-    // send text prompt to chatGpt and get response
-    try {
-        let completion = await this.openai.createChatCompletion( {
-            model: "gpt-3.5-turbo-16k",
-            messages: messages,
-            top_p: 0.3,
-            max_tokens: 2048,
-            temperature: 1.69,
-            presence_penalty: 0.25,
-            frequency_penalty: 0.6
-        });
-      const result = completion.data.choices[0].message?.content as string;
-      console.log("\n\nDEBUG: plain answer: ", result);
-      return result;
+            const result = JSON.parse(completion.data.choices[0].message?.function_call?.arguments as string);
+            if(!result){
+                console.log(completion.data.choices[0].message?.function_call.arguments);
+                return false;
+            }
 
-    } catch (error) {
-        console.log(error);
-        return false;
+            console.log("\n\nDEBUG: parsed json: ", result);
+            return result;
+
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+
     }
-  }
+
 
 
   public async promptDavinci(prompt: string) : Promise<string | boolean> {

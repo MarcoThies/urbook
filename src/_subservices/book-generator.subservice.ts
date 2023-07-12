@@ -144,6 +144,7 @@ export class BookGeneratorSubservice {
     for(let ind in chapters) {
       const currChapter = chapters[ind];
 
+
       // Search for each character Name in Chapter Text
       for(let n in characterImagePrompts as IImageAvatar[]) {
         const currAvatar = characterImagePrompts[n] as IImageAvatar;

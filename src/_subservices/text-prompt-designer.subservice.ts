@@ -48,8 +48,10 @@ export class TextPromptDesignerSubservice {
       "Die Geschichte soll auch einen Dialog enthalten und einem roten Faden folgen."+
       "\n\n" +
       "Eine Geschichte besteht immer aus einem Titel und mehreren Paragraphen Text.\n" +
-      "Außerdem gehört zu jeder Geschichte eine Liste mit auftretenden Characteren jeweils mit einer bildlichen Beschreibung.\n" +
-      "Die Character-Beschreibung sollte sehr genau auf das Aussehen, Kleidung und Außenwirkung des jeweiligen Characters eingehen.";
+      "Außerdem gehört zu jeder Geschichte eine Liste mit auftretenden Charakteren jeweils mit einer bildlichen Beschreibung.\n" +
+      "Der Charaktername muss ein einziges Wort sein, mit welchem der Charakter in der Geschichte referenziert wird und keine Beschreibung beinhalten. " +
+      "Beispiel für einen falschen Namen: 'Balu der Bär', Beispiele für einen richtigen Namen: 'Balu', 'Schmidt', 'Mann'" +
+      "Die Character-Beschreibung soll sehr genau auf das Aussehen, Kleidung und Außenwirkung des jeweiligen Characters eingehen.";
 
     let userContent =
     "Generiere mir ein personalisiertes Kinderbuch, das auf die Interessen und Persönlichkeit meines Kindes zugeschnitten ist. \n" +
@@ -57,7 +59,7 @@ export class TextPromptDesignerSubservice {
     "Hier sind Details über den Hauptcharakter des Buchs und weitere Details, die in der Geschichte vorkommen sollen:\n\n" +
 
     "Daten zum Hauptcharakter: \n" +
-    "- Name: " + parameter.charName + "\n" +
+    "- Hauptcharakter: " + parameter.charName + "\n" +
     "- Alter: " + parameter.charAge + "\n" +
     "- Geschlecht: " + parameter.charGender + "\n";
 
@@ -66,7 +68,7 @@ export class TextPromptDesignerSubservice {
     userContent += "Daten zur Geschichte: \n";
 
     if(parameter.optTopic) userContent += "- Thema der Geschichte: " + parameter.optTopic + "\n";
-    if(parameter.optSidekick) userContent += "- Nebencharakter der Geschichte: " + parameter.optSidekick + "\n";
+    if(parameter.optSidekick) userContent += "- Nebencharakter: " + parameter.optSidekick + "\n";
     if(parameter.optPlace) userContent += "- Schauplatz: " + parameter.optPlace + "\n";
 
     if(parameter.optMoral) userContent += "- Moral der Geschichte: " + parameter.optMoral + "\n";
