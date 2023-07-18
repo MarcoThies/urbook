@@ -1,5 +1,14 @@
 # UrBook - Team 13
+### Repository for a backend API that generates children's books with AI
 
+---
+### Live Demo: [urbook.de](http://urbook.de)
+(requires closed beta key to access)
+
+---
+The repository for the frontend can be found [here](https://gitlab.rz.htw-berlin.de/s0577395/urbook-frontend).
+
+---
 ## Team
 - [x] Theo Kolb
 - [x] Marco Thies
@@ -13,39 +22,42 @@
 
 ## Installation and requirements
 1) Clone the repository
-   2) Ask the team for the .env file -> contains live db-credentials
-      - Place the .env file in the root directory
-      - (optional) create your own .env file with the following attributes:
+2) Ask the team for the .env file -> contains live db-credentials
+   - Place the .env file in the root directory
+   - (optional) create your own .env file with the following attributes:
    
-      ```
-       JWT_SECRETKEY=       [your_secret_key]
-       JWT_EXPIRATION=         1h
-       JWT_IGNORE_EXPIRATION=  false
+   ```
+    JWT_SECRETKEY=       [your_secret_key]
+    JWT_EXPIRATION          = 1h
+    JWT_IGNORE_EXPIRATION   = false
+    
+    # Server API Port
+    PORT        = 8081
+    
+    # File Server URL
+    FILE_URL = localhost
+    FILE_PORT   = 8080
+    FILE_SSL    = false
 
-       LIVE_URL=    api.urbook.de
-       #LIVE_URL=   localhost
-       PORT=        [port]
-       FILE_PORT=   [file_port]
-       FILE_SSL=    false
+    API_SALT=    [some_bcrypt_balt]
+    
+    OPENAI_API_KEY=  [ai_key]
+    OPENAI_API_ORG=  [ai_org]
+    
+    # MidJourney auth token
+    MID_SALAI=   [discord_account_key]
+    # MidJounrey Discord Server and Channel
+    MID_SERVER  = [discord_server_number]
+    MID_CHANNEL = [discord_channel_number]
+    
+    TYPEORM_HOST=           [db_host]
+    TYPEORM_PORT=           [db_port]
+    TYPEORM_USERNAME=       [db_user]
+    TYPEORM_PASSWORD=       [db_password]
+    TYPEORM_DATABASE=       [db_name]
+    TYPEORM_SYNC=           true
 
-       API_SALT=    [some_bcrypt_balt]
-
-       OPENAI_API_KEY=  [ai_key]
-       OPENAI_API_ORG=  [ai_org]
-      
-       MID_SALAI=   [discord_account_key]
-      
-       MID_SERVER  = [discord_server_number]
-       MID_CHANNEL = [discord_channel_number]
-      
-       TYPEORM_HOST=           [db_host]
-       TYPEORM_PORT=           [db_port]
-       TYPEORM_USERNAME=       [db_user]
-       TYPEORM_PASSWORD=       [db_password]
-       TYPEORM_DATABASE=       [db_name]
-       TYPEORM_SYNC=           true
-
-      ```
+   ```
 3) Run 'npm install' in the root directory to solve dependencies
 
 ## Usage and Testing
@@ -55,8 +67,9 @@
   - Try `Collections` for different server test
 
 ## Deployment
-- Run `npm run build` to build a deployable version of the server
-- Upload to Docker / Host yourself
+- Run `docker build -t urbook-docker .` in the main dir to build a deployable image of the api
+- Run `docker run -p 8081:8081 -p 8080:8080 urbook-docker` to start the container
+- The nginx file server is running on port 8080, the api is running on port 8081
 
 ***
 
@@ -88,4 +101,4 @@ Bonus:
 - [x] get it running in docker
 
 ## Project status
-The project is currently in development. We antivipate that the MVP will be ready for demonstration by and the next steps are being planned.
+The project is currently in development. We anticipate that the MVP will be ready for demonstration by and the next steps are being planned.
