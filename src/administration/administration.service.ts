@@ -99,7 +99,8 @@ export class AdministrationService {
             bookId: book.bookId,
             created: book.createdAt.toUTCString(),
             chapterCount: book.chapters.length,
-            state: statusStrings(book.state)
+            state: statusStrings(book.state),
+            review: (book.review && book.review.length > 1) ? book.review : false
           } as IBookInfo;
         })
       } as IUserData);

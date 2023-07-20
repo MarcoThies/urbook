@@ -14,5 +14,6 @@ export interface IBookInfo {
   cover?: string,
   created: string,
   chapterCount: number,
-  state: IStatusInfo
+  state: IStatusInfo,
+  review?: string | boolean
 }
