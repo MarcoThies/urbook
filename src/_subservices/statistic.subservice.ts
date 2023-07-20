@@ -21,7 +21,7 @@ export class StatisticSubservice {
 
   public async getStatisticsOfUser(user: ApiKeyEntity): Promise<IUserStatistic>{
     
-    const books = await this.dataManager.getBookList(user);
+    const books = await this.dataManager.getBookList(user, false);
     let imageJobs: number = 0;
     let textJobs: number = 0;
 
