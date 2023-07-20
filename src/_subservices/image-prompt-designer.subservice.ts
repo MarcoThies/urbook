@@ -78,8 +78,7 @@ export class ImagePromptDesignerSubservice {
     "Dick Bruna",
     "Hsiao Ron Cheng",
     "Joey Chou",
-    "Bob Clampett",
-    "Gemma Correll"
+    "Bob Clampett"
   ];
 
   public async addImagePromptsToChapter(book: BooksEntity, chapterId?: number): Promise<boolean|ChapterEntity[]>{
