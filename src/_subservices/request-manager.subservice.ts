@@ -74,7 +74,7 @@ export class RequestManagerSubservice {
         }
       }
     ]
-    const textResult = await this.openAi.promptGPT35(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
@@ -134,7 +134,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT35(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
     if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       return false;
@@ -174,7 +174,7 @@ export class RequestManagerSubservice {
       }
     ]
 
-    const textResult = await this.openAi.promptGPT35(characterAvatarPrompt, structure);
+    const textResult = await this.openAi.promptGPT4(characterAvatarPrompt, structure);
     if(textResult === false){
       return false;
     }
@@ -204,7 +204,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT35Short(storyImagePromptPrompt, structure);
+    const textResult = await this.openAi.promptGPT4Short(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }
