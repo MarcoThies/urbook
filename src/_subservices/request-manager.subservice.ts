@@ -41,7 +41,7 @@ export class RequestManagerSubservice {
           "properties" : {
             "title" : {
               "type" : "string",
-              "description" : "A fitting, creative title for the story. Make it catchy and interesting"
+              "description" : "A short, fitting, creative title for the story. Make it catchy and interesting"
             },
             "chapters" : {
               "type": "array",
@@ -53,17 +53,17 @@ export class RequestManagerSubservice {
             },
             "characters" : {
               "type": "array",
-              "description": "A list of characters and their visual depiction",
+              "description": "A list of important characters and objects starred in the story and their visual depiction",
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the character found in the story. Not the type of animal or character just the plain name"
+                    "description": "The name of the character or object found in the story. Just use a single word for the name. No spaces or special characters."
                   },
                   "info": {
                     "type": "string",
-                    "description": "A very detailed description of the character found in the story. Give at least 100 words that describe the looks of the character. Include everything you find in the story paragraphs and also make up how you would imagine the character to look like."
+                    "description": "A very detailed description of the character found in the story. Give at least 100 words that describe the looks of the character. Include everything you find in the story paragraphs and also make up how you would imagine the character to look like. Give greate details about clothing, color, hair, eyes, body, etc."
                   }
                 },
                 "required" : ["name", "info"]
