@@ -96,11 +96,11 @@ export class ImagePromptDesignerSubservice {
 
     // 3. Map the result to the chapters
     for(let i in chapters) {
-      let chapterPrompt = this.replaceStringWeight(promptResults[i].trim(), 30);
+      let chapterPrompt = this.replaceStringWeight(promptResults[i].trim(), 50);
       const characterLen = (chapters[i].characters) ? chapters[i].characters.length : 0;
       if(characterLen > 0){
         // 50*e-0.127833*t
-        const weight = Math.floor(50 + Math.exp(-0.125*characterLen));
+        const weight = Math.floor(35 + Math.exp(-0.125*characterLen));
         for(let char of chapters[i].characters){
           if(!char.prompt) continue;
           const charPrompt = this.replaceStringWeight(char.prompt.trim(), weight);

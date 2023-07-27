@@ -58,6 +58,7 @@ export class RequestQueue {
         } catch (error) {
             console.error("Job in request queue failed with error: ", error);
             this.runNextJob();
+
         }
     }
 

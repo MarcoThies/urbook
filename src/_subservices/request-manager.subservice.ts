@@ -74,7 +74,7 @@ export class RequestManagerSubservice {
         }
       }
     ]
-    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT(textPrompt, structure, "gpt-4", 2048);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
@@ -134,7 +134,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT(textPrompt, structure, "gpt-4");
     if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       return false;
@@ -174,7 +174,7 @@ export class RequestManagerSubservice {
       }
     ]
 
-    const textResult = await this.openAi.promptGPT4(characterAvatarPrompt, structure);
+    const textResult = await this.openAi.promptGPT(characterAvatarPrompt, structure, "gpt-4", 512);
     if(textResult === false){
       return false;
     }
@@ -204,7 +204,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT4Short(storyImagePromptPrompt, structure);
+    const textResult = await this.openAi.promptGPT(storyImagePromptPrompt, structure, "gpt-4");
     if(!textResult){
       return false;
     }
@@ -256,8 +256,14 @@ export class RequestManagerSubservice {
     // check if abort flag is set -> abort next generation in pipeline
     if(this.abortFlag) return false;
 
+    const currImageRequest = await this.imageAPI.requestImage(prompt);
+
+    if(!currImageRequest){
+      this.abortFlag = true;
+    }
+
     // add Job to queue
-    return await this.imageAPI.requestImage(prompt);
+    return currImageRequest;
   }
 
 

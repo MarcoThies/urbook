@@ -12,6 +12,9 @@ export class MidjourneyApiSubservice {
       ChannelId: process.env.MID_CHANNEL,
       SalaiToken: process.env.MID_SALAI ? process.env.MID_SALAI:"",
       Debug: false,
+      MaxWait: 350,
+      ApiInterval: 350,
+      Remix: false,
       Ws: true,
     });
 
@@ -21,19 +24,26 @@ export class MidjourneyApiSubservice {
   private suffix = ` --ar 2:1 --v 5.2 --q ${this.imgQuality}`;
 
   async requestImage(prompt: string): Promise<string | boolean> {
-    console.log("\n\n... requesting new image");
-    const imgGrid =  await this.client.Imagine(
-      prompt+this.suffix,
-      (uri, progress)=>{
-        console.log(uri, progress);
+
+    try {
+      console.log("\n\n... requesting new image");
+      const imgGrid = await this.client.Imagine(
+        prompt + this.suffix,
+        (uri, progress) => {
+          console.log(uri, progress);
+        }
+      );
+      if (!imgGrid) {
+        return false;
       }
-    );
-    if(!imgGrid) {
+
+      console.log("image grid generated", imgGrid.uri);
+      return await this.upscaleImage(imgGrid, 1);
+
+    } catch (error) {
+      console.log("MIDJOURNEY ERROR", error);
       return false;
     }
-    console.log("image grid generated", imgGrid.uri);
-
-    return await this.upscaleImage(imgGrid, 1);
   }
 
 

@@ -51,7 +51,7 @@ export class AuthService {
       await this.logManager.error('Invalid token.', __filename, "AUTH");
       throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
     }
-    await this.logManager.log(`Login by User no.${apiUser.apiId}`, __filename, "AUTH");
+    await this.logManager.log(`Auth check user no.${apiUser.apiId}`, __filename, "AUTH");
 
     return apiUser;
   }
