@@ -74,7 +74,7 @@ export class RequestManagerSubservice {
         }
       }
     ]
-    const textResult = await this.openAi.promptGPT(textPrompt, structure, "gpt-4", 2048);
+    const textResult = await this.openAi.promptGPT(textPrompt, structure, 2048);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
@@ -134,7 +134,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT(textPrompt, structure, "gpt-4");
+    const textResult = await this.openAi.promptGPT(textPrompt, structure);
     if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       return false;
@@ -174,7 +174,7 @@ export class RequestManagerSubservice {
       }
     ]
 
-    const textResult = await this.openAi.promptGPT(characterAvatarPrompt, structure, "gpt-4", 512);
+    const textResult = await this.openAi.promptGPT(characterAvatarPrompt, structure, 512);
     if(textResult === false){
       return false;
     }
@@ -204,7 +204,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT(storyImagePromptPrompt, structure, "gpt-4");
+    const textResult = await this.openAi.promptGPT(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }

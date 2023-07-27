@@ -20,7 +20,7 @@ export class OpenAi {
 
   private openai = new OpenAIApi(this.configuration);
 
-  public async promptGPT(messages: IOpenAiPromptMessage[], functions : any, model: "gpt-3.5-turbo-16k" | "gpt-4" = "gpt-4", token= 1024){
+  public async promptGPT(messages: IOpenAiPromptMessage[], functions : any, token= 1024, model: "gpt-3.5-turbo-16k" | "gpt-4" = "gpt-4"){
     console.log("\nPrompt:\n", messages);
     // send text prompt to chatGpt and get response
     try {
