@@ -38,6 +38,10 @@ export class ManageService {
         state: statusStrings(book.state),
       } as IBookInfo;
 
+      /// TODO: Quick-NGIX ERROR FIX
+      /// Einkommentieren und Zeile entfernen, sobald Ngix wieder läuft, um lokal heruntergeladenen Bilder zu serven
+      newBookEntry.cover = book.chapters[chapterLength - 1].imageUrl;
+      /*
       const localImageDir = this.dataManager.getLocalImageDir(book);
       const imgFiles = await this.getLocalImages(localImageDir);
 
@@ -50,6 +54,7 @@ export class ManageService {
           newBookEntry.cover = imgFiles.includes(localCoverName) ? this.dataManager.getLivePath(localImageDir+localCoverName) : book.chapters[chapterLength - 1].imageUrl;
         }
       }
+       */
       BookArray.push(newBookEntry);
     }
     return BookArray
@@ -84,6 +89,10 @@ export class ManageService {
     const userBook = await this.dataManager.getBookWithAccessCheck(user, bookIdDto.bookId);
     await this.logManager.log(`Request single book ${bookIdDto.bookId}`, __filename, "MANAGE", userBook, user);
 
+    /// TODO: Quick-NGIX ERROR FIX
+    /// Einkommentieren und Zeile entfernen, sobald Ngix wieder läuft, um lokal heruntergeladenen Bilder zu serven
+    return userBook;
+    /*
     const localImageDir = this.dataManager.getLocalImageDir(userBook);
     const imgFiles = await this.getLocalImages(localImageDir);
 
@@ -103,6 +112,7 @@ export class ManageService {
     });
 
     return userBook;
+     */
   }
 
   private async getLocalImages(dir: string): Promise<string[]|false> {

@@ -125,7 +125,7 @@ export class DataManagerService {
     for(let ind in chapters) {
       const localImgPath = bookPath + ind + '.png';
       if(await this.fileExists(localImgPath, fs)){
-        console.log("Image file already downloaded", localImgPath);
+        // console.log("Image file already downloaded", localImgPath);
         imgList[ind] = localImgPath;
         continue;
       }
