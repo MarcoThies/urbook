@@ -1,6 +1,6 @@
 {
   "name": "ur-book",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "author": "",
   "private": true,
@@ -35,7 +35,7 @@
     "class-validator": "^0.14.0",
     "express-rate-limit": "^6.3.0",
     "helmet": "^5.0.2",
-    "midjourney": "^3.1.93",
+    "midjourney": "^4.3.12",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.3",
     "node-mailjet": "^5.1.1",

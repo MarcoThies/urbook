@@ -41,7 +41,7 @@ export class RequestManagerSubservice {
           "properties" : {
             "title" : {
               "type" : "string",
-              "description" : "A fitting, creative title for the story. Make it catchy and interesting"
+              "description" : "A short, fitting, creative title for the story. Make it catchy and interesting"
             },
             "chapters" : {
               "type": "array",
@@ -53,17 +53,17 @@ export class RequestManagerSubservice {
             },
             "characters" : {
               "type": "array",
-              "description": "A list of characters and their visual depiction",
+              "description": "A list of important characters and objects starred in the story and their visual depiction",
               "items": {
                 "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name of the character found in the story. Not the type of animal or character just the plain name"
+                    "description": "The name of the character or object found in the story. Just use a single word for the name. No spaces or special characters."
                   },
                   "info": {
                     "type": "string",
-                    "description": "A very detailed description of the character found in the story. Give at least 100 words that describe the looks of the character. Include everything you find in the story paragraphs and also make up how you would imagine the character to look like."
+                    "description": "A very detailed description of the character found in the story. Give at least 100 words that describe the looks of the character. Include everything you find in the story paragraphs and also make up how you would imagine the character to look like. Give greate details about clothing, color, hair, eyes, body, etc."
                   }
                 },
                 "required" : ["name", "info"]
@@ -74,7 +74,7 @@ export class RequestManagerSubservice {
         }
       }
     ]
-    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT(textPrompt, structure, 2048);
     if(!textResult){
       await this.logManager.error("No result from text ai", __filename, "GENERATE", book);
       return false;
@@ -134,7 +134,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT4(textPrompt, structure);
+    const textResult = await this.openAi.promptGPT(textPrompt, structure);
     if(textResult === false){
       await this.logManager.log(`No result from text ai`, __filename, "REGENERATE");
       return false;
@@ -174,7 +174,7 @@ export class RequestManagerSubservice {
       }
     ]
 
-    const textResult = await this.openAi.promptGPT4(characterAvatarPrompt, structure);
+    const textResult = await this.openAi.promptGPT(characterAvatarPrompt, structure, 512);
     if(textResult === false){
       return false;
     }
@@ -204,7 +204,7 @@ export class RequestManagerSubservice {
         }
       }
     ];
-    const textResult = await this.openAi.promptGPT4Short(storyImagePromptPrompt, structure);
+    const textResult = await this.openAi.promptGPT(storyImagePromptPrompt, structure);
     if(!textResult){
       return false;
     }
@@ -256,8 +256,14 @@ export class RequestManagerSubservice {
     // check if abort flag is set -> abort next generation in pipeline
     if(this.abortFlag) return false;
 
+    const currImageRequest = await this.imageAPI.requestImage(prompt);
+
+    if(!currImageRequest){
+      this.abortFlag = true;
+    }
+
     // add Job to queue
-    return await this.imageAPI.requestImage(prompt);
+    return currImageRequest;
   }
 
 
