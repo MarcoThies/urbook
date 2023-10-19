@@ -15,7 +15,7 @@ export class MidjourneyApiSubservice {
       MaxWait: 350,
       ApiInterval: 350,
       Remix: false,
-      Ws: true,
+      Ws: true
     });
 
   }
