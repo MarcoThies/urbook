@@ -169,3 +169,5 @@ export class AdministrationService {
       } as IUserLogs);
     }
     return logsList;
+  }
+}
