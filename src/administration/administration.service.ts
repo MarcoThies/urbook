@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindManyOptions, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { ApiKeyEntity } from "../_subservices/_shared/entities/api-keys.entity";
 import { IApiKey } from "./interface/api-key.interface";
 import { generateId, hash, statusStrings } from "../_shared/utils";
@@ -169,5 +169,3 @@ export class AdministrationService {
       } as IUserLogs);
     }
     return logsList;
-  }
-}

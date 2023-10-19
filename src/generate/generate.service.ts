@@ -13,9 +13,7 @@ import { BookGeneratorSubservice } from "../_subservices/book-generator.subservi
 import { RegenerateChapterDto } from './dto/regenerate-chapter.dto';
 import { DatabaseLoggerService } from "../_subservices/_shared/database-logger.service";
 import { DataManagerService } from "../_subservices/_shared/data-manager.service";
-import { RequestManagerSubservice } from '../_subservices/request-manager.subservice';
 import { PdfGeneratorSubservice } from "../_subservices/pdf-generator.subservice";
-import { promises as fs } from "fs";
 
 @Injectable()
 export class GenerateService {
