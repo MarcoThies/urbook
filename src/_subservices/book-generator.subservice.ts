@@ -4,7 +4,7 @@ import { DataManagerService } from "./_shared/data-manager.service";
 import { TextPromptDesignerSubservice } from "./text-prompt-designer.subservice";
 import { ImagePromptDesignerSubservice } from "./image-prompt-designer.subservice";
 import { RequestManagerSubservice } from "./request-manager.subservice";
-import { generateId } from "../_shared/utils";
+import { generateId, statusStrings } from "../_shared/utils";
 import { CreateBookDto } from "../generate/dto/create-book.dto";
 import { RegenerateChapterDto } from "../generate/dto/regenerate-chapter.dto";
 import { ApiKeyEntity } from "./_shared/entities/api-keys.entity";
@@ -322,6 +322,13 @@ export class BookGeneratorSubservice {
   }
 
   // REGENERATE ONE CHAPTER IMAGE
+  public async regenerateBook(bookId: string, user: ApiKeyEntity): Promise<number> {
+    const abortedBook = await this.dataManager.getBookWithAccessCheck(user, bookId);
+    await this.dataManager.updateBookState(abortedBook, 1);
+    this.startGenerationPipeline(abortedBook);
+    return abortedBook.state;
+  }
+
   public async regenerateChapterImage(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity): Promise<void> {
     const chapterId = regenerateChapterDto.chapterId - 1;
     const bookId = regenerateChapterDto.bookId;

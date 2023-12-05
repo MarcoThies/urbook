@@ -38,6 +38,7 @@ export class ManageController {
     return await this.manageService.deleteBook(req.user, bookIdDto);
   }
 
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('book')
   public async getBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<BooksEntity> {

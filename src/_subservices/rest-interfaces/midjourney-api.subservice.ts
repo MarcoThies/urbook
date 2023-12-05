@@ -20,7 +20,7 @@ export class MidjourneyApiSubservice {
 
   }
 
-  private imgQuality = 0.5; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
+  private imgQuality = 1; // 0.25 | 0.5 | 0.75 | 1 -> in .25 increments
   private suffix = ` --ar 2:1 --v 5.2 --q ${this.imgQuality}`;
 
   async requestImage(prompt: string): Promise<string | boolean> {

@@ -30,6 +30,11 @@ export class GenerateController {
       return await this.generateService.regenerateChapterImage(regenerateChapterDto, req.user);
     }
 
+    @Post("regenerate-book")
+    public async regenerateBook(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookState> {
+      return await this.generateService.regenerateBook(bookIdDto.bookId, req.user);
+    }
+
     @Post("check-status")
     public async checkStatus(@Body() bookIdDto: BookIdDto, @Request() req): Promise<IBookState> {
       return await this.generateService.checkStatus(bookIdDto.bookId, req.user);

@@ -66,6 +66,19 @@ export class GenerateService {
     return true;
   }
 
+  public async regenerateBook(bookId: string, user: ApiKeyEntity): Promise<IBookState> {
+    if(await this.dataManager.userIsGenerating(user)) {
+      throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
+    }
+
+    const stateNumb = await this.bookGenSubservice.regenerateBook(bookId, user);
+
+    return {
+      bookId: bookId,
+      status: statusStrings(stateNumb),
+    } as IBookState;
+  }
+
   public async regenerateChapterText(regenerateChapterDto: RegenerateChapterDto, user: ApiKeyEntity) {
     if(await this.dataManager.userIsGenerating(user)) {
       throw new HttpException("User is already generating a book currently", HttpStatus.CONFLICT);
