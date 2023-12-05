@@ -4,8 +4,8 @@ import { IsNotEmpty, IsString, IsNumber, IsEnum } from "class-validator";
 export enum UsageEventTypes {
   Forward = "forward",
   Backward = "backward",
-  Finished = "finished",
-  FirstOpen = "firstOpen"
+  Finishing = "finishing",
+  Starting = "starting"
 }
 
 export class GetUsageDto {
