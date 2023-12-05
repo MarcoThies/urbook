@@ -7,10 +7,13 @@ import { ApiKeyEntity } from "./entities/api-keys.entity";
 import { ChapterEntity } from "./entities/chapter.entity";
 import { CharacterEntity } from "./entities/character.entity";
 import { LogEntity } from "./entities/log.entity";
+import { StatisticsEntity } from "./entities/statistics.entitiy";
+
 import { DatabaseLoggerService } from "./database-logger.service";
 import * as path from 'path';
 import { extname } from 'path';
 import * as process from "process";
+import { GetUsageDto } from "./dto/get-usage.dto";
 
 @Injectable()
 export class DataManagerService {
@@ -25,6 +28,8 @@ export class DataManagerService {
     private readonly characterRepo : Repository<CharacterEntity>,
     @InjectRepository(LogEntity)
     private readonly logRepo : Repository<LogEntity>,
+    @InjectRepository(StatisticsEntity)
+    private readonly statisticsRepo : Repository<StatisticsEntity>,
 
     private readonly logManager : DatabaseLoggerService
   ) {}
@@ -316,5 +321,25 @@ export class DataManagerService {
     }
 
     return await this.logRepo.find(ormOptions);
+  }
+
+  async logUsage(user: ApiKeyEntity, getUsageDto: GetUsageDto) {
+    const userBook = await this.getBookWithAccessCheck(user, getUsageDto.bookId);
+
+    // get current Chapter from Book
+    const chapterNbr = getUsageDto.chapterNbr-1;
+    if(!userBook.chapters[chapterNbr] || !userBook.chapters[chapterNbr].chapterId){
+      console.log(userBook.chapters[chapterNbr]);
+      throw new HttpException("Chapter does not exist", HttpStatus.CONFLICT)
+    }
+
+    const newStatisticsEntry = await this.statisticsRepo.create({
+      eventType : getUsageDto.eventType,
+      chapterLink: userBook.chapters[chapterNbr],
+      bookLink: userBook
+    });
+    // save new Book
+    const savedStatistic = await this.statisticsRepo.save(newStatisticsEntry);
+    return !(!savedStatistic);
   }
 }

@@ -18,6 +18,7 @@ import { IDeletedBook } from "./interfaces/delete-book.interface";
 import { IBookInfo } from "../administration/interface/user-data.interface";
 import { IReviewBookStatus } from "./interfaces/review-book-status.interface";
 import { BookReviewDto } from "../_subservices/_shared/dto/book-review.dto";
+import { GetUsageDto } from "../_subservices/_shared/dto/get-usage.dto";
 
 @UseGuards(
   AuthGuard('jwt'),
@@ -51,5 +52,10 @@ export class ManageController {
   @Post('review-book')
   public async reviewBook(@Body() bookReviewDto: BookReviewDto, @Request() req): Promise<IReviewBookStatus> {
     return await this.manageService.reviewBook(req.user, bookReviewDto);
+  }
+
+  @Post('usage-log')
+  public async usageLog(@Body() getUsageDto: GetUsageDto, @Request() req): Promise<boolean>{
+    return await this.manageService.usageLog(req.user, getUsageDto);
   }
 }

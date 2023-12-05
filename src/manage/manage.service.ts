@@ -11,6 +11,7 @@ import { statusStrings } from "../_shared/utils";
 import { IBookInfo } from "../administration/interface/user-data.interface";
 import { BookReviewDto } from "../_subservices/_shared/dto/book-review.dto";
 import { IReviewBookStatus } from "./interfaces/review-book-status.interface";
+import { GetUsageDto } from "../_subservices/_shared/dto/get-usage.dto";
 
 
 @Injectable()
@@ -116,7 +117,6 @@ export class ManageService {
   async reviewBook(user: ApiKeyEntity, reviewDto: BookReviewDto): Promise<IReviewBookStatus> {
     const userBook = await this.dataManager.getBookWithAccessCheck(user, reviewDto.bookId);
     await this.logManager.log(`Request single book for Review${reviewDto.bookId}`, __filename, "MANAGE", userBook, user);
-
     console.log("Review Book", reviewDto.review);
     userBook.review = reviewDto.review;
     await this.dataManager.updateBookContent(userBook);
@@ -128,5 +128,9 @@ export class ManageService {
       status: true,
       timeStamp: new Date().toUTCString()
     } as IReviewBookStatus;
+  }
+
+  async usageLog(user: ApiKeyEntity, getUsageDto: GetUsageDto): Promise<boolean> {
+    return await this.dataManager.logUsage(user, getUsageDto);
   }
 }
