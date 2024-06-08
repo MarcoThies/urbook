@@ -1,6 +1,5 @@
-## UrBook - A backend API that generates children's books with AI
+# UrBook - An API that generates children's books with AI
 
----
 ## Team
 - [x] Theo Kolb
 - [x] Marco Thies
@@ -70,11 +69,8 @@ With innovative text- and image-generating AIs like Chat GPT or Midjourney, comp
 Currently, the individual AIs must be operated separately, and the generated content must be manually combined. 
 There is high market potential in optimizing this process and offering it as a SaaS or "Children's Book Generation as a Service" on the internet.
 
-In the first step we will develop an MVP for this use case to ensure the basic feasibility. 
-The MVP also lays the foundation for demonstrating the potential of such a service to potential customers.
-
 ## Support
-For support and questions email us at admin@urbook.com
+For support and questions send me an Email via thies(at)consultt.net
 
 ## Roadmap
 After the MVP we plan to further develop the software into a proper commercial service.
@@ -93,4 +89,4 @@ Bonus:
 - [x] get it running in docker
 
 ## Project status
-The project is currently in development. We anticipate that the MVP will be ready for demonstration by and the next steps are being planned.
+The project is currently paused.
