@@ -1,11 +1,4 @@
-# UrBook - A backend API that generates children's books with AI
-
----
-### Live Demo: [urbook.de](http://urbook.de)
-(requires closed beta key to access)
-
----
-The repository for the frontend can be found [here](https://gitlab.rz.htw-berlin.de/s0577395/urbook-frontend).
+## UrBook - A backend API that generates children's books with AI
 
 ---
 ## Team
