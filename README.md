@@ -1,5 +1,4 @@
-# UrBook - Team 13
-### Repository for a backend API that generates children's books with AI
+# UrBook - A backend API that generates children's books with AI
 
 ---
 ### Live Demo: [urbook.de](http://urbook.de)
