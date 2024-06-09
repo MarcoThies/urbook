@@ -1,5 +1,7 @@
 # UrBook - An API that generates children's books with AI
 
+![Example for generated book displayed in frontend](https://i.postimg.cc/MHb1CjfP/Mockup.png)
+
 ## Team
 - [x] Theo Kolb
 - [x] Marco Thies
